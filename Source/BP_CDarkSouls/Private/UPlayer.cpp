@@ -61,7 +61,7 @@ void AUPlayer::Horizeontal(float value)
 {
 	AddMovementInput(GetActorRightVector(), value);
 	
-[p}
+}
 
 void AUPlayer::Vertical(float value)
 {
