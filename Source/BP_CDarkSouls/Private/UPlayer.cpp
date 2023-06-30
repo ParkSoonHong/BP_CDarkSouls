@@ -44,6 +44,7 @@ void AUPlayer::BeginPlay()
 void AUPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	//player tick
 
 }
 
