@@ -26,6 +26,8 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	//포인터 변수들
+
 	UPROPERTY(EditAnywhere)
 	class USpringArmComponent * compArm;
 	
@@ -36,14 +38,43 @@ public:
 	class UMeshComponent * compMesh;
 
 	UPROPERTY(EditAnywhere)
-	FRotator Rot;
+	FTimerHandle HoldTimerHandle;
 
+	//변수들
+
+	UPROPERTY(EditAnywhere)
+	bool isRun = false;
+
+	
+	UPROPERTY(EditAnywhere)
+	bool isPressed = false;
+
+	UPROPERTY(EditAnywhere)
+	float pressedTime = 0;
+
+	UPROPERTY(EditAnywhere)
+	float changeActionTime = 0.5f;
+
+	/*
+	UPROPERTY(EditAnywhere)
+	bool isRun = false;
+	*/
 public:
-
+	
+	UFUNCTION()
 	void Horizeontal(float value);
+
+	UFUNCTION()
 	void Vertical(float value);
 
 	//마우스에 따른 회전
+	UFUNCTION()
 	void Turn(float value);
+	UFUNCTION()
 	void LookUp(float value);
+
+	void RollBackStepRun();
+
+	void PressedSpacebar();
+	void ReleasedSpacebar();
 };
