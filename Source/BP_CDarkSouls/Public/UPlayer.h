@@ -51,8 +51,15 @@ public:
 	UPROPERTY(EditAnywhere) // 백스텝을 사용했는지
 	bool isBackstep=false;
 
+	
+	UPROPERTY(EditAnywhere) // 구르기를 사용했는지
+	bool isRoll=false;
+
 	UPROPERTY(EditAnywhere)
-	bool isPressedMovekey=false;
+	bool isPressedHorizontalMovekey=false;
+
+	UPROPERTY(EditAnywhere)
+	bool isPressedVerticalMovekey=false;
 
 	UPROPERTY(EditAnywhere) // 눌린 시간
 	float pressedTime = 0;
@@ -67,7 +74,13 @@ public:
 	float backStepTime = 0.5;
 	
 	UPROPERTY(EditAnywhere) // 백스텝 거리
-	float BackstepDest = 0;
+	float BackstepDest = 50;
+
+	UPROPERTY(EditAnywhere) // 백스탭 시전 시간
+	float RollTime = 0.5;
+	
+	UPROPERTY(EditAnywhere) // 백스텝 거리
+	float RollDest = 50;
 
 	UPROPERTY(EditAnywhere) // 시작할 위치
 	FVector StartVector;
@@ -97,4 +110,8 @@ public:
 
 	void PressedSpacebar();
 	void ReleasedSpacebar();
+
+	void Roll();
+	void BackStep();
+	void Run();
 };
