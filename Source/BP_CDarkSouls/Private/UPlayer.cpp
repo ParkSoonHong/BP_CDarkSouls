@@ -48,7 +48,22 @@ void AUPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	//player tick
+	//UE_LOG(LogTemp,Warning,TEXT("% s"),isPressedMovekey)
+	if (isBackstep==true)
+	{
+		curTime+=DeltaTime; // 시간을 더한다.
+		
+		//백스텝
+		FVector BackstepVector = GetActorForwardVector() * -1; // 캐릭터의 정면에 -1곱해서 뒷면을 기준으로 잡음
+		BackstepDest += 0.5f;
+		FVector BackstepLocation = GetActorLocation() + BackstepVector * BackstepDest; // 추후에 백스텝 천천히 하는걸로 교정
+		SetActorLocation(BackstepLocation);
 
+		if(curTime>=backStepTime)
+		{ 
+		isBackstep =false;
+		}
+	}
 
 }
 
@@ -76,9 +91,20 @@ void AUPlayer::Horizeontal(float value)
 		GetCharacterMovement()->MaxWalkSpeed = 1200;
 	}
 
+	if (!isBackstep )
+	{
 	FVector direction = FRotationMatrix(Controller->GetControlRotation()).GetUnitAxis(EAxis::Y);
 	AddMovementInput(direction, value);
+	}
 
+	if (value == 0)
+	{
+		isPressedMovekey = false;
+	}else if (value != 0)
+	{ 
+		isPressedMovekey = true;
+	}
+	
 }
 
 void AUPlayer::Vertical(float value)
@@ -92,9 +118,20 @@ void AUPlayer::Vertical(float value)
 	{
 		GetCharacterMovement()->MaxWalkSpeed = 1200;
 	}
-
+	if(!isBackstep)
+	{ 
 	FVector direction = FRotationMatrix(Controller->GetControlRotation()).GetUnitAxis(EAxis::X);
 	AddMovementInput(direction, value);
+	}
+	
+	if (value == 0)
+	{
+		isPressedMovekey = false;
+	}
+	else if (value != 0)
+	{
+		isPressedMovekey = true;
+	}
 }
 
 void AUPlayer::Turn(float value)
@@ -116,13 +153,15 @@ void AUPlayer::RollBackStepRun()
 	//isRun = true;
 	
 	//if() 방향키가 눌리고 있지 않다면.
-	//백스텝
-	FVector BackstepVector = FVector::BackwardVector ;
-	float BackstepDest= 500;
-	FVector BackstepLocation = GetActorLocation() + BackstepVector * BackstepDest; // 추후에 백스텝 천천히 하는걸로 교정
-	SetActorLocation(BackstepLocation);
-	
-	//else if 방향키가 눌리고 있다면.
+	if(isPressedMovekey==false)
+	{ 
+	isBackstep = true;
+	curTime = 0;
+	BackstepDest = 0;
+	}
+	else if(isPressedMovekey==true) //방향키가 눌리고 있다면
+	{
+
 	pressedTime += 0.1f; //시간을 0.1초씩 더함
 	if (isPressed && pressedTime >= changeActionTime) // 스페이스바가 눌려있고 눌려있던 시간이 변호 시간보다 크거나 같다면 변환
 	{
@@ -131,6 +170,7 @@ void AUPlayer::RollBackStepRun()
 	else 
 	{ 
 		// 방향키 + 스페이스바 짧게 누르면 구르기
+	}
 	}
 }
 
