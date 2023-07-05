@@ -10,11 +10,21 @@ UENUM(BlueprintType)
 enum class EEnmeyState :uint8
 {
 	Idle UMETA(DisplayName = "Idle State"),
+	Backstep UMETA(DisplayName = "Backstep State"),
 	Move UMETA(DisplayName = "Move State"),
 	Dash UMETA(DisplayName = "Dash State"),
 	Attack UMETA(DisplayName = "Attack State"),
 	Damage UMETA(DisplayName = "Damage State"),
 	Die UMETA(DisplayName = "Die State")
+};
+
+UENUM(BlueprintType)
+enum class EEnmeyAttackState :uint8
+{
+	AttackBasic UMETA(DisplayName="Attack Basic State"),
+	Attack1 UMETA(DisplayName = "Attack1 State"),
+	Attack2 UMETA(DisplayName = "Attack2 State"),
+	Attack3 UMETA(DisplayName = "Attack3 State")
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -54,6 +64,7 @@ public:
 
 public:	 // 상태 함수
 	void IdleState();
+	void BackstepState();
 	void MoveState();
 	void DashState();
 	void AttackState();
@@ -61,10 +72,22 @@ public:	 // 상태 함수
 	void DieState();
 
 public: //Idle 속성
-	// 필요속성 : 플레이어와의 거리, 대시거리, 무브거리,어택거리
-	float DashDistance = 3000;
-	float MoveDistance = 2000;
-	float AttackDistance = 200;
+	// 필요속성 : 플레이어와의 거리, 대시거리, 무브거리,어택거리, 백스텝거리
+	float DashDistance = 1000;
+	float MoveDistance = 500;
+	float AttackDistance = 100;
+	float BackstepDistance = 30;
 
+
+public: // Attack 상태함수
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category ="FSM")
+	EEnmeyAttackState mAttackState = EEnmeyAttackState::AttackBasic;
+
+	void AttackBasic();
+	void Attack1();
+	void Attack2();
+	void Attack3();
+
+public: // Attack 속성
 		
 };
