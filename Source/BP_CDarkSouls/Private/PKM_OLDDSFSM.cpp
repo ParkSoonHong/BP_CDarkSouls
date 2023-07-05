@@ -31,11 +31,20 @@ void UPKM_OLDDSFSM::BeginPlay()
 // Called every frame
 void UPKM_OLDDSFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
+	if (bDebugRange)
+	{
+	DrawDebugSphere(GetWorld(), Me->GetActorLocation(), attackRange, 100, FColor::Red, false, -1, 0, 2);
+	DrawDebugSphere(GetWorld(), Me->GetActorLocation(), MoveRange, 100, FColor::Yellow, false, -1, 0, 2);
+	DrawDebugSphere(GetWorld(), Me->GetActorLocation(), RunRange, 100, FColor::Blue, false, -1, 0, 2);
+	}
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	switch (mState)
 	{
 	case EEnemyState::Idle:
 		IdleState();
+		break;
+	case EEnemyState::Run:
+		RunState();
 		break;
 	case EEnemyState::Move:
 		MoveState();
@@ -63,29 +72,84 @@ void UPKM_OLDDSFSM::IdleState()
 		direction = Target->GetActorLocation() - Me->GetActorLocation();
 		distance = direction.Size();
 	}
-	if (distance<MoveRange)
+	int checkdis = distance;
+	if (distance<attackRange)
+	{
+		UE_LOG(LogTemp, Log, TEXT("switchAttack"));
+		currentTime = 0;
+		mState = EEnemyState::Attack;
+	}
+	else if (distance < MoveRange)
 	{
 		UE_LOG(LogTemp, Log, TEXT("switchMove"));
 		mState = EEnemyState::Move;
 	}
+	else if (distance < RunRange)
+	{
+		UE_LOG(LogTemp, Log, TEXT("switchRun"));
+		mState = EEnemyState::Run;
+	}
+
 }
 
-void UPKM_OLDDSFSM::MoveState()
+void UPKM_OLDDSFSM::RunState()
 {
-	FVector Forward = Me->GetActorForwardVector();
 	//direction = FVector(0, 0, 0);
 	if (Target != nullptr)
 	{
 		direction = Target->GetActorLocation() - Me->GetActorLocation();
-		distance=direction.Size();
+		distance = direction.Size();
 	}
 	if (distance < attackRange)
 	{
-		currentTime = 0;
 		UE_LOG(LogTemp, Log, TEXT("switchAttack"));
+		currentTime = 0;
 		mState = EEnemyState::Attack;
 	}
+	else if (distance < MoveRange)
+	{
+		UE_LOG(LogTemp, Log, TEXT("switchMove"));
+		mState = EEnemyState::Move;
+	}
+	else if (distance < RunRange)
+	{
+		Moving(500, direction);
+	}
 	else {
+		UE_LOG(LogTemp, Log, TEXT("switchIdle"));
+		mState = EEnemyState::Idle;
+	}
+
+}
+
+void UPKM_OLDDSFSM::MoveState()
+{
+	//direction = FVector(0, 0, 0);
+	if (Target != nullptr)
+	{
+		direction = Target->GetActorLocation() - Me->GetActorLocation();
+		distance = direction.Size();
+	}
+	if (distance < attackRange)
+	{
+		UE_LOG(LogTemp, Log, TEXT("switchAttack"));
+		currentTime = 0;
+		mState = EEnemyState::Attack;
+	}
+	else if (distance < MoveRange)
+	{
+		Moving(200, direction);
+	}
+	else if (distance < RunRange)
+	{
+		UE_LOG(LogTemp, Log, TEXT("switchRun"));
+		mState = EEnemyState::Run;
+	}
+	else {
+		UE_LOG(LogTemp, Log, TEXT("switchIdle"));
+		mState = EEnemyState::Idle;
+	}
+	/*else {
 		direction.Normalize();
 		FVector P0 = Me->GetActorLocation();
 		FVector vt = direction * 200 * GetWorld()->DeltaTimeSeconds;
@@ -93,17 +157,41 @@ void UPKM_OLDDSFSM::MoveState()
 		Forward = FMath::Lerp<FVector, float>(Forward, direction, 5 * GetWorld()->DeltaTimeSeconds);
 		GetOwner()->SetActorRotation(Forward.Rotation());
 		GetOwner()->SetActorLocation(P);
-	}
+	}*/
 	
 }
 
 void UPKM_OLDDSFSM::AttackState()
 {
 	currentTime += GetWorld()->DeltaTimeSeconds;
+	if (Target != nullptr)
+	{
+		direction = Target->GetActorLocation() - Me->GetActorLocation();
+		distance = direction.Size();
+		FVector Forward = Me->GetActorForwardVector();
+		Forward = FMath::Lerp<FVector, float>(Forward, direction, 5 * GetWorld()->DeltaTimeSeconds);
+		GetOwner()->SetActorRotation(Forward.Rotation());
+	}
 	if (currentTime>idleDelayTime)
 	{
-		UE_LOG(LogTemp, Log, TEXT("attack"));
-		mState = EEnemyState::Idle;
+		if (distance < attackRange)
+		{
+			currentTime = 0;
+		}
+		else if (distance < MoveRange)
+		{
+			UE_LOG(LogTemp, Log, TEXT("switchMove"));
+			mState = EEnemyState::Move;
+		}
+		else if (distance < RunRange)
+		{
+			UE_LOG(LogTemp, Log, TEXT("switchRun"));
+			mState = EEnemyState::Run;
+		}
+		else {
+			UE_LOG(LogTemp, Log, TEXT("switchIdle"));
+			mState = EEnemyState::Idle;
+		}
 	}
 }
 
@@ -115,4 +203,17 @@ void UPKM_OLDDSFSM::DamageState()
 void UPKM_OLDDSFSM::DieState()
 {
 
+}
+
+void UPKM_OLDDSFSM::Moving(float speed,FVector dir)
+{
+	
+	direction.Normalize();
+	FVector P0 = Me->GetActorLocation();
+	FVector vt = direction * speed * GetWorld()->DeltaTimeSeconds;
+	FVector P = P0 + vt;
+	FVector Forward = Me->GetActorForwardVector();
+	Forward = FMath::Lerp<FVector, float>(Forward, dir, 5 * GetWorld()->DeltaTimeSeconds);
+	GetOwner()->SetActorRotation(Forward.Rotation());
+	GetOwner()->SetActorLocation(P);
 }
