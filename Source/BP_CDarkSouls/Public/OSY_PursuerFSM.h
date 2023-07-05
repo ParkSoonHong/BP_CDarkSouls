@@ -11,6 +11,7 @@ enum class EEnmeyState :uint8
 {
 	Idle UMETA(DisplayName = "Idle State"),
 	Move UMETA(DisplayName = "Move State"),
+	Dash UMETA(DisplayName = "Dash State"),
 	Attack UMETA(DisplayName = "Attack State"),
 	Damage UMETA(DisplayName = "Damage State"),
 	Die UMETA(DisplayName = "Die State")
@@ -54,8 +55,16 @@ public:
 public:	 // 상태 함수
 	void IdleState();
 	void MoveState();
+	void DashState();
 	void AttackState();
 	void DamageState();
 	void DieState();
+
+public: //Idle 속성
+	// 필요속성 : 플레이어와의 거리, 대시거리, 무브거리,어택거리
+	float DashDistance = 3000;
+	float MoveDistance = 2000;
+	float AttackDistance = 200;
+
 		
 };
