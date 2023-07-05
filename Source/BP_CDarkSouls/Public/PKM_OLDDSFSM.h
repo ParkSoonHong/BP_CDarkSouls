@@ -47,7 +47,11 @@ public:
 	class APKM_OLDDS *Me;
 	FVector direction;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
-	float attackRange = 150.0f;
+	float distance;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
+	float MoveRange = 800.0f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
+	float attackRange = 200.0f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
 	float attackDelayTime = 2.0f;
 };
