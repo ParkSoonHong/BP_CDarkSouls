@@ -63,20 +63,22 @@ void AUPlayer::Tick(float DeltaTime)
 		if (curTime >= backStepTime)
 		{
 			isBackstep = false;
+// 			isPressedHorizontalMovekey = true;
+// 			isPressedVerticalMovekey = true;
 			curTime = 0;
 			BackstepDest = 50;
 		}
 	}
 
 	if (isRoll)
-	{			//백스텝
+	{			//구르기
 		curTime += DeltaTime; // 시간을 더한다.
 		FVector RollVector = GetActorForwardVector(); // 캐릭터의 정면에 -1곱해서 뒷면을 기준으로 잡음
 		//FVector BackstepLocation = FMath::Lerp(BackstepVector, BackstepTagetVector, 5*DeltaTime);
 		//FVector BackstepLocation = GetActorLocation() + BackstepVector * BackstepDest; // 추후에 백스텝 천천히 하는걸로 교정
 		FVector RollLocation = GetActorLocation() + RollVector * RollDest;
 		//10
-		RollDest -= 2;
+		RollDest += 2;
 		SetActorLocation(RollLocation);
 		if (curTime >= RollTime)
 		{
@@ -109,7 +111,7 @@ void AUPlayer::Horizeontal(float value)
 	}
 	else
 	{
-		GetCharacterMovement()->MaxWalkSpeed = 1200;
+		GetCharacterMovement()->MaxWalkSpeed = 12000;
 	}
 
 	if (!isBackstep )
@@ -117,16 +119,15 @@ void AUPlayer::Horizeontal(float value)
 	FVector direction = FRotationMatrix(Controller->GetControlRotation()).GetUnitAxis(EAxis::Y);
 	AddMovementInput(direction, value);
 	}
-	/*
+	
 	if (value == 0)
 	{
 		isPressedHorizontalMovekey = false;
 		//UE_LOG(LogTemp, Warning, TEXT("No"));
-	}else */
-	if (value != 0)
+	}else if (value != 0)
 	{ 
 		isPressedHorizontalMovekey = true;
-		UE_LOG(LogTemp,Warning,TEXT("On"));
+		//UE_LOG(LogTemp,Warning,TEXT("On"));
 	}
 	
 }
@@ -149,17 +150,16 @@ void AUPlayer::Vertical(float value)
 	AddMovementInput(direction, value);
 	}
 	
-	/*
+	
 	if (value == 0)
 	{
 		isPressedVerticalMovekey = false;
 		//UE_LOG(LogTemp, Warning, TEXT("No2"));
 	}
-	else */
-	if (value != 0)
+	else if (value != 0)
 	{
 		isPressedVerticalMovekey = true;
-		UE_LOG(LogTemp, Warning, TEXT("On2"));
+		//UE_LOG(LogTemp, Warning, TEXT("On2"));
 	}
 }
 
@@ -181,6 +181,7 @@ void AUPlayer::RollBackStepRun()
 	if(isPressedHorizontalMovekey==false&&isPressedVerticalMovekey==false)
 	{ 
 			BackStep();
+			isRun = false;
 	}
 	else if(isPressedHorizontalMovekey||isPressedVerticalMovekey) //방향키가 눌리고 있다면
 	{
@@ -191,14 +192,14 @@ void AUPlayer::RollBackStepRun()
 		{
 			// 방향키 + 스페이스바 길게 누르면 달리기
 			Run();
-			UE_LOG(LogTemp,Warning,TEXT("GOGO"));
+		//	UE_LOG(LogTemp,Warning,TEXT("GOGO"));
 		}
 		else 
 		{ 
 			// 방향키 + 스페이스바 짧게 누르면 구르기
 			Roll();
 			curTime =0;
-			UE_LOG(LogTemp, Warning, TEXT("Roll"));
+		//	UE_LOG(LogTemp, Warning, TEXT("Roll"));
 		}
 	}
 	
