@@ -15,6 +15,7 @@ APKM_OLDDS::APKM_OLDDS()
 	{
 		GetMesh()->SetSkeletalMesh(TempMesh.Object);
 		GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
+		GetMesh()->SetWorldScale3D(FVector(0.5, 0.5, 0.5));
 	}
 	FSM = CreateDefaultSubobject<UPKM_OLDDSFSM>(TEXT("FSM"));
 }
@@ -39,4 +40,3 @@ void APKM_OLDDS::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 }
-
