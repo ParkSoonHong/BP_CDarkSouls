@@ -67,4 +67,6 @@ public:
 	// 공격범위 시각화여부
 	UPROPERTY(EditAnywhere,Category="FSM")
 	bool bDebugRange=false;
+
+	float MovingSpeed=0;
 };
