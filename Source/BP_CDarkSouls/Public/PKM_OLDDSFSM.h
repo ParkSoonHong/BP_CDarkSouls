@@ -11,9 +11,11 @@ enum class EEnemyState : uint8
 {
 	Idle UMETA(DisplayName = "Idle State"),
 	Move,
+	Run,
 	Attack,
 	Damage,
-	Die
+	Die,
+	BackStep,
 };
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BP_CDARKSOULS_API UPKM_OLDDSFSM : public UActorComponent
@@ -32,10 +34,13 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void IdleState();
+	void RunState();
 	void MoveState();
 	void AttackState();
 	void DamageState();
 	void DieState();
+	void Moving(float speed, FVector dir);
+	void BackStepState();
 	UPROPERTY(EditAnywhere, Category ="FSM")
 	float currentTime=0;
 	float idleDelayTime=2;
@@ -49,9 +54,17 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
 	float distance;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
-	float MoveRange = 800.0f;
+	float RunRange = 3000.0f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
-	float attackRange = 200.0f;
+	float MoveRange = 1000.0f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
+	float BackRange = 200.0f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
+	float attackRange = 400.0f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
 	float attackDelayTime = 2.0f;
+	float BackStepSpeed;
+	// 공격범위 시각화여부
+	UPROPERTY(EditAnywhere,Category="FSM")
+	bool bDebugRange=false;
 };

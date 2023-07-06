@@ -10,10 +10,21 @@ UENUM(BlueprintType)
 enum class EEnmeyState :uint8
 {
 	Idle UMETA(DisplayName = "Idle State"),
-	Move UMETA(DisplayName = "Move State"),
+	Backstep UMETA(DisplayName = "Backstep State"),
+	Walk UMETA(DisplayName = "Walk State"),
+	Rush UMETA(DisplayName = "Rush State"),
 	Attack UMETA(DisplayName = "Attack State"),
 	Damage UMETA(DisplayName = "Damage State"),
 	Die UMETA(DisplayName = "Die State")
+};
+
+UENUM(BlueprintType)
+enum class EEnmeyAttackState :uint8
+{
+	AttackBasic UMETA(DisplayName="Attack Basic State"),
+	Attack1 UMETA(DisplayName = "Attack1 State"),
+	Attack2 UMETA(DisplayName = "Attack2 State"),
+	Attack3 UMETA(DisplayName = "Attack3 State")
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -43,7 +54,9 @@ public:
 	float currentTIme = 0;
 	// 필요속성 : 타겟, 이동속도, 방향
 	UPROPERTY(EditAnywhere, Category ="FSM")
-	float speed= 500;
+	float Walkspeed= 500;
+	UPROPERTY(EditAnywhere, Category ="FSM")
+	float Rushspeed = 1000;
 	// 나를 소유하고 있는 액터
 	UPROPERTY()
 	class AOSY_Pursuer *me;
@@ -53,9 +66,30 @@ public:
 
 public:	 // 상태 함수
 	void IdleState();
-	void MoveState();
+	void BackstepState();
+	void WalkState();
+	void RushState();
 	void AttackState();
 	void DamageState();
 	void DieState();
+
+public: //Idle 속성
+	// 필요속성 : 플레이어와의 거리, 대시거리, 무브거리,어택거리, 백스텝거리
+	float RushDistance = 5000;
+	float WalkStartDistance = 1000;
+	float AttackStartDistance = 150;
+	float BackstepStartDistance = 70;
+
+
+public: // Attack 상태함수
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category ="FSM")
+	EEnmeyAttackState mAttackState = EEnmeyAttackState::AttackBasic;
+
+	void AttackBasic();
+	void Attack1();
+	void Attack2();
+	void Attack3();
+
+public: // Attack 속성
 		
 };
