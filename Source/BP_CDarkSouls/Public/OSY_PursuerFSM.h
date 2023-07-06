@@ -11,8 +11,8 @@ enum class EEnmeyState :uint8
 {
 	Idle UMETA(DisplayName = "Idle State"),
 	Backstep UMETA(DisplayName = "Backstep State"),
-	Move UMETA(DisplayName = "Move State"),
-	Dash UMETA(DisplayName = "Dash State"),
+	Walk UMETA(DisplayName = "Walk State"),
+	Rush UMETA(DisplayName = "Rush State"),
 	Attack UMETA(DisplayName = "Attack State"),
 	Damage UMETA(DisplayName = "Damage State"),
 	Die UMETA(DisplayName = "Die State")
@@ -54,7 +54,9 @@ public:
 	float currentTIme = 0;
 	// 필요속성 : 타겟, 이동속도, 방향
 	UPROPERTY(EditAnywhere, Category ="FSM")
-	float speed= 500;
+	float Walkspeed= 500;
+	UPROPERTY(EditAnywhere, Category ="FSM")
+	float Rushspeed = 1000;
 	// 나를 소유하고 있는 액터
 	UPROPERTY()
 	class AOSY_Pursuer *me;
@@ -65,18 +67,18 @@ public:
 public:	 // 상태 함수
 	void IdleState();
 	void BackstepState();
-	void MoveState();
-	void DashState();
+	void WalkState();
+	void RushState();
 	void AttackState();
 	void DamageState();
 	void DieState();
 
 public: //Idle 속성
 	// 필요속성 : 플레이어와의 거리, 대시거리, 무브거리,어택거리, 백스텝거리
-	float DashDistance = 1000;
-	float MoveDistance = 500;
-	float AttackDistance = 100;
-	float BackstepDistance = 30;
+	float RushDistance = 5000;
+	float WalkStartDistance = 1000;
+	float AttackStartDistance = 150;
+	float BackstepStartDistance = 70;
 
 
 public: // Attack 상태함수
