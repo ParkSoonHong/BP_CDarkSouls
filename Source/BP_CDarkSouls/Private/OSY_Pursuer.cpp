@@ -10,6 +10,7 @@ AOSY_Pursuer::AOSY_Pursuer()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+
 	ConstructorHelpers::FObjectFinder<USkeletalMesh> TempMesh(TEXT("/Script/Engine.SkeletalMesh'/Engine/Tutorial/SubEditors/TutorialAssets/Character/TutorialTPP.TutorialTPP'"));
 
 	if (TempMesh.Succeeded())
@@ -18,6 +19,7 @@ AOSY_Pursuer::AOSY_Pursuer()
 		GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
 	}
 	FSM = CreateDefaultSubobject<UOSY_PursuerFSM>(TEXT("FSM"));
+
 }
 
 // Called when the game starts or when spawned

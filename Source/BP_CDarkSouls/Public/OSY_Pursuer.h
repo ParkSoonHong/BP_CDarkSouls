@@ -30,4 +30,6 @@ public:
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly)
 	class UOSY_PursuerFSM* FSM;
 
+
+
 };
