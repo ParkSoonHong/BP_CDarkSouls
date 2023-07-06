@@ -53,21 +53,25 @@ void AUPlayer::Tick(float DeltaTime)
 	if(isBackstep)
 	{			//백스텝
 		curTime += DeltaTime; // 시간을 더한다.
-		FVector BackstepVector = GetActorForwardVector() * -1; // 캐릭터의 정면에 -1곱해서 뒷면을 기준으로 잡음
+		FVector BackstepVector = GetActorForwardVector(); // 캐릭터의 정면에 -1곱해서 뒷면을 기준으로 잡음
 		//FVector BackstepLocation = FMath::Lerp(BackstepVector, BackstepTagetVector, 5*DeltaTime);
 		//FVector BackstepLocation = GetActorLocation() + BackstepVector * BackstepDest; // 추후에 백스텝 천천히 하는걸로 교정
 		FVector BackstepLocation = GetActorLocation() + BackstepVector * BackstepDest; 
 		//10
-		BackstepDest -= 2;
+		BackstepDest += -0.25f;
 		SetActorLocation(BackstepLocation);
 		if (curTime >= backStepTime)
 		{
 			isBackstep = false;
 // 			isPressedHorizontalMovekey = true;
 // 			isPressedVerticalMovekey = true;
+			isNoWarlk = false;
 			curTime = 0;
-			BackstepDest = 50;
+			BackstepDest = -0; 
+			
 		}
+		UE_LOG(LogTemp, Warning, TEXT("%d"),BackstepDest);
+		
 	}
 
 	if (isRoll)
@@ -78,15 +82,27 @@ void AUPlayer::Tick(float DeltaTime)
 		//FVector BackstepLocation = GetActorLocation() + BackstepVector * BackstepDest; // 추후에 백스텝 천천히 하는걸로 교정
 		FVector RollLocation = GetActorLocation() + RollVector * RollDest;
 		//10
-		RollDest += 2;
+		RollDest += 0.25f;
 		SetActorLocation(RollLocation);
+		UE_LOG(LogTemp, Warning, TEXT("Roll"));
+
 		if (curTime >= RollTime)
 		{
 			isRoll = false;
+			isNoWarlk = false;
 			curTime = 0;
-			RollDest = 50;
+			RollDest = 10;
+		
 		}
 	}
+
+	if (isPressed)
+	{
+		pressedTime += DeltaTime;		
+			RollBackStepRun(pressedTime);
+	}
+
+	
 
 }
 
@@ -99,7 +115,8 @@ void AUPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAxis(TEXT("Turn"), this, &AUPlayer::Turn);
 	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &AUPlayer::LookUp);
 
-	PlayerInputComponent->BindAction(TEXT("Roll/BackStep/Run"),IE_Pressed,this,&AUPlayer::RollBackStepRun);
+	PlayerInputComponent->BindAction(TEXT("Roll/BackStep/Run"),IE_Pressed,this,&AUPlayer::PressedSpacebar); // 눌렀을때
+	PlayerInputComponent->BindAction(TEXT("Roll/BackStep/Run"),IE_Released,this,&AUPlayer::ReleasedSpacebar);//땠을때
 }
 
 void AUPlayer::Horizeontal(float value)
@@ -114,7 +131,7 @@ void AUPlayer::Horizeontal(float value)
 		GetCharacterMovement()->MaxWalkSpeed = 12000;
 	}
 
-	if (!isBackstep )
+	if (!isNoWarlk)
 	{
 	FVector direction = FRotationMatrix(Controller->GetControlRotation()).GetUnitAxis(EAxis::Y);
 	AddMovementInput(direction, value);
@@ -127,6 +144,7 @@ void AUPlayer::Horizeontal(float value)
 	}else if (value != 0)
 	{ 
 		isPressedHorizontalMovekey = true;
+		
 		//UE_LOG(LogTemp,Warning,TEXT("On"));
 	}
 	
@@ -144,7 +162,7 @@ void AUPlayer::Vertical(float value)
 	{
 		GetCharacterMovement()->MaxWalkSpeed = 1200;
 	}
-	if(!isBackstep)
+	if(!isNoWarlk)
 	{ 
 	FVector direction = FRotationMatrix(Controller->GetControlRotation()).GetUnitAxis(EAxis::X);
 	AddMovementInput(direction, value);
@@ -159,6 +177,7 @@ void AUPlayer::Vertical(float value)
 	else if (value != 0)
 	{
 		isPressedVerticalMovekey = true;
+		
 		//UE_LOG(LogTemp, Warning, TEXT("On2"));
 	}
 }
@@ -174,72 +193,82 @@ void AUPlayer::LookUp(float value)
 	AddControllerPitchInput(value);
 }
 
-void AUPlayer::RollBackStepRun()
+void AUPlayer::RollBackStepRun(float Time)
 {
-	
-	//if() 방향키가 눌리고 있지 않다면.
-	if(isPressedHorizontalMovekey==false&&isPressedVerticalMovekey==false)
-	{ 
-			BackStep();
-			isRun = false;
-	}
-	else if(isPressedHorizontalMovekey||isPressedVerticalMovekey) //방향키가 눌리고 있다면
+	UE_LOG(LogTemp, Warning, TEXT("%f"), Time);
+	if (isPressedHorizontalMovekey || isPressedVerticalMovekey)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("curTimeOn"));
-		pressedTime +=0.1;
-		
-		if (pressedTime >= changeActionTime) // 스페이스바가 눌려있고 눌려있던 시간이 변호 시간보다 크거나 같다면 변환
-		{
-			// 방향키 + 스페이스바 길게 누르면 달리기
-			Run();
-		//	UE_LOG(LogTemp,Warning,TEXT("GOGO"));
-		}
-		else 
+		if( Time>=0.1)
 		{ 
-			// 방향키 + 스페이스바 짧게 누르면 구르기
-			Roll();
-			curTime =0;
-		//	UE_LOG(LogTemp, Warning, TEXT("Roll"));
+			isNoRun = true;
 		}
+			if (Time >= changeActionTime)
+			{
+				Run();
+				UE_LOG(LogTemp, Warning, TEXT("GOGO"));
+			}
+			else
+			{	// 불값을 통해 롤이랑 
+				Roll();
+			}
+			
+		
+
 	}
 	
+}
 
+void AUPlayer::PressedSpacebar() // 버튼이 눌렸을때
+{
+
+	if (isPressedHorizontalMovekey == false && isPressedVerticalMovekey == false)
+	{
+		BackStep();
+		isNoWarlk = true;
+		UE_LOG(LogTemp, Warning, TEXT("Backstep"));
+	}
+	else
+	{
+		isPressed = true;
+	}
 	
 }
 
-void AUPlayer::PressedSpacebar()
+void AUPlayer::ReleasedSpacebar() // 버튼이 눌리지 않을때
 {
-	
-	/*
-	isPressed = true;
-	isRun =true;
-	isBackstep =true;
 	pressedTime = 0;
-	GetWorldTimerManager().SetTimer(HoldTimerHandle,this,&AUPlayer::RollBackStepRun,0.1f);
-	*/
+	isPressed = false;
 	
 }
 
-void AUPlayer::Roll()
+void AUPlayer::Roll() // 구르기
 {
+	if (isNoRun)
+	{
+		isRoll = false;
+		isNoWarlk = false;
+	}
+	else
+	{ 
 	isRoll = true;
+	isRun = false;
+	isNoWarlk = true;
+	}
 }
 
-void AUPlayer::BackStep()
+void AUPlayer::BackStep() // 백스탭
 {
 	isBackstep = true;
+	isNoWarlk = true;
+	isNoRun =false;
+
 }
 
-void AUPlayer::Run()
+void AUPlayer::Run() // 달리기
 {
+	isNoWarlk = false;
 	isRun = true;
+	isRoll = false;
 }
 
-void AUPlayer::ReleasedSpacebar()
-{/*
-	// 스페이스바를 땐것을 판별 
-	isPressed = false;
-	isRun = false;
-	GetWorldTimerManager().ClearTimer(HoldTimerHandle);*/
-}
 
