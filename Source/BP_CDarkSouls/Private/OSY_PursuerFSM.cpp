@@ -508,9 +508,9 @@ void UOSY_PursuerFSM::Attack3()
 
 void UOSY_PursuerFSM::LowerAndRaiseWeapon()
 {
-	if (me->compSword)
-	{
-		FVector RootBoneTransform = me->compSword->GetBoneTransform(0);
-		FVector NewLocation = RootBoneTransform.GetLocation();
-	}
+	//if (me->compSword)
+	//{
+	//	FVector RootBoneTransform = me->compSword->GetBoneTransform(0);
+	//	FVector NewLocation = RootBoneTransform.GetLocation();
+	//}
 }
