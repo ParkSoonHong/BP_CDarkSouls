@@ -188,6 +188,10 @@ void UPKM_OLDDSFSM::MoveState()
 	}
 	else if (distance < MoveRange)
 	{
+		if (MovingSpeed>200)
+		{
+			MovingSpeed = 200;
+		}
 		Moving(200, direction);
 	}
 	else if (distance < RunRange)
@@ -283,7 +287,28 @@ void UPKM_OLDDSFSM::Moving(float speed,FVector dir)
 	
 	dir.Normalize();
 	FVector P0 = Me->GetActorLocation();
-	FVector vt = dir * speed * GetWorld()->DeltaTimeSeconds;
+	if (MovingSpeed>speed)//감속
+	{
+		if (MovingSpeed - 5<speed)
+		{
+			MovingSpeed = speed;
+		}
+		else {
+			MovingSpeed = MovingSpeed - 5;
+		}
+	}
+	else if (MovingSpeed < speed)//애매하네
+	{
+		if (MovingSpeed + 5>speed)
+		{
+			MovingSpeed = speed;
+		}
+		else
+		{
+			MovingSpeed = MovingSpeed + 5;
+		}
+	}
+	FVector vt = dir * MovingSpeed * GetWorld()->DeltaTimeSeconds;
 	FVector P = P0 + vt;
 	FVector Forward = Me->GetActorForwardVector();
 	Forward = FMath::Lerp<FVector, float>(Forward, dir, 5 * GetWorld()->DeltaTimeSeconds);
