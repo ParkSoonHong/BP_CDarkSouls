@@ -53,7 +53,9 @@ public:
 	float idleDelayTime = 2;
 	float currentTIme = 0;
 	UPROPERTY(EditAnywhere, Category ="FSM")
-	float delyTime =0;
+	float delayTime ;
+	
+
 	// 필요속성 : 타겟, 이동속도, 방향
 	UPROPERTY(EditAnywhere, Category ="FSM")
 	float Backspeed;
@@ -97,5 +99,6 @@ public: // Attack 상태함수
 public: // Attack 속성
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void LowerAndRaiseWeapon();
-		
+	
+	bool isAnimPlay = false;
 };

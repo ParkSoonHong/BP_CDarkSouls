@@ -31,7 +31,10 @@ public:
 	class UOSY_PursuerFSM* FSM;
 
 	UPROPERTY(EditAnywhere)
-	class USkeletalMeshComponent* compSword;
+	class UStaticMeshComponent* compSword;
+
+	UPROPERTY(EditAnywhere)
+	class UStaticMeshComponent* compShield;
 
 
 

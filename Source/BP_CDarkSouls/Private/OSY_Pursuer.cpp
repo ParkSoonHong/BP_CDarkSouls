@@ -11,25 +11,41 @@ AOSY_Pursuer::AOSY_Pursuer()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	compSword = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("compSword"));
-	compSword->SetupAttachment(GetCapsuleComponent());
-	compSword->SetRelativeLocation(FVector(0,90,60));
-	compSword->SetRelativeRotation(FRotator(0,90,90));
-	compSword->SetRelativeScale3D(FVector(0.28));
 
-	ConstructorHelpers::FObjectFinder<USkeletalMesh> TempSwordMesh(TEXT("/Script/Engine.SkeletalMesh'/Engine/EditorMeshes/SkeletalMesh/DefaultSkeletalMesh.DefaultSkeletalMesh'"));
-	if (TempSwordMesh.Succeeded())
-	{
-		compSword->SetSkeletalMesh(TempSwordMesh.Object);
-	}
-
-	ConstructorHelpers::FObjectFinder<USkeletalMesh> TempMesh(TEXT("/Script/Engine.SkeletalMesh'/Engine/Tutorial/SubEditors/TutorialAssets/Character/TutorialTPP.TutorialTPP'"));
+	// ½ºÄÌ·¹Å»-----------------------------------------------------------
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> TempMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/OhSeYoung/Asset/The_Pursuer/PC_Computer_-_Dark_Souls_II_-_The_Pursuer/The_Pursuer/untitled_R1.untitled_R1'"));
 
 	if (TempMesh.Succeeded())
 	{
 		GetMesh()->SetSkeletalMesh((TempMesh.Object));
 		GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
 	}
+
+	// ¼Òµå----------------------------------------------------------
+	compSword = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("compSword"));
+	compSword->SetupAttachment(GetCapsuleComponent());
+	compSword->SetRelativeLocation(FVector(0,90,20));
+	compSword->SetRelativeRotation(FRotator(0,90,00));
+	compSword->SetRelativeScale3D(FVector(1));
+
+	ConstructorHelpers::FObjectFinder<UStaticMesh> TempSwordMesh(TEXT("/Script/Engine.StaticMesh'/Game/OhSeYoung/Asset/The_Pursuer/PC_Computer_-_Dark_Souls_II_-_The_Pursuer/The_Pursuer/sword.sword'"));
+	if (TempSwordMesh.Succeeded())
+	{
+		compSword->SetStaticMesh(TempSwordMesh.Object);
+	}
+	// ½Çµå----------------------------------------------------------
+	compShield = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("compShield"));
+	compShield->SetupAttachment(GetCapsuleComponent());
+	compShield->SetRelativeLocation(FVector(0, -80, -30));
+	compShield->SetRelativeRotation(FRotator(0, -90, 00));
+	compShield->SetRelativeScale3D(FVector(1));
+
+	ConstructorHelpers::FObjectFinder<UStaticMesh> TempShieldMesh(TEXT("/Script/Engine.StaticMesh'/Game/OhSeYoung/Asset/The_Pursuer/PC_Computer_-_Dark_Souls_II_-_The_Pursuer/The_Pursuer/shield.shield'"));
+	if (TempShieldMesh.Succeeded())
+	{
+		compShield->SetStaticMesh(TempShieldMesh.Object);
+	}
+	// FSM----------------------------------------------------------
 	FSM = CreateDefaultSubobject<UOSY_PursuerFSM>(TEXT("FSM"));
 
 }
