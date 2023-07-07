@@ -31,7 +31,7 @@ void UPKM_OLDDSFSM::BeginPlay()
 // Called every frame
 void UPKM_OLDDSFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-	if (bDebugRange)
+	/*if (bDebugRange)
 	{
 
 	DrawDebugSphere(GetWorld(), Me->GetActorLocation(), BackRange, 100, FColor::Black, false, -1, 0, 2);
@@ -39,7 +39,7 @@ void UPKM_OLDDSFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	DrawDebugSphere(GetWorld(), Me->GetActorLocation(), MoveRange, 100, FColor::Yellow, false, -1, 0, 2);
 	DrawDebugSphere(GetWorld(), Me->GetActorLocation(), RunRange, 100, FColor::Blue, false, -1, 0, 2);
 
-	}
+	}*/
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	switch (mState)
 	{
@@ -63,6 +63,9 @@ void UPKM_OLDDSFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 		break;
 	case EEnemyState::Die:
 		DieState();
+		break;
+	case  EEnemyState::RushAttack:
+		RushAttackState();
 		break;
 	default:
 		break;
@@ -158,10 +161,10 @@ void UPKM_OLDDSFSM::RunState()
 void UPKM_OLDDSFSM::MoveState()
 {
 	//direction = FVector(0, 0, 0);
-	if (currentTime<3)
+	/*if (currentTime<3)
 	{
 		currentTime += GetWorld()->DeltaTimeSeconds;
-	}
+	}*/
 	if (Target != nullptr)
 	{
 		direction = Target->GetActorLocation() - Me->GetActorLocation();
@@ -219,6 +222,7 @@ void UPKM_OLDDSFSM::AttackState()
 {
 	currentTime += GetWorld()->DeltaTimeSeconds;
 	float FixRotTime = 1;
+
 	if (Target != nullptr)
 	{
 		direction = Target->GetActorLocation() - Me->GetActorLocation();
@@ -230,45 +234,26 @@ void UPKM_OLDDSFSM::AttackState()
 		FVector Forward = Me->GetActorForwardVector();
 		Forward = FMath::Lerp<FVector, float>(Forward, direction, 0.1 * GetWorld()->DeltaTimeSeconds);
 		GetOwner()->SetActorRotation(Forward.Rotation());
-		UE_LOG(LogTemp, Log, TEXT("fixRot ing.."));
-	}
-	else if (currentTime < idleDelayTime)
-	{
-
+		//UE_LOG(LogTemp, Log, TEXT("fixRot ing.."));
 	}
 	else
 	{
-		if (distance < BackRange) {
-			if (FVector::DotProduct(direction, Me->GetActorForwardVector())>=0) {
-				mState = EEnemyState::BackStep;
-				currentTime = 0;
-				UE_LOG(LogTemp, Log, TEXT("Go BFackStep"));
-			}
-			else {
-				UE_LOG(LogTemp, Log, TEXT("Turn.."));
-				FVector Forward = Me->GetActorForwardVector();
-				Forward = FMath::Lerp<FVector, float>(Forward, direction, 0.1 * GetWorld()->DeltaTimeSeconds);
-				GetOwner()->SetActorRotation(Forward.Rotation());
-			}
-		}
-		else if (distance < attackRange)
+		//공격시작
+		int32 RandAttack = FMath::RandRange(1, 2);
+		if (RandAttack==1)
 		{
 			currentTime = 0;
+			bRushdirCheck = false;
+			mState = EEnemyState::RushAttack;
+			
 		}
-		else if (distance < MoveRange)
+		else
 		{
-			UE_LOG(LogTemp, Log, TEXT("switchMove"));
-			mState = EEnemyState::Move;
-		}
-		else if (distance < RunRange)
-		{
-			UE_LOG(LogTemp, Log, TEXT("switchRun"));
-			mState = EEnemyState::Run;
-		}
-		else {
-			UE_LOG(LogTemp, Log, TEXT("switchIdle"));
+			UE_LOG(LogTemp, Log, TEXT("Normal Attack"));
 			mState = EEnemyState::Idle;
 		}
+
+		//공격종료or 피함
 	}
 }
 
@@ -355,6 +340,85 @@ void UPKM_OLDDSFSM::BackStepState()
 	{
 		UE_LOG(LogTemp, Log, TEXT("BackSEnd"));
 		mState = EEnemyState::Idle;
+	}
+}
+void UPKM_OLDDSFSM::RushAttackState()
+{
+	currentTime += GetWorld()->DeltaTimeSeconds;
+	float FastTime = 0.1;
+	float SlowTime = 0.8;
+	float EndTime = 1;
+	FVector P0 = Me->GetActorLocation();
+	if(!bRushdirCheck){
+		direction = Target->GetActorLocation() - P0;
+		direction.Normalize();
+		bRushdirCheck = true;
+	}
+	//FVector Forward = Me->GetActorForwardVector();
+	//Forward = FMath::Lerp<FVector, float>(Forward, direction, 5 * GetWorld()->DeltaTimeSeconds);
+	//GetOwner()->SetActorRotation(Forward.Rotation());
+	if (currentTime <= FastTime)// 0~0.1
+	{
+		BackStepSpeed = 1000 * sqrt(currentTime / FastTime);
+		//UE_LOG(LogTemp, Log, TEXT("Time=%f BSS1%f"),currentTime,BackStepSpeed);
+		FVector vt = direction  * BackStepSpeed * GetWorld()->DeltaTimeSeconds;
+		FVector P = P0 + vt;
+		Me->SetActorLocation(P);
+	}
+	else if (currentTime < SlowTime)// 0.1~0.8
+	{
+		BackStepSpeed = 1000;
+		FVector vt = direction  * BackStepSpeed * GetWorld()->DeltaTimeSeconds;
+		FVector P = P0 + vt;
+		Me->SetActorLocation(P);
+	}
+	else if (currentTime < EndTime)// 0.8<= CT<1.0
+	{	//				1000 * (1-x2)
+		BackStepSpeed = 1000 * (1 - ((currentTime - SlowTime) / (EndTime - SlowTime)) * ((currentTime - SlowTime) / (EndTime - SlowTime)));
+		//UE_LOG(LogTemp, Log, TEXT("TIme=%f BSS2 %f ,((currentTime-1)/2)=%f, (1-((currentTime-1)/2)*((currentTime - 1)/ 2)) %f"), currentTime, BackStepSpeed, (1 - ((currentTime - 2.0f) / 1.0f) * ((currentTime - 2.0f) / 1.0f)));
+		FVector vt = direction  * BackStepSpeed * GetWorld()->DeltaTimeSeconds;
+		FVector P = P0 + vt;
+		Me->SetActorLocation(P);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("RushEnd"));
+		mState = EEnemyState::Idle;
+	}
+}
+
+void UPKM_OLDDSFSM::ReciveDamage(float value)
+{
+	if (MyAttacktype == 1) //어택타입1은 슈퍼아머임
+	{
+		if (HP-value>0)
+		{
+			HP -= value;
+		}
+		else
+		{
+			HP = 0;
+			mState = EEnemyState::Die;
+		}
+	}
+}
+
+float UPKM_OLDDSFSM::GiveDamage()
+{
+	switch (MyAttacktype)
+	{
+	case 1:
+		return 1;
+		break;
+	case 2:
+		return 2;
+		break;
+	case 3:
+		return 3;
+		break;
+	default:
+		return -1;
+		break;
 	}
 }
 
