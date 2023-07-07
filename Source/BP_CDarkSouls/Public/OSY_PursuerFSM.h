@@ -95,5 +95,7 @@ public: // Attack 상태함수
 	void Attack3();
 
 public: // Attack 속성
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void LowerAndRaiseWeapon();
 		
 };

@@ -30,6 +30,9 @@ public:
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly)
 	class UOSY_PursuerFSM* FSM;
 
+	UPROPERTY(EditAnywhere)
+	class USkeletalMeshComponent* compSword;
+
 
 
 };
