@@ -9,6 +9,9 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Math/RotationMatrix.h"
+#include "Kismet/GameplayStatics.h"
+#include "PKM_OLDDS.h"
+#include "OSY_Pursuer.h"
 
 // Sets default values
 AUPlayer::AUPlayer()
@@ -117,6 +120,8 @@ void AUPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 	PlayerInputComponent->BindAction(TEXT("Roll/BackStep/Run"),IE_Pressed,this,&AUPlayer::PressedSpacebar); // 눌렀을때
 	PlayerInputComponent->BindAction(TEXT("Roll/BackStep/Run"),IE_Released,this,&AUPlayer::ReleasedSpacebar);//땠을때
+
+	PlayerInputComponent->BindAction(TEXT("TagetLook"),IE_Pressed,this,&AUPlayer::TagetLook);// 타겟 지정 눌렀을때
 }
 
 void AUPlayer::Horizeontal(float value)
@@ -211,9 +216,6 @@ void AUPlayer::RollBackStepRun(float Time)
 			{	// 불값을 통해 롤이랑 
 				Roll();
 			}
-			
-		
-
 	}
 	
 }
@@ -270,5 +272,59 @@ void AUPlayer::Run() // 달리기
 	isRun = true;
 	isRoll = false;
 }
+
+void AUPlayer::TagetLook()
+{
+	// 한번 누르면 가장 가장 가까운 적을 지정해서 본다.
+	// 한번 누른다.
+	setTagetLook = true;
+	tagetLookNum++;
+	UE_LOG(LogTemp,Warning,TEXT("%d"),tagetLookNum);
+	if (setTagetLook)
+	{
+		tagetOldDs = Cast<APKM_OLDDS>(UGameplayStatics::GetActorOfClass(GetWorld(),APKM_OLDDS::StaticClass()));
+		tagetPursuer = Cast<AOSY_Pursuer>(UGameplayStatics::GetActorOfClass(GetWorld(),AOSY_Pursuer::StaticClass()));
+
+	}
+	// 적을 지정한다.
+	// 카메라로 본다.
+}
+
+/*
+void AUPlayer::UpdateCamer()
+{
+	if (tagetOldDs)
+	{
+		FVector TargetLocation = tagetOldDs->GetActorLocation();
+		FVector camerLocation = GetActorLocation();
+
+		FVector directionToTaget = TargetLocation - camerLocation;
+		directionToTaget.Normalize();
+
+		FRotator NewcameraRotion = directionToTaget.Rotation();
+		FRotator currentCamerRotation = compCamera->GetComponentRotation();
+
+		FRotator InterpolatedRotation = FMath::RInterpTo(currentCamerRotation,NewcameraRotion,GetWorld()->GetDeltaSeconds(),5.0f);
+
+		compCamera->SetWorldRotation(InterpolatedRotation);
+	}
+
+	if (tagetPursuer)
+	{
+		FVector TargetLocation = tagetPursuer->GetActorLocation();
+		FVector camerLocation = GetActorLocation();
+
+		FVector directionToTaget = TargetLocation - camerLocation;
+		directionToTaget.Normalize();
+
+		FRotator NewcameraRotion = directionToTaget.Rotation();
+		FRotator currentCamerRotation = compCamera->GetComponentRotation();
+
+		FRotator InterpolatedRotation = FMath::RInterpTo(currentCamerRotation, NewcameraRotion, GetWorld()->GetDeltaSeconds(), 5.0f);
+
+		compCamera->SetWorldRotation(InterpolatedRotation);
+	}
+}
+*/
 
 
