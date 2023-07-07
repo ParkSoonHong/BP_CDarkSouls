@@ -30,6 +30,7 @@ void UOSY_PursuerFSM::BeginPlay()
 	Target = Cast<AUPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), AUPlayer::StaticClass()));
 	me = Cast<AOSY_Pursuer>(GetOwner());
 	
+	
 }
 
 
@@ -398,26 +399,44 @@ void UOSY_PursuerFSM::Attack1()
 	// Enemy forward 벡터가 direction 방향으로 일치시키고 싶다.
 	me->SetActorRotation(forward.Rotation());
 
-	// 이쪽으로 상태가 넘어오면 어택1을 하고
-		//PRINT_LOG(TEXT("ATTACK1!!!!"));
+		// 이쪽으로 상태가 넘어오면 어택1을 하고
+		PRINT_LOG(TEXT("ATTACK1!!!!"));
+// 		Direction.Z = 0;
+// 		FVector forward = me->GetActorForwardVector();
+// 		forward = FMath::Lerp(forward, Direction, 5 * GetWorld()->DeltaTimeSeconds);
+// 		// Enemy forward 벡터가 direction 방향으로 일치시키고 싶다.
+// 		me->SetActorRotation(forward.Rotation());
 
-	// 만약 어택거리 보다 크다면 아이들로 돌아가
+		//하고 싶은 일 : 어택상태에 들어가면 손에 있는 스켈레탈메쉬가 x 방향으로 90% 내려갔다 올라오게 하고 싶고 그 일정시간이 지난후 돌아가고 싶다
+		// 스켈레탈메쉬가 x 방향으로 90% 내려갔다 올라오게 하고 싶다
+		// 스켈레탈 메쉬가 뭔데?
+		// compSword 임(전역에 선언했으니 그냥 써)
+		// 얼마동안 내려가고 얼마동안 올라올거야?
+		// 1초동안 내려가고 1초동안 올라올거야
+		float AttackStarttoHalf = 1;
+		float AttackHalftoEnd =1;
+		// 1초 동안 어떻게 내려갈건데?
+		// 
+		// 1초동안 수업에서 배운 러프의 방법으로 내려갈거야
+		// 그러면 1초동안 어떻게 내려갈건데?
+		// 1초동안 수업에서 배운 러프의 방법으로 올라올거야
+		// 그 일정시간이 지난후 돌아가고 싶다
+		// 일정시간은 얼마나 되는데?
+		// 한 2초정도 기다렸다가 돌아갈거야
+		
+		// 만약 어택거리 보다 크다면 아이들로 돌아가
 		if (distance > AttackStartDistance)
 		{
-		//PRINT_LOG(TEXT("A1_Back to Idle"));
-		 mState = EEnmeyState::Idle;
+			PRINT_LOG(TEXT("A1_Back to Idle"));
+			mState = EEnmeyState::Idle;
 		}
-	//  아직 어택거리면 어택베이직으로 돌아가
+		//  아직 어택거리면 어택베이직으로 돌아가
 		else
 		{
-		//PRINT_LOG(TEXT("A1_Back to Attack Basic"));
-		mAttackState= EEnmeyAttackState::AttackBasic;
+			PRINT_LOG(TEXT("A1_Back to Attack Basic"));
+			mAttackState= EEnmeyAttackState::AttackBasic;
 
 		}
-
-
-
-
 
 }
 
@@ -437,18 +456,18 @@ void UOSY_PursuerFSM::Attack2()
 
 
 	// 이쪽으로 상태가 넘어오면 어택1을 하고
-	//PRINT_LOG(TEXT("ATTACK2!!!!"));
+	PRINT_LOG(TEXT("ATTACK2!!!!"));
 
 		// 만약 어택거리 보다 크다면 아이들로 돌아가
 		if (distance > AttackStartDistance)
 		{
-			//PRINT_LOG(TEXT("A2_Back to Idle"));
+			PRINT_LOG(TEXT("A2_Back to Idle"));
 				mState = EEnmeyState::Idle;
 		}
 	//  아직 어택거리면 어택베이직으로 돌아가
 		else
 		{
-			//PRINT_LOG(TEXT("A2_Back to Attack Basic"));
+			PRINT_LOG(TEXT("A2_Back to Attack Basic"));
 			mAttackState = EEnmeyAttackState::AttackBasic;
 
 		}
@@ -485,4 +504,13 @@ void UOSY_PursuerFSM::Attack3()
 			mAttackState = EEnmeyAttackState::AttackBasic;
 
 		}
+}
+
+void UOSY_PursuerFSM::LowerAndRaiseWeapon()
+{
+	if (me->compSword)
+	{
+		FVector RootBoneTransform = me->compSword->GetBoneTransform(0);
+		FVector NewLocation = RootBoneTransform.GetLocation();
+	}
 }

@@ -3,6 +3,7 @@
 
 #include "OSY_Pursuer.h"
 #include "OSY_PursuerFSM.h"
+#include "Components/CapsuleComponent.h"
 
 // Sets default values
 AOSY_Pursuer::AOSY_Pursuer()
@@ -10,6 +11,17 @@ AOSY_Pursuer::AOSY_Pursuer()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	compSword = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("compSword"));
+	compSword->SetupAttachment(GetCapsuleComponent());
+	compSword->SetRelativeLocation(FVector(0,90,60));
+	compSword->SetRelativeRotation(FRotator(0,90,90));
+	compSword->SetRelativeScale3D(FVector(0.28));
+
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> TempSwordMesh(TEXT("/Script/Engine.SkeletalMesh'/Engine/EditorMeshes/SkeletalMesh/DefaultSkeletalMesh.DefaultSkeletalMesh'"));
+	if (TempSwordMesh.Succeeded())
+	{
+		compSword->SetSkeletalMesh(TempSwordMesh.Object);
+	}
 
 	ConstructorHelpers::FObjectFinder<USkeletalMesh> TempMesh(TEXT("/Script/Engine.SkeletalMesh'/Engine/Tutorial/SubEditors/TutorialAssets/Character/TutorialTPP.TutorialTPP'"));
 
