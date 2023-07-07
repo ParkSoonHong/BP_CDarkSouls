@@ -119,6 +119,7 @@ void UPKM_OLDDSFSM::IdleState()
 void UPKM_OLDDSFSM::RunState()
 {
 	//direction = FVector(0, 0, 0);
+	bRunAnimCheck = true;
 	if (Target != nullptr)
 	{
 		direction = Target->GetActorLocation() - Me->GetActorLocation();
@@ -126,6 +127,7 @@ void UPKM_OLDDSFSM::RunState()
 	}
 	if (distance < BackRange) {
 		if (FVector::DotProduct(direction, Me->GetActorForwardVector())) {
+			bRushAnimCheck = false;
 			mState = EEnemyState::BackStep;
 			UE_LOG(LogTemp, Log, TEXT("Go BackStep"));
 		}
@@ -140,11 +142,13 @@ void UPKM_OLDDSFSM::RunState()
 	{
 		UE_LOG(LogTemp, Log, TEXT("switchAttack"));
 		currentTime = 0;
+		bRushAnimCheck = false;
 		mState = EEnemyState::Attack;
 	}
 	else if (distance < MoveRange)
 	{
 		UE_LOG(LogTemp, Log, TEXT("switchMove"));
+		bRushAnimCheck = false;
 		mState = EEnemyState::Move;
 	}
 	else if (distance < RunRange)
@@ -153,6 +157,7 @@ void UPKM_OLDDSFSM::RunState()
 	}
 	else {
 		UE_LOG(LogTemp, Log, TEXT("switchIdle"));
+		bRunAnimCheck = false;
 		mState = EEnemyState::Idle;
 	}
 
@@ -165,6 +170,7 @@ void UPKM_OLDDSFSM::MoveState()
 	{
 		currentTime += GetWorld()->DeltaTimeSeconds;
 	}*/
+	bWalkAnimCheck = true;
 	if (Target != nullptr)
 	{
 		direction = Target->GetActorLocation() - Me->GetActorLocation();
@@ -172,6 +178,7 @@ void UPKM_OLDDSFSM::MoveState()
 	}
 	if (distance < BackRange) {
 		if (FVector::DotProduct(direction, Me->GetActorForwardVector()) >= 0) {
+			bWalkAnimCheck = false;
 			mState = EEnemyState::BackStep;
 			currentTime = 0;
 			UE_LOG(LogTemp, Log, TEXT("Go BFackStep"));
@@ -187,6 +194,7 @@ void UPKM_OLDDSFSM::MoveState()
 	{
 		UE_LOG(LogTemp, Log, TEXT("switchAttack"));
 		currentTime = 0;
+		bWalkAnimCheck = false;
 		mState = EEnemyState::Attack;
 	}
 	else if (distance < MoveRange)
@@ -200,10 +208,12 @@ void UPKM_OLDDSFSM::MoveState()
 	else if (distance < RunRange)
 	{
 		UE_LOG(LogTemp, Log, TEXT("switchRun"));
+		bWalkAnimCheck = false;
 		mState = EEnemyState::Run;
 	}
 	else {
 		UE_LOG(LogTemp, Log, TEXT("switchIdle"));
+		bWalkAnimCheck = false;
 		mState = EEnemyState::Idle;
 	}
 	/*else {
@@ -269,7 +279,6 @@ void UPKM_OLDDSFSM::DieState()
 
 void UPKM_OLDDSFSM::Moving(float speed,FVector dir)
 {
-	
 	dir.Normalize();
 	FVector P0 = Me->GetActorLocation();
 	if (MovingSpeed>speed)//°¨¼Ó
@@ -303,6 +312,7 @@ void UPKM_OLDDSFSM::Moving(float speed,FVector dir)
 
 void UPKM_OLDDSFSM::BackStepState()
 {
+	
 	currentTime += GetWorld()->DeltaTimeSeconds;
 	float FastTime=0.1;
 	float SlowTime=0.8;
@@ -315,6 +325,7 @@ void UPKM_OLDDSFSM::BackStepState()
 	direction.Normalize();
 	if (currentTime<=FastTime)// 0~0.1
 	{
+		bBackStepAnimCheck = true;
 		BackStepSpeed = 1000 * sqrt(currentTime/FastTime);
 		//UE_LOG(LogTemp, Log, TEXT("Time=%f BSS1%f"),currentTime,BackStepSpeed);
 		FVector vt = direction * -1 *BackStepSpeed * GetWorld()->DeltaTimeSeconds;
@@ -339,6 +350,7 @@ void UPKM_OLDDSFSM::BackStepState()
 	else
 	{
 		UE_LOG(LogTemp, Log, TEXT("BackSEnd"));
+		bBackStepAnimCheck = false;
 		mState = EEnemyState::Idle;
 	}
 }
@@ -359,6 +371,7 @@ void UPKM_OLDDSFSM::RushAttackState()
 	//GetOwner()->SetActorRotation(Forward.Rotation());
 	if (currentTime <= FastTime)// 0~0.1
 	{
+		bRushAnimCheck = true;
 		BackStepSpeed = 1000 * sqrt(currentTime / FastTime);
 		//UE_LOG(LogTemp, Log, TEXT("Time=%f BSS1%f"),currentTime,BackStepSpeed);
 		FVector vt = direction  * BackStepSpeed * GetWorld()->DeltaTimeSeconds;
@@ -382,6 +395,7 @@ void UPKM_OLDDSFSM::RushAttackState()
 	}
 	else
 	{
+		bRushAnimCheck = false;
 		UE_LOG(LogTemp, Log, TEXT("RushEnd"));
 		mState = EEnemyState::Idle;
 	}

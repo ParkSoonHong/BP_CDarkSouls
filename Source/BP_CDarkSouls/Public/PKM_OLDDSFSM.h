@@ -74,7 +74,15 @@ public:
 	int32 HP=100;
 	UPROPERTY(EditAnywhere,Category="FSMDraw")
 	bool bDebugRange=false;
-
 	bool bRushdirCheck=false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
+	bool bBackStepAnimCheck = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
+	bool bRushAnimCheck = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
+	bool bWalkAnimCheck = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
+	bool bRunAnimCheck = false;
+
 	float MovingSpeed=0;
 };
