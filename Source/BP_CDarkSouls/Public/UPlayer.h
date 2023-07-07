@@ -67,6 +67,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	bool isNoRun = false;
 
+	UPROPERTY(EditAnywhere) // 타겟쳐다보기 버튼을 눌렀는지 체크
+	bool setTagetLook = 0;
+
 	UPROPERTY(EditAnywhere) // 눌린 시간
 	float pressedTime = 0;
 
@@ -88,12 +91,21 @@ public:
 	UPROPERTY(EditAnywhere) // 백스텝 거리
 	float RollDest = 0;
 
+	UPROPERTY(EditAnywhere) // 버튼 몇번 클릭했는지 확인
+	int32 tagetLookNum=0;
+
+
+
 	UPROPERTY(EditAnywhere) // 시작할 위치
 	FVector StartVector;
 	UPROPERTY(EditAnywhere) // 도착할 위치
 	FVector tagetVector;
 
+	UPROPERTY(EditAnywhere)
+	class AOSY_Pursuer * tagetPursuer;
 
+	UPROPERTY(EditAnywhere)
+	class APKM_OLDDS * tagetOldDs;
 	/*
 	UPROPERTY(EditAnywhere)
 	bool isRun = false;
@@ -120,4 +132,8 @@ public:
 	void Roll();
 	void BackStep();
 	void Run();
+
+	void TagetLook();
+
+	void UpdateCamer();
 };

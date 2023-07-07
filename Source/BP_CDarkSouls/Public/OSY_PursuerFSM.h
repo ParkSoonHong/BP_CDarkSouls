@@ -52,11 +52,15 @@ public:
 	UPROPERTY(EditAnywhere, Category ="FSM")
 	float idleDelayTime = 2;
 	float currentTIme = 0;
+	UPROPERTY(EditAnywhere, Category ="FSM")
+	float delyTime =0;
 	// 필요속성 : 타겟, 이동속도, 방향
 	UPROPERTY(EditAnywhere, Category ="FSM")
-	float Walkspeed= 500;
+	float Backspeed;
 	UPROPERTY(EditAnywhere, Category ="FSM")
-	float Rushspeed = 1000;
+	float Walkspeed = 3000;
+	UPROPERTY(EditAnywhere, Category ="FSM")
+	float Rushspeed;
 	// 나를 소유하고 있는 액터
 	UPROPERTY()
 	class AOSY_Pursuer *me;
@@ -76,7 +80,7 @@ public:	 // 상태 함수
 public: //Idle 속성
 	// 필요속성 : 플레이어와의 거리, 대시거리, 무브거리,어택거리, 백스텝거리
 	float RushDistance = 5000;
-	float WalkStartDistance = 1000;
+	float RushStartDistance = 1000;
 	float AttackStartDistance = 150;
 	float BackstepStartDistance = 70;
 
