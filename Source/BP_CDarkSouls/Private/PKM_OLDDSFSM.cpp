@@ -321,7 +321,6 @@ void UPKM_OLDDSFSM::AttackState()
 	{
 		//공격시작
 		int32 RandAttack = FMath::RandRange(1, 4);
-		RandAttack = 2;
 		if (RandAttack == 1)
 		{
 			currentTime = 0;
