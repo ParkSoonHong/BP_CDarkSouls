@@ -363,28 +363,22 @@ void AUPlayer::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 	{
 		OverlapOldDs->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		UE_LOG(LogTemp, Warning, TEXT("Overlap"));
-		curHp -= damge;
+		Damaged(1);
 		UE_LOG(LogTemp, Warning, TEXT("%d"), curHp);
-		if (curHp <= 0)
-		{
-			Destroy();
-		}
+		
 	}
 	tagetPursuer = Cast<AOSY_Pursuer>(UGameplayStatics::GetActorOfClass(GetWorld(), AOSY_Pursuer::StaticClass()));
 	if (tagetPursuer != nullptr)
 	{
 		tagetPursuer->compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		UE_LOG(LogTemp, Warning, TEXT("Overlap"));
-		curHp -= damge;
-		UE_LOG(LogTemp, Warning, TEXT("%d"), curHp);
-		if (curHp <= 0)
-		{
-			Destroy();
-		}
+		Damaged(1);
 	}
 
 	
 }
+
+//PKMWrite
 
 void AUPlayer::Attack()
 {
@@ -393,6 +387,20 @@ void AUPlayer::Attack()
 		PlayerWeaponComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		PKMCurrentTime = 0;
 		PlayingAttack = true;
+	}
+}
+
+void AUPlayer::Damaged(float value)
+{
+	if (curHp-value>0)
+	{
+		curHp -= value;
+		UE_LOG(LogTemp, Warning, TEXT("%d"), curHp);
+	}
+	else
+	{
+		curHp = 0;
+		Destroy();
 	}
 }
 
