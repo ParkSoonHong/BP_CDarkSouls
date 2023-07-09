@@ -12,6 +12,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "PKM_OLDDS.h"
 #include "OSY_Pursuer.h"
+#include "GameFramework/Character.h"
 
 // Sets default values
 AUPlayer::AUPlayer()
@@ -43,7 +44,8 @@ AUPlayer::AUPlayer()
 void AUPlayer::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	curHp = maxHp;
+	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this,&AUPlayer::OnComponentBeginOverlap);
 }
 
 // Called every frame
@@ -105,6 +107,11 @@ void AUPlayer::Tick(float DeltaTime)
 			RollBackStepRun(pressedTime);
 	}
 
+	if (setTagetLook)
+	{
+		UpdateCamer();
+
+	}
 	
 
 }
@@ -189,13 +196,20 @@ void AUPlayer::Vertical(float value)
 
 void AUPlayer::Turn(float value)
 {
+	if (setTagetLook == false)
+	{ 
 	AddControllerYawInput(value);
-
+	UE_LOG(LogTemp, Warning, TEXT("Turn"));
+	}
 }
 
 void AUPlayer::LookUp(float value)
 {
+	if(setTagetLook == false)
+	{ 
 	AddControllerPitchInput(value);
+	UE_LOG(LogTemp, Warning, TEXT("LookUp"));
+	}
 }
 
 void AUPlayer::RollBackStepRun(float Time)
@@ -286,14 +300,23 @@ void AUPlayer::TagetLook()
 		tagetPursuer = Cast<AOSY_Pursuer>(UGameplayStatics::GetActorOfClass(GetWorld(),AOSY_Pursuer::StaticClass()));
 
 	}
+
 	// 적을 지정한다.
 	// 카메라로 본다.
 }
 
-/*
+
 void AUPlayer::UpdateCamer()
-{
-	if (tagetOldDs)
+{	
+	if (tagetPursuer != nullptr)
+	{
+		FVector saveCamerLocation = compCamera->GetComponentLocation();
+		compArm->SetWorldLocation(tagetPursuer->GetActorLocation());
+		//compCamera->SetRelativeLocation(saveCamerLocation);
+	}
+/*
+	UE_LOG(LogTemp, Warning, TEXT("TargetOn"));
+	if (tagetOldDs != nullptr)
 	{
 		FVector TargetLocation = tagetOldDs->GetActorLocation();
 		FVector camerLocation = GetActorLocation();
@@ -309,7 +332,7 @@ void AUPlayer::UpdateCamer()
 		compCamera->SetWorldRotation(InterpolatedRotation);
 	}
 
-	if (tagetPursuer)
+	if (tagetPursuer!= nullptr)
 	{
 		FVector TargetLocation = tagetPursuer->GetActorLocation();
 		FVector camerLocation = GetActorLocation();
@@ -324,7 +347,19 @@ void AUPlayer::UpdateCamer()
 
 		compCamera->SetWorldRotation(InterpolatedRotation);
 	}
+	*/
 }
-*/
+
+void AUPlayer::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{	
+	UE_LOG(LogTemp, Warning, TEXT("Overlap"));
+	curHp -= damge;
+	UE_LOG(LogTemp, Warning, TEXT("%d"), curHp);
+
+	if (curHp <= 0)
+	{
+		Destroy();
+	}
+}
 
 
