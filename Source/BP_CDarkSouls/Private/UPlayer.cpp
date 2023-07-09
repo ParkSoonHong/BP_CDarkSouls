@@ -63,11 +63,12 @@ void AUPlayer::Tick(float DeltaTime)
 		//FVector BackstepLocation = GetActorLocation() + BackstepVector * BackstepDest; // 추후에 백스텝 천천히 하는걸로 교정
 		FVector BackstepLocation = GetActorLocation() + BackstepVector * BackstepDest; 
 		//10
-		BackstepDest += -2;
+		BackstepDest += -1;
 		SetActorLocation(BackstepLocation);
-		isNoWarlk = false;
+	
 		if (curTime >= backStepTime)
 		{
+			isNoWarlk = false;
 			isBackstep = false;
 // 			isPressedHorizontalMovekey = true;
 // 			isPressedVerticalMovekey = true;
@@ -88,14 +89,14 @@ void AUPlayer::Tick(float DeltaTime)
 		//FVector BackstepLocation = GetActorLocation() + BackstepVector * BackstepDest; // 추후에 백스텝 천천히 하는걸로 교정
 		FVector RollLocation = GetActorLocation() + RollVector * RollDest;
 		//10
-		RollDest += 2;
+		RollDest += 1;
 		SetActorLocation(RollLocation);
 		UE_LOG(LogTemp, Warning, TEXT("Roll"));
 
-		isNoWarlk = false;
 		if (curTime >= RollTime)
 		{
 			isRoll = false;
+			isNoWarlk = false;
 			curTime = 0;
 			RollDest = 0;
 		
@@ -217,19 +218,19 @@ void AUPlayer::RollBackStepRun(float Time)
 	UE_LOG(LogTemp, Warning, TEXT("%f"), Time);
 	if (isPressedHorizontalMovekey || isPressedVerticalMovekey)
 	{
-		if (Time >= 0.1)
-		{
-			isNoRun = true;
-		}
+		
 			if (Time >= changeActionTime)
 			{
 				Run();
 				UE_LOG(LogTemp, Warning, TEXT("GOGO"));
+				UE_LOG(LogTemp, Warning, TEXT("Time : , %f"),Time);
 			}
-			else
+			else 
 			{	// 불값을 통해 롤이랑 
+				isNoRun = true;
 				Roll();
 				UE_LOG(LogTemp, Warning, TEXT("Roll"));
+				UE_LOG(LogTemp, Warning, TEXT("Time : , %f"), Time);
 			}
 	}
 	
@@ -241,14 +242,11 @@ void AUPlayer::PressedSpacebar() // 버튼이 눌렸을때
 	if (isPressedHorizontalMovekey == false && isPressedVerticalMovekey == false)
 	{
 		BackStep();
-		isNoWarlk = true;
 		UE_LOG(LogTemp, Warning, TEXT("Backstep"));
 	}
 	else
 	{
 		isPressed = true;
-		Roll();
-		UE_LOG(LogTemp, Warning, TEXT("Roll"));
 	}
 	
 }
@@ -262,17 +260,11 @@ void AUPlayer::ReleasedSpacebar() // 버튼이 눌리지 않을때
 
 void AUPlayer::Roll() // 구르기
 {
-	if (isNoRun)
-	{
-		isRoll = false;
-		isNoWarlk = false;
-	}
-	else
-	{ 
+	
 	isRoll = true;
 	isRun = false;
 	isNoWarlk = true;
-	}
+	
 }
 
 void AUPlayer::BackStep() // 백스탭
