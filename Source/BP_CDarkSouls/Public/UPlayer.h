@@ -94,7 +94,12 @@ public:
 	UPROPERTY(EditAnywhere) // 버튼 몇번 클릭했는지 확인
 	int32 tagetLookNum=0;
 
-
+	UPROPERTY(EditAnywhere)
+	int32 maxHp = 10;
+	UPROPERTY(EditAnywhere)
+	int32  curHp = 0;
+	UPROPERTY(EditAnywhere)
+	int32 damge = 1;
 
 	UPROPERTY(EditAnywhere) // 시작할 위치
 	FVector StartVector;
@@ -136,4 +141,7 @@ public:
 	void TagetLook();
 
 	void UpdateCamer();
+
+	UFUNCTION()
+	void OnComponentBeginOverlap (UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 };
