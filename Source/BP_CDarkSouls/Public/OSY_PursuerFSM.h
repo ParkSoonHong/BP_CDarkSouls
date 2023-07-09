@@ -88,7 +88,11 @@ public: // Attack 加己
 	
 	bool bAttackSelect = false;
 	float pattern;
-
+	bool bAttackdirOk = false;
+	FVector	Attackdir;
 public: //乔拜 加己
- void OnDamageProcess();
+	UFUNCTION()
+	void ReciveDamage(float value);
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
+	int32 HP=10;
 };
