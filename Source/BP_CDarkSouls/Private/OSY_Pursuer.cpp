@@ -4,6 +4,7 @@
 #include "OSY_Pursuer.h"
 #include "OSY_PursuerFSM.h"
 #include "Components/CapsuleComponent.h"
+#include "UPlayer.h"
 
 // Sets default values
 AOSY_Pursuer::AOSY_Pursuer()
@@ -48,12 +49,18 @@ AOSY_Pursuer::AOSY_Pursuer()
 	// FSM----------------------------------------------------------
 	FSM = CreateDefaultSubobject<UOSY_PursuerFSM>(TEXT("FSM"));
 
+	HitComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("HitComp"));
+	HitComp->SetupAttachment(RootComponent);
+	HitComp->SetWorldScale3D(FVector(3, 3, 3));
+	HitComp->SetCollisionProfileName(TEXT("Pursuer"));
 }
 
 // Called when the game starts or when spawned
 void AOSY_Pursuer::BeginPlay()
 {
 	Super::BeginPlay();
+	HitComp->OnComponentBeginOverlap.AddDynamic(this, &AOSY_Pursuer::OnComponentBeginOverlap);
+
 	
 }
 
@@ -69,5 +76,23 @@ void AOSY_Pursuer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+void AOSY_Pursuer::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+
+	if (FSM!=nullptr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Good"));
+		if (FSM->Target->PlayingAttack)
+		{
+			FSM->ReciveDamage(1);
+			FSM->Target->PlayerWeaponComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("BUG"));
+	}
 }
 

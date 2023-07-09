@@ -370,6 +370,19 @@ void AUPlayer::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 			Destroy();
 		}
 	}
+	tagetPursuer = Cast<AOSY_Pursuer>(UGameplayStatics::GetActorOfClass(GetWorld(), AOSY_Pursuer::StaticClass()));
+	if (tagetPursuer != nullptr)
+	{
+		tagetPursuer->compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		UE_LOG(LogTemp, Warning, TEXT("Overlap"));
+		curHp -= damge;
+		UE_LOG(LogTemp, Warning, TEXT("%d"), curHp);
+		if (curHp <= 0)
+		{
+			Destroy();
+		}
+	}
+
 	
 }
 

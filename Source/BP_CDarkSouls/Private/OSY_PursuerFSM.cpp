@@ -262,7 +262,7 @@ void UOSY_PursuerFSM::DamageState()
 
 void UOSY_PursuerFSM::DieState()
 {
-
+	GetOwner()->Destroy();
 }
 
 void UOSY_PursuerFSM::AttackState()
@@ -390,8 +390,20 @@ void UOSY_PursuerFSM::LowerAndRaiseWeapon3()
 		mState = EEnmeyState::Idle;
 	}
 }
+
 //-------------------------ÇÇ°Ý----------------------//
-void UOSY_PursuerFSM::OnDamageProcess()
+void UOSY_PursuerFSM::ReciveDamage(float value)
 {
-  me->Destroy();
+	if (HP - value > 0)
+	{
+		HP -= value;
+		UE_LOG(LogTemp, Log, TEXT("OLDDS HP=%d"), HP);
+	}
+	else
+	{
+		HP = 0;
+		mState = EEnmeyState::Die;
+	}
 }
+
+
