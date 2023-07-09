@@ -20,6 +20,7 @@ enum class EEnemyState : uint8
 	StingAttack,
 	SweepAttack,
 	SwingAttack,
+	RangeAttack,
 };
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BP_CDARKSOULS_API UPKM_OLDDSFSM : public UActorComponent
@@ -49,6 +50,7 @@ public:
 	void StingAttackState();
 	void SweepAttackState();
 	void SwingAttackState();
+	void RangeAttackState();
 	void ReciveDamage(float value);
 	float GiveDamage();
 	int32 MyAttacktype;
@@ -83,6 +85,7 @@ public:
 	bool bStingdirCheck = false;
 	bool bRushdirCheck=false;
 	bool bSweepGoCheck = false;
+	bool bRangeAttackHit = false;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
 	bool bBackStepAnimCheck = false;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")

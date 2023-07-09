@@ -138,7 +138,6 @@ public:
 	void Roll();
 	void BackStep();
 	void Run();
-
 	void TagetLook();
 
 	void UpdateCamer();
@@ -155,4 +154,5 @@ public:
 	void Attack();
 	float PKMCurrentTime;
 	bool PlayingAttack=false;
+	void Damaged(float value);
 };

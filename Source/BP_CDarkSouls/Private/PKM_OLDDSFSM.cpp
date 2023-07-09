@@ -77,6 +77,9 @@ void UPKM_OLDDSFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	case  EEnemyState::SwingAttack:
 		SwingAttackState();
 		break;
+	case  EEnemyState::RangeAttack:
+		RangeAttackState();
+		break;
 	default:
 		break;
 	}
@@ -317,7 +320,7 @@ void UPKM_OLDDSFSM::AttackState()
 	else
 	{
 		//공격시작
-		int32 RandAttack = FMath::RandRange(1, 3);
+		int32 RandAttack = FMath::RandRange(1, 4);
 		if (RandAttack == 1)
 		{
 			currentTime = 0;
@@ -339,7 +342,13 @@ void UPKM_OLDDSFSM::AttackState()
 			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 			mState = EEnemyState::SwingAttack;
 		}
-
+		else if (RandAttack == 4)
+		{
+			currentTime = 0;
+			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			bRangeAttackHit = false;
+			mState = EEnemyState::RangeAttack;
+		}
 		//공격종료or 피함
 	}
 }
@@ -569,6 +578,43 @@ void UPKM_OLDDSFSM::SwingAttackState()
 	}
 }
 
+void UPKM_OLDDSFSM::RangeAttackState()
+{
+	currentTime += GetWorld()->DeltaTimeSeconds;
+	if (Target!=nullptr)
+	{
+		FVector RangeDistance = Me->GetActorLocation() - Target->GetActorLocation();
+		if (currentTime < 1)//벌리기
+		{
+			DrawDebugSphere(GetWorld(), Me->GetActorLocation(), 500 * (currentTime / 1), 100, FColor::Red, false, -1, 0, 2);
+			if (!bRangeAttackHit)
+			{
+				if (RangeDistance.Size() < 500 * (currentTime / 1))
+				{
+					Target->Damaged(1);
+					bRangeAttackHit = true;
+				}
+			}
+		}
+		else if (currentTime < 2)//좁히기
+		{
+			DrawDebugSphere(GetWorld(), Me->GetActorLocation(), 500 - 500 * ((currentTime - 1) / 1), 100, FColor::Red, false, -1, 0, 2);
+			if (!bRangeAttackHit)
+			{
+				if (RangeDistance.Size() < 500 - 500 * ((currentTime - 1) / 1))
+				{
+					Target->Damaged(1);
+					bRangeAttackHit = true;
+				}
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Log, TEXT("RangeEnd"));
+			mState = EEnemyState::Idle;
+		}
+	}
+}
 
 //상태끝
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
