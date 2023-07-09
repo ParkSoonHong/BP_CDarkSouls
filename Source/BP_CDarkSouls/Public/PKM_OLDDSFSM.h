@@ -74,9 +74,8 @@ public:
 	float attackDelayTime = 2.0f;
 	float BackStepSpeed;
 	float StingSpeed;
-	// 공격범위 시각화여부
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
-	int32 HP=100;
+	int32 HP=10;
 	UPROPERTY(EditAnywhere,Category="FSMDraw")
 	bool bDebugRange=false;
 	bool bStingdirCheck = false;

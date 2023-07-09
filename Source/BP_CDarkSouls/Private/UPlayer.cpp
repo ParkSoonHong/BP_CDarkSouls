@@ -38,6 +38,18 @@ AUPlayer::AUPlayer()
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0,4000,0);
 
+	//PKM Write
+	PlayerWeaponComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponMesh"));
+	PlayerWeaponComp->SetupAttachment(GetMesh());
+	ConstructorHelpers::FObjectFinder<UStaticMesh> TempSMesh(TEXT("/Script/Engine.StaticMesh'/Game/ParkKyoungMin/Model/Spear/Myspear.Myspear'"));
+	if (TempSMesh.Succeeded())
+	{
+		PlayerWeaponComp->SetStaticMesh(TempSMesh.Object);
+		PlayerWeaponComp->SetRelativeLocationAndRotation(FVector(0, 0, 140), FRotator(0, 0, 0));
+		PlayerWeaponComp->SetWorldScale3D(FVector(0.5, 0.5, 0.5));
+	}
+	PlayerWeaponComp->SetCollisionProfileName(TEXT("PlayerWeapon"));
+	PlayerWeaponComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 // Called when the game starts or when spawned
@@ -114,7 +126,22 @@ void AUPlayer::Tick(float DeltaTime)
 		UpdateCamer();
 	}
 	
-
+	//PKMWtire
+	if (PlayingAttack)
+	{
+		PKMCurrentTime += DeltaTime;
+		if (PKMCurrentTime<0.3)
+		{
+			PlayerWeaponComp->SetRelativeRotation(FRotator(0, 360 * (PKMCurrentTime / 0.3), 0));
+		}
+		else
+		{
+			PlayerWeaponComp->SetRelativeRotation(FRotator(0, 0, 0));
+			PlayingAttack = false;
+			PKMCurrentTime = 0;
+			PlayerWeaponComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+	}
 }
 
 // Called to bind functionality to input
@@ -130,6 +157,9 @@ void AUPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction(TEXT("Roll/BackStep/Run"),IE_Released,this,&AUPlayer::ReleasedSpacebar);//¶®À»¶§
 
 	PlayerInputComponent->BindAction(TEXT("TagetLook"),IE_Pressed,this,&AUPlayer::TagetLook);// Å¸°Ù ÁöÁ¤ ´­·¶À»¶§
+
+	//PKM Write
+	PlayerInputComponent->BindAction(TEXT("Attack"), IE_Pressed, this, &AUPlayer::Attack);//¶®À»¶§
 }
 
 void AUPlayer::Horizeontal(float value)
@@ -200,7 +230,7 @@ void AUPlayer::Turn(float value)
 {
 	
 	AddControllerYawInput(value);
-	UE_LOG(LogTemp, Warning, TEXT("Turn"));
+	//UE_LOG(LogTemp, Warning, TEXT("Turn"));
 	
 }
 
@@ -209,7 +239,7 @@ void AUPlayer::LookUp(float value)
 	if(setTagetLook == false)
 	{ 
 	AddControllerPitchInput(value);
-	UE_LOG(LogTemp, Warning, TEXT("LookUp"));
+	//UE_LOG(LogTemp, Warning, TEXT("LookUp"));
 	}
 }
 
@@ -328,14 +358,28 @@ void AUPlayer::UpdateCamer()
 
 void AUPlayer::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {	
-	UE_LOG(LogTemp, Warning, TEXT("Overlap"));
-	curHp -= damge;
-	UE_LOG(LogTemp, Warning, TEXT("%d"), curHp);
-
-	if (curHp <= 0)
+	OverlapOldDs= Cast<APKM_OLDDS>(UGameplayStatics::GetActorOfClass(GetWorld(), APKM_OLDDS::StaticClass()));
+	if (OverlapOldDs!=nullptr)
 	{
-		Destroy();
+		OverlapOldDs->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		UE_LOG(LogTemp, Warning, TEXT("Overlap"));
+		curHp -= damge;
+		UE_LOG(LogTemp, Warning, TEXT("%d"), curHp);
+		if (curHp <= 0)
+		{
+			Destroy();
+		}
 	}
+	
 }
 
+void AUPlayer::Attack()
+{
+	if (PlayingAttack==false)
+	{
+		PlayerWeaponComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		PKMCurrentTime = 0;
+		PlayingAttack = true;
+	}
+}
 
