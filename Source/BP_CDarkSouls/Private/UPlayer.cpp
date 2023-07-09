@@ -63,14 +63,15 @@ void AUPlayer::Tick(float DeltaTime)
 		//FVector BackstepLocation = GetActorLocation() + BackstepVector * BackstepDest; // 추후에 백스텝 천천히 하는걸로 교정
 		FVector BackstepLocation = GetActorLocation() + BackstepVector * BackstepDest; 
 		//10
-		BackstepDest += -0.25f;
+		BackstepDest += -2;
 		SetActorLocation(BackstepLocation);
+		isNoWarlk = false;
 		if (curTime >= backStepTime)
 		{
 			isBackstep = false;
 // 			isPressedHorizontalMovekey = true;
 // 			isPressedVerticalMovekey = true;
-			isNoWarlk = false;
+
 			curTime = 0;
 			BackstepDest = -0; 
 			
@@ -87,16 +88,16 @@ void AUPlayer::Tick(float DeltaTime)
 		//FVector BackstepLocation = GetActorLocation() + BackstepVector * BackstepDest; // 추후에 백스텝 천천히 하는걸로 교정
 		FVector RollLocation = GetActorLocation() + RollVector * RollDest;
 		//10
-		RollDest += 0.25f;
+		RollDest += 2;
 		SetActorLocation(RollLocation);
 		UE_LOG(LogTemp, Warning, TEXT("Roll"));
 
+		isNoWarlk = false;
 		if (curTime >= RollTime)
 		{
 			isRoll = false;
-			isNoWarlk = false;
 			curTime = 0;
-			RollDest = 10;
+			RollDest = 0;
 		
 		}
 	}
@@ -104,13 +105,12 @@ void AUPlayer::Tick(float DeltaTime)
 	if (isPressed)
 	{
 		pressedTime += DeltaTime;		
-			RollBackStepRun(pressedTime);
+		RollBackStepRun(pressedTime);
 	}
 
 	if (setTagetLook)
 	{
 		UpdateCamer();
-
 	}
 	
 
@@ -145,8 +145,8 @@ void AUPlayer::Horizeontal(float value)
 
 	if (!isNoWarlk)
 	{
-	FVector direction = FRotationMatrix(Controller->GetControlRotation()).GetUnitAxis(EAxis::Y);
-	AddMovementInput(direction, value);
+			FVector direction = FRotationMatrix(Controller->GetControlRotation()).GetUnitAxis(EAxis::Y);
+			AddMovementInput(direction, value);
 	}
 	
 	if (value == 0)
@@ -159,6 +159,7 @@ void AUPlayer::Horizeontal(float value)
 		
 		//UE_LOG(LogTemp,Warning,TEXT("On"));
 	}
+	
 	
 }
 
@@ -196,11 +197,10 @@ void AUPlayer::Vertical(float value)
 
 void AUPlayer::Turn(float value)
 {
-	if (setTagetLook == false)
-	{ 
+	
 	AddControllerYawInput(value);
 	UE_LOG(LogTemp, Warning, TEXT("Turn"));
-	}
+	
 }
 
 void AUPlayer::LookUp(float value)
@@ -217,8 +217,8 @@ void AUPlayer::RollBackStepRun(float Time)
 	UE_LOG(LogTemp, Warning, TEXT("%f"), Time);
 	if (isPressedHorizontalMovekey || isPressedVerticalMovekey)
 	{
-		if( Time>=0.1)
-		{ 
+		if (Time >= 0.1)
+		{
 			isNoRun = true;
 		}
 			if (Time >= changeActionTime)
@@ -229,6 +229,7 @@ void AUPlayer::RollBackStepRun(float Time)
 			else
 			{	// 불값을 통해 롤이랑 
 				Roll();
+				UE_LOG(LogTemp, Warning, TEXT("Roll"));
 			}
 	}
 	
@@ -246,6 +247,8 @@ void AUPlayer::PressedSpacebar() // 버튼이 눌렸을때
 	else
 	{
 		isPressed = true;
+		Roll();
+		UE_LOG(LogTemp, Warning, TEXT("Roll"));
 	}
 	
 }
@@ -294,6 +297,8 @@ void AUPlayer::TagetLook()
 	setTagetLook = true;
 	tagetLookNum++;
 	UE_LOG(LogTemp,Warning,TEXT("%d"),tagetLookNum);
+
+	GetCharacterMovement()->bOrientRotationToMovement = false;
 	if (setTagetLook)
 	{
 		tagetOldDs = Cast<APKM_OLDDS>(UGameplayStatics::GetActorOfClass(GetWorld(),APKM_OLDDS::StaticClass()));
@@ -301,6 +306,12 @@ void AUPlayer::TagetLook()
 
 	}
 
+	if (tagetLookNum > 1)
+	{
+		setTagetLook = false;
+		tagetLookNum = 0;
+		GetCharacterMovement()->bOrientRotationToMovement = true;
+	}
 	// 적을 지정한다.
 	// 카메라로 본다.
 }
@@ -308,46 +319,19 @@ void AUPlayer::TagetLook()
 
 void AUPlayer::UpdateCamer()
 {	
-	if (tagetPursuer != nullptr)
-	{
-		FVector saveCamerLocation = compCamera->GetComponentLocation();
-		compArm->SetWorldLocation(tagetPursuer->GetActorLocation());
-		//compCamera->SetRelativeLocation(saveCamerLocation);
+	if(tagetPursuer != nullptr)
+	{ 
+	FVector Direction = tagetPursuer->GetActorLocation() - GetActorLocation();
+	FRotator PlayerRot = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(),tagetPursuer->GetActorLocation());
+	GetController()->SetControlRotation(PlayerRot);
+	compCamera->SetRelativeRotation(PlayerRot);
 	}
-/*
-	UE_LOG(LogTemp, Warning, TEXT("TargetOn"));
 	if (tagetOldDs != nullptr)
 	{
-		FVector TargetLocation = tagetOldDs->GetActorLocation();
-		FVector camerLocation = GetActorLocation();
-
-		FVector directionToTaget = TargetLocation - camerLocation;
-		directionToTaget.Normalize();
-
-		FRotator NewcameraRotion = directionToTaget.Rotation();
-		FRotator currentCamerRotation = compCamera->GetComponentRotation();
-
-		FRotator InterpolatedRotation = FMath::RInterpTo(currentCamerRotation,NewcameraRotion,GetWorld()->GetDeltaSeconds(),5.0f);
-
-		compCamera->SetWorldRotation(InterpolatedRotation);
+		FVector Direction = tagetOldDs->GetActorLocation() - GetActorLocation();
+		FRotator PlayerRot = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), tagetOldDs->GetActorLocation());
+		GetController()->SetControlRotation(PlayerRot);
 	}
-
-	if (tagetPursuer!= nullptr)
-	{
-		FVector TargetLocation = tagetPursuer->GetActorLocation();
-		FVector camerLocation = GetActorLocation();
-
-		FVector directionToTaget = TargetLocation - camerLocation;
-		directionToTaget.Normalize();
-
-		FRotator NewcameraRotion = directionToTaget.Rotation();
-		FRotator currentCamerRotation = compCamera->GetComponentRotation();
-
-		FRotator InterpolatedRotation = FMath::RInterpTo(currentCamerRotation, NewcameraRotion, GetWorld()->GetDeltaSeconds(), 5.0f);
-
-		compCamera->SetWorldRotation(InterpolatedRotation);
-	}
-	*/
 }
 
 void AUPlayer::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
