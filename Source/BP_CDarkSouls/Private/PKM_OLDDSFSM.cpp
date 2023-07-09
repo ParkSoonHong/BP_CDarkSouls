@@ -74,6 +74,9 @@ void UPKM_OLDDSFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	case  EEnemyState::SweepAttack:
 		SweepAttackState();
 		break;
+	case  EEnemyState::SwingAttack:
+		SwingAttackState();
+		break;
 	default:
 		break;
 	}
@@ -314,7 +317,7 @@ void UPKM_OLDDSFSM::AttackState()
 	else
 	{
 		//공격시작
-		int32 RandAttack = FMath::RandRange(1, 2);
+		int32 RandAttack = FMath::RandRange(1, 3);
 		if (RandAttack == 1)
 		{
 			currentTime = 0;
@@ -323,12 +326,18 @@ void UPKM_OLDDSFSM::AttackState()
 			mState = EEnemyState::RushAttack;
 
 		}
-		else
+		else if (RandAttack==2)
 		{
 			currentTime = 0;
 			bStingdirCheck = false;
 			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 			mState = EEnemyState::StingAttack;
+		}
+		else if(RandAttack==3)
+		{
+			currentTime = 0;
+			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			mState = EEnemyState::SwingAttack;
 		}
 
 		//공격종료or 피함
@@ -527,6 +536,42 @@ void UPKM_OLDDSFSM::SweepAttackState()
 	}
 }
 
+void UPKM_OLDDSFSM::SwingAttackState()
+{
+	currentTime += GetWorld()->DeltaTimeSeconds;
+	if (currentTime < 0.4)//들어올리기
+	{	
+		Me->spearComp->SetRelativeRotation(FRotator(0, 150 * currentTime / 0.4f, -20 * currentTime / 0.4f));
+	}
+	else if (currentTime < 0.5)//휘두르기
+	{
+		Me->spearComp->SetRelativeRotation(FRotator(0, 150 -(300* (currentTime-0.4) / 0.1f), -20 +(50* (currentTime - 0.4) / 0.1f)));
+	}
+	else if (currentTime < 0.7)//후딜레이 0.2초
+	{
+
+	}
+	else if (currentTime < 1.1)
+	{
+		Me->spearComp->SetRelativeRotation(FRotator(0, -150, 30-(50*(currentTime-0.7)/0.2f)));
+	}
+	else if (currentTime < 1.2)
+	{
+		Me->spearComp->SetRelativeRotation(FRotator(0, -150 + (300 * (currentTime - 1.1) / 0.1f), -20 + (50 * (currentTime - 1.1) / 0.1f)));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("SWingEnd"));
+		bStingdirCheck = false;
+		Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		mState = EEnemyState::Idle;
+		bSweepGoCheck = false;
+	}
+}
+
+
+//상태끝
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 void UPKM_OLDDSFSM::ReciveDamage(float value)
 {
 		if (HP - value > 0)

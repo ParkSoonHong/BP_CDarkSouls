@@ -19,6 +19,7 @@ enum class EEnemyState : uint8
 	RushAttack,
 	StingAttack,
 	SweepAttack,
+	SwingAttack,
 };
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BP_CDARKSOULS_API UPKM_OLDDSFSM : public UActorComponent
@@ -47,6 +48,7 @@ public:
 	void RushAttackState();
 	void StingAttackState();
 	void SweepAttackState();
+	void SwingAttackState();
 	void ReciveDamage(float value);
 	float GiveDamage();
 	int32 MyAttacktype;
