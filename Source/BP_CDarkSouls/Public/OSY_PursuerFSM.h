@@ -88,7 +88,8 @@ public: // Attack 加己
 	
 	bool bAttackSelect = false;
 	float pattern;
-
+	bool bAttackdirOk = false;
+	FVector	Attackdir;
 public: //乔拜 加己
  void OnDamageProcess();
 };

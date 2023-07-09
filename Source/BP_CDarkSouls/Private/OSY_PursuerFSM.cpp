@@ -280,17 +280,20 @@ void UOSY_PursuerFSM::AttackState()
 	me->SetActorRotation(forward.Rotation());
 
 	//랜덤한 확률로 패턴1,2,3d
-	if (!bAttackSelect) { pattern = FMath::RandRange(1, 3); bAttackSelect = true; }
+	if (!bAttackSelect) { pattern = FMath::RandRange(1, 3); bAttackSelect = true;}
 	if (pattern > 2)
 	{
+	bAttackdirOk=false;
 	LowerAndRaiseWeapon();
 	}
 	else if (pattern > 1)
 	{
+	bAttackdirOk = false;
 	LowerAndRaiseWeapon2();
 	}
 	else
 	{
+	bAttackdirOk = false;
 	LowerAndRaiseWeapon3();
 	}
 }
@@ -299,15 +302,29 @@ void UOSY_PursuerFSM::AttackState()
 void UOSY_PursuerFSM::LowerAndRaiseWeapon()
 {
 	currentTIme += GetWorld()->DeltaTimeSeconds;
+	if (currentTIme<1)
+	{
+		FVector P0=me->GetActorLocation();
+		if (!bAttackdirOk)
+		{
+			Attackdir = me->GetActorRightVector();
+			Attackdir.Z=0;
+			bAttackdirOk=true;
 
-	// 1초동안 내렸다가
-	if (currentTIme < 1)
-	{ // 1초동안은 내려가세요							y	z		x
-		me->compSword->SetRelativeRotation(FRotator(0, 90, -90 * (currentTIme / 1)));
+		}
+		Attackdir.Normalize();
+		FVector vt=Attackdir*100*GetWorld()->DeltaTimeSeconds;
+		FVector P=P0+vt;
+		me->SetActorLocation(P);
 	}
+	// 2초동안 내렸다가
 	else if (currentTIme < 2)
-	{ // 1~2초 동안 까지 올라가세요					y	z		x
-		me->compSword->SetRelativeRotation(FRotator(0, 90, -90 + (90 * ((currentTIme - 1) / 1))));
+	{ // 1초동안은 내려가세요							y	z		x
+		me->compSword->SetRelativeRotation(FRotator(0, 90-20*((currentTIme-1)/1), -90 * ((currentTIme-1) / 1)));
+	}
+	else if (currentTIme < 3)
+	{ // 2~3초 동안 까지 올라가세요					y	z		x
+		me->compSword->SetRelativeRotation(FRotator(0, 70+20*((currentTIme-2)/1), -90 + (90 * ((currentTIme - 2) / 1))));
 		// 1초동안 위로 올려
 	}
 	else
@@ -320,15 +337,29 @@ void UOSY_PursuerFSM::LowerAndRaiseWeapon()
 void UOSY_PursuerFSM::LowerAndRaiseWeapon2()
 {
 	currentTIme += GetWorld()->DeltaTimeSeconds;
-
-	// 1초동안 내렸다가
 	if (currentTIme < 1)
-	{ // 1초동안은 내려가세요							y	z		x
-		me->compSword->SetRelativeRotation(FRotator((-90 * (currentTIme / 1)), 90, 0));
+	{
+		FVector P0 = me->GetActorLocation();
+		if (!bAttackdirOk)
+		{
+			Attackdir = me->GetActorRightVector() * -1;
+			Attackdir.Z = 0;
+			bAttackdirOk = true;
+
+		}
+		Attackdir.Normalize();
+		FVector vt = Attackdir * 100 * GetWorld()->DeltaTimeSeconds;
+		FVector P = P0 + vt;
+		me->SetActorLocation(P);
 	}
+	// 2초동안 내렸다가
 	else if (currentTIme < 2)
-	{ // 1~2초 동안 까지 올라가세요					y	z		x
-		me->compSword->SetRelativeRotation(FRotator(-90+(90 * ((currentTIme - 1) / 1)), 90, 0 ));
+	{ // 1초동안은 내려가세요							y	z		x
+		me->compSword->SetRelativeRotation(FRotator(0, 90 - 20 * ((currentTIme - 1) / 1), -90 * ((currentTIme - 1) / 1)));
+	}
+	else if (currentTIme < 3)
+	{ // 2~3초 동안 까지 올라가세요					y	z		x
+		me->compSword->SetRelativeRotation(FRotator(0, 70 + 20 * ((currentTIme - 2) / 1), -90 + (90 * ((currentTIme - 2) / 1))));
 		// 1초동안 위로 올려
 	}
 	else
@@ -340,16 +371,18 @@ void UOSY_PursuerFSM::LowerAndRaiseWeapon2()
 void UOSY_PursuerFSM::LowerAndRaiseWeapon3()
 {
 	currentTIme += GetWorld()->DeltaTimeSeconds;
-
-	// 1초동안 내렸다가
 	if (currentTIme < 1)
-	{ // 1초동안은 내려가세요							y	z		x
-		me->compSword->SetRelativeRotation(FRotator(0, 90, 90 * (currentTIme / 1)));
+	{
+		
 	}
+	// 2초동안 내렸다가
 	else if (currentTIme < 2)
-	{ // 1~2초 동안 까지 올라가세요					y	z		x
-	
-		me->compSword->SetRelativeRotation(FRotator(0, 90, 90 + (-90 * ((currentTIme - 1) / 1))));
+	{ // 1초동안은 내려가세요							y	z		x
+		me->compSword->SetRelativeRotation(FRotator(0, 90 - 20 * ((currentTIme - 1) / 1), -90 * ((currentTIme - 1) / 1)));
+	}
+	else if (currentTIme < 3)
+	{ // 2~3초 동안 까지 올라가세요					y	z		x
+		me->compSword->SetRelativeRotation(FRotator(0, 70 + 20 * ((currentTIme - 2) / 1), -90 + (90 * ((currentTIme - 2) / 1))));
 		// 1초동안 위로 올려
 	}
 	else
