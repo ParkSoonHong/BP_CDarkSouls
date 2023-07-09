@@ -52,7 +52,7 @@ public:
 	UPROPERTY(EditAnywhere, Category ="FSM")
 	float Backspeed;
 	UPROPERTY(EditAnywhere, Category ="FSM")
-	float Walkspeed = 3000;
+	float Walkspeed = 500;
 	UPROPERTY(EditAnywhere, Category ="FSM")
 	float Rushspeed;
 	// 나를 소유하고 있는 액터
@@ -75,8 +75,8 @@ public: //Idle 속성
 	// 필요속성 : 플레이어와의 거리, 대시거리, 무브거리,어택거리, 백스텝거리
 	float RushDistance = 5000;
 	float RushStartDistance = 1000;
-	float AttackStartDistance = 200;
-	float BackstepStartDistance = 100;
+	float AttackStartDistance = 400;
+	float BackstepStartDistance = 200;
 
 public: // Attack 속성
 	UFUNCTION(BlueprintCallable, Category = "Weapon")

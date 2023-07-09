@@ -87,7 +87,6 @@ void UOSY_PursuerFSM::IdleState()
 	FVector Direction = Target->GetActorLocation()-me->GetActorLocation();
 	float distance = Direction.Length();
 	Direction.Normalize();
-
 	// 타겟방향으로 회전하기
 	// forward vector가 direction이 되고 싶다
 	Direction.Z = 0;
@@ -95,7 +94,6 @@ void UOSY_PursuerFSM::IdleState()
 	forward = FMath::Lerp(forward, Direction, 5 * GetWorld()->DeltaTimeSeconds);
 	// Enemy forward 벡터가 direction 방향으로 일치시키고 싶다.
 	me->SetActorRotation(forward.Rotation());
-
 	// 만약 플레이어와의 거리가 러시스타트보다 크면
 	if (distance > RushStartDistance)
 	{
@@ -112,6 +110,7 @@ void UOSY_PursuerFSM::IdleState()
 	// 그렇지 않고 백스텝거리보다 크면 어택으로 가
 	else if(distance > BackstepStartDistance)
 	{
+		UE_LOG(LogTemp, Log, TEXT("why"));
 		bAttackSelect= false;
 		mState = EEnmeyState::Attack;
 	}
@@ -122,6 +121,7 @@ void UOSY_PursuerFSM::IdleState()
 		Backspeed = 0;
 		mState = EEnmeyState::Backstep;
 	}
+	UE_LOG(LogTemp, Log, TEXT("dis= %f, BackstepStartDistance= %f, AttackStartDistance= %f,RushStartDistance= %f"),distance,BackstepStartDistance,AttackStartDistance,RushStartDistance);
 
 }
 // 플레이어와의 거리가 백스텝 거리보다 작으면 백스텝을 실행하고 아이들상태로 돌아가
@@ -267,6 +267,7 @@ void UOSY_PursuerFSM::DieState()
 
 void UOSY_PursuerFSM::AttackState()
 {
+	UE_LOG(LogTemp, Log, TEXT("hi"));
 	FVector Direction = Target->GetActorLocation() - me->GetActorLocation();
 	float distance = Direction.Length();
 	Direction.Normalize();
