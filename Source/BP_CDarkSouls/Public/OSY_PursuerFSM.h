@@ -88,4 +88,7 @@ public: // Attack 加己
 	
 	bool bAttackSelect = false;
 	float pattern;
+
+public: //乔拜 加己
+ void OnDamageProcess();
 };

@@ -328,7 +328,7 @@ void UOSY_PursuerFSM::LowerAndRaiseWeapon2()
 	}
 	else if (currentTIme < 2)
 	{ // 1~2초 동안 까지 올라가세요					y	z		x
-		me->compSword->SetRelativeRotation(FRotator((-90 * ((currentTIme - 1) / 1)), 90, 0 ));
+		me->compSword->SetRelativeRotation(FRotator(-90+(90 * ((currentTIme - 1) / 1)), 90, 0 ));
 		// 1초동안 위로 올려
 	}
 	else
@@ -348,11 +348,17 @@ void UOSY_PursuerFSM::LowerAndRaiseWeapon3()
 	}
 	else if (currentTIme < 2)
 	{ // 1~2초 동안 까지 올라가세요					y	z		x
-		me->compSword->SetRelativeRotation(FRotator(0, 90, 90 + (90 * ((currentTIme - 1) / 1))));
+	
+		me->compSword->SetRelativeRotation(FRotator(0, 90, 90 + (-90 * ((currentTIme - 1) / 1))));
 		// 1초동안 위로 올려
 	}
 	else
 	{
 		mState = EEnmeyState::Idle;
 	}
+}
+//-------------------------피격----------------------//
+void UOSY_PursuerFSM::OnDamageProcess()
+{
+  me->Destroy();
 }
