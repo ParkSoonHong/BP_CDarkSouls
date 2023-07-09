@@ -321,6 +321,7 @@ void UPKM_OLDDSFSM::AttackState()
 	{
 		//공격시작
 		int32 RandAttack = FMath::RandRange(1, 4);
+		RandAttack = 2;
 		if (RandAttack == 1)
 		{
 			currentTime = 0;
@@ -444,9 +445,9 @@ void UPKM_OLDDSFSM::BackStepState()
 void UPKM_OLDDSFSM::RushAttackState()
 {
 	currentTime += GetWorld()->DeltaTimeSeconds;
-	float FastTime = 0.1;
-	float SlowTime = 0.8;
-	float EndTime = 1;
+	float FastTime = 0.2;
+	float SlowTime = 0.4;
+	float EndTime = 0.5;
 	FVector P0 = Me->GetActorLocation();
 	if (!bRushdirCheck) {
 		direction = Target->GetActorLocation() - P0;
@@ -460,7 +461,7 @@ void UPKM_OLDDSFSM::RushAttackState()
 	if (currentTime <= FastTime)// 0~0.1
 	{
 		bRushAnimCheck = true;
-		BackStepSpeed = 1000 * sqrt(currentTime / FastTime);
+		BackStepSpeed = 2000 * sqrt(currentTime / FastTime);
 		//UE_LOG(LogTemp, Log, TEXT("Time=%f BSS1%f"),currentTime,BackStepSpeed);
 		FVector vt = direction * BackStepSpeed * GetWorld()->DeltaTimeSeconds;
 		FVector P = P0 + vt;
@@ -468,14 +469,14 @@ void UPKM_OLDDSFSM::RushAttackState()
 	}
 	else if (currentTime < SlowTime)// 0.1~0.8
 	{
-		BackStepSpeed = 1000;
+		BackStepSpeed = 2000;
 		FVector vt = direction * BackStepSpeed * GetWorld()->DeltaTimeSeconds;
 		FVector P = P0 + vt;
 		Me->SetActorLocation(P);
 	}
 	else if (currentTime < EndTime)// 0.8<= CT<1.0
 	{	//				1000 * (1-x2)
-		BackStepSpeed = 1000 * (1 - ((currentTime - SlowTime) / (EndTime - SlowTime)) * ((currentTime - SlowTime) / (EndTime - SlowTime)));
+		BackStepSpeed = 2000 * (1 - ((currentTime - SlowTime) / (EndTime - SlowTime)) * ((currentTime - SlowTime) / (EndTime - SlowTime)));
 		//UE_LOG(LogTemp, Log, TEXT("TIme=%f BSS2 %f ,((currentTime-1)/2)=%f, (1-((currentTime-1)/2)*((currentTime - 1)/ 2)) %f"), currentTime, BackStepSpeed, (1 - ((currentTime - 2.0f) / 1.0f) * ((currentTime - 2.0f) / 1.0f)));
 		FVector vt = direction * BackStepSpeed * GetWorld()->DeltaTimeSeconds;
 		FVector P = P0 + vt;
@@ -499,11 +500,18 @@ void UPKM_OLDDSFSM::StingAttackState()
 	if (!bStingdirCheck) {
 		UE_LOG(LogTemp, Log, TEXT("StingStart"));
 		direction = Target->GetActorLocation() - P0;
-		StingSpeed = direction.Size();
+		StingSpeed = 1000;
 		direction.Normalize();
 		bStingdirCheck = true;
 	}
-	if (currentTime < 1.0)
+	else if (currentTime < 0.1)
+	{
+		//UE_LOG(LogTemp, Log, TEXT("Time=%f BSS1%f"),currentTime,BackStepSpeed);
+		FVector vt = direction * (StingSpeed*currentTime/0.1) * GetWorld()->DeltaTimeSeconds;
+		FVector P = P0 + vt;
+		Me->SetActorLocation(P);
+	}
+	else if (currentTime < 0.5)
 	{
 		//UE_LOG(LogTemp, Log, TEXT("Time=%f BSS1%f"),currentTime,BackStepSpeed);
 		FVector vt = direction * StingSpeed * GetWorld()->DeltaTimeSeconds;
@@ -527,9 +535,13 @@ void UPKM_OLDDSFSM::StingAttackState()
 void UPKM_OLDDSFSM::SweepAttackState()
 {
 	currentTime += GetWorld()->DeltaTimeSeconds;
-	if (currentTime < 1.0)
+	if (currentTime < 0.3)
 	{
-		Me->spearComp->SetRelativeRotation(FRotator(0, 360 * currentTime / 1.0f, 0));
+		Me->spearComp->SetRelativeRotation(FRotator(0, 120 * currentTime / 0.3f, 0));
+	}
+	if (currentTime < 0.5)
+	{
+		Me->spearComp->SetRelativeRotation(FRotator(0, 120+ (240* (currentTime-0.3) / 0.2f), 0));
 	}
 	else if (currentTime < 1.5)//후딜레이 0.5초
 	{
@@ -570,6 +582,7 @@ void UPKM_OLDDSFSM::SwingAttackState()
 	}
 	else
 	{
+		Me->spearComp->SetRelativeRotation(FRotator(0, 0, 0));
 		UE_LOG(LogTemp, Log, TEXT("SWingEnd"));
 		bStingdirCheck = false;
 		Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
