@@ -25,6 +25,7 @@ void UPKM_OLDDSFSM::BeginPlay()
 	// ...
 	Target = Cast<AUPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), AUPlayer::StaticClass()));
 	Me = Cast<APKM_OLDDS>(GetOwner());
+	Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 
@@ -67,6 +68,12 @@ void UPKM_OLDDSFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	case  EEnemyState::RushAttack:
 		RushAttackState();
 		break;
+	case  EEnemyState::StingAttack:
+		StingAttackState();
+		break;
+	case  EEnemyState::SweepAttack:
+		SweepAttackState();
+		break;
 	default:
 		break;
 	}
@@ -86,15 +93,32 @@ void UPKM_OLDDSFSM::IdleState()
 			UE_LOG(LogTemp, Log, TEXT("Go BackStep"));
 			currentTime = 0;
 			BackStepSpeed = 0;
+			//방향 완전히 돌려라
+			GetOwner()->SetActorRotation(direction.Rotation());
+			//--------------------------------------------------------------------------------------------
 			mState = EEnemyState::BackStep;
+			
 			UE_LOG(LogTemp, Log, TEXT("memset Time=%f"), currentTime);
 		}
 		else {
-			/*FVector Forward = Me->GetActorForwardVector();
-			Forward = FMath::Lerp<FVector, float>(Forward, direction, 0.1 * GetWorld()->DeltaTimeSeconds);
-			GetOwner()->SetActorRotation(Forward.Rotation())*/;
-			UE_LOG(LogTemp, Log, TEXT("Turn.."));
-			mState = EEnemyState::Idle;
+			if (!bSweepGoCheck)
+			{
+				SweepRand = FMath::RandRange(1, 10);
+				bSweepGoCheck = true;
+			}
+			if (SweepRand>5)
+			{
+				currentTime = 0;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				mState = EEnemyState::SweepAttack;
+			}
+			else
+			{	//방향돌리기
+				FVector Forward = Me->GetActorForwardVector();
+				Forward = FMath::Lerp<FVector, float>(Forward, direction, 0.1 * GetWorld()->DeltaTimeSeconds);
+				GetOwner()->SetActorRotation(Forward.Rotation());
+				UE_LOG(LogTemp, Log, TEXT("Turn.."));
+			}
 		}
 	}
 	else if (distance<attackRange)
@@ -126,29 +150,49 @@ void UPKM_OLDDSFSM::RunState()
 		distance = direction.Size();
 	}
 	if (distance < BackRange) {
-		if (FVector::DotProduct(direction, Me->GetActorForwardVector())) {
-			bRushAnimCheck = false;
-			mState = EEnemyState::BackStep;
+		if (FVector::DotProduct(direction, Me->GetActorForwardVector()) >= 0) {
 			UE_LOG(LogTemp, Log, TEXT("Go BackStep"));
+			currentTime = 0;
+			BackStepSpeed = 0;
+			//방향 완전히 돌려라
+			GetOwner()->SetActorRotation(direction.Rotation());
+			//--------------------------------------------------------------------------------------------
+			mState = EEnemyState::BackStep;
+
+			UE_LOG(LogTemp, Log, TEXT("memset Time=%f"), currentTime);
 		}
 		else {
-			FVector Forward = Me->GetActorForwardVector();
-			Forward = FMath::Lerp<FVector, float>(Forward, direction, 5 * GetWorld()->DeltaTimeSeconds);
-			GetOwner()->SetActorRotation(Forward.Rotation());
-			UE_LOG(LogTemp, Log, TEXT("Turn.."));
+			if (!bSweepGoCheck)
+			{
+				SweepRand = FMath::RandRange(1, 10);
+				bSweepGoCheck = true;
+			}
+			if (SweepRand > 5)
+			{
+				currentTime = 0;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				mState = EEnemyState::SweepAttack;
+			}
+			else
+			{	//방향돌리기
+				FVector Forward = Me->GetActorForwardVector();
+				Forward = FMath::Lerp<FVector, float>(Forward, direction, 0.1 * GetWorld()->DeltaTimeSeconds);
+				GetOwner()->SetActorRotation(Forward.Rotation());
+				UE_LOG(LogTemp, Log, TEXT("Turn.."));
+			}
 		}
 	}
 	else if (distance < attackRange)
 	{
 		UE_LOG(LogTemp, Log, TEXT("switchAttack"));
 		currentTime = 0;
-		bRushAnimCheck = false;
+		bRunAnimCheck = false;
 		mState = EEnemyState::Attack;
 	}
 	else if (distance < MoveRange)
 	{
 		UE_LOG(LogTemp, Log, TEXT("switchMove"));
-		bRushAnimCheck = false;
+		bRunAnimCheck = false;
 		mState = EEnemyState::Move;
 	}
 	else if (distance < RunRange)
@@ -159,6 +203,7 @@ void UPKM_OLDDSFSM::RunState()
 		UE_LOG(LogTemp, Log, TEXT("switchIdle"));
 		bRunAnimCheck = false;
 		mState = EEnemyState::Idle;
+		bSweepGoCheck = false;
 	}
 
 }
@@ -178,16 +223,35 @@ void UPKM_OLDDSFSM::MoveState()
 	}
 	if (distance < BackRange) {
 		if (FVector::DotProduct(direction, Me->GetActorForwardVector()) >= 0) {
-			bWalkAnimCheck = false;
-			mState = EEnemyState::BackStep;
+			UE_LOG(LogTemp, Log, TEXT("Go BackStep"));
 			currentTime = 0;
-			UE_LOG(LogTemp, Log, TEXT("Go BFackStep"));
+			BackStepSpeed = 0;
+			//방향 완전히 돌려라
+			GetOwner()->SetActorRotation(direction.Rotation());
+			//--------------------------------------------------------------------------------------------
+			mState = EEnemyState::BackStep;
+
+			UE_LOG(LogTemp, Log, TEXT("memset Time=%f"), currentTime);
 		}
 		else {
-			UE_LOG(LogTemp, Log, TEXT("Turn.."));
-			FVector Forward = Me->GetActorForwardVector();
-			Forward = FMath::Lerp<FVector, float>(Forward, direction, 0.1 * GetWorld()->DeltaTimeSeconds);
-			GetOwner()->SetActorRotation(Forward.Rotation());
+			if (!bSweepGoCheck)
+			{
+				SweepRand = FMath::RandRange(1, 10);
+				bSweepGoCheck = true;
+			}
+			if (SweepRand > 5)
+			{
+				currentTime = 0;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				mState = EEnemyState::SweepAttack;
+			}
+			else
+			{	//방향돌리기
+				FVector Forward = Me->GetActorForwardVector();
+				Forward = FMath::Lerp<FVector, float>(Forward, direction, 0.1 * GetWorld()->DeltaTimeSeconds);
+				GetOwner()->SetActorRotation(Forward.Rotation());
+				UE_LOG(LogTemp, Log, TEXT("Turn.."));
+			}
 		}
 	}
 	else if (distance < attackRange)
@@ -215,6 +279,7 @@ void UPKM_OLDDSFSM::MoveState()
 		UE_LOG(LogTemp, Log, TEXT("switchIdle"));
 		bWalkAnimCheck = false;
 		mState = EEnemyState::Idle;
+		bSweepGoCheck = false;
 	}
 	/*else {
 		direction.Normalize();
@@ -254,13 +319,16 @@ void UPKM_OLDDSFSM::AttackState()
 		{
 			currentTime = 0;
 			bRushdirCheck = false;
+			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 			mState = EEnemyState::RushAttack;
 			
 		}
 		else
 		{
-			UE_LOG(LogTemp, Log, TEXT("Normal Attack"));
-			mState = EEnemyState::Idle;
+			currentTime = 0;
+			bStingdirCheck = false;
+			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			mState = EEnemyState::StingAttack;
 		}
 
 		//공격종료or 피함
@@ -352,6 +420,7 @@ void UPKM_OLDDSFSM::BackStepState()
 		UE_LOG(LogTemp, Log, TEXT("BackSEnd"));
 		bBackStepAnimCheck = false;
 		mState = EEnemyState::Idle;
+		bSweepGoCheck = false;
 	}
 }
 void UPKM_OLDDSFSM::RushAttackState()
@@ -397,7 +466,62 @@ void UPKM_OLDDSFSM::RushAttackState()
 	{
 		bRushAnimCheck = false;
 		UE_LOG(LogTemp, Log, TEXT("RushEnd"));
+		Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		mState = EEnemyState::Idle;
+		bSweepGoCheck = false;
+	}
+}
+
+void UPKM_OLDDSFSM::StingAttackState()
+{
+	currentTime += GetWorld()->DeltaTimeSeconds;
+	FVector P0 = Me->GetActorLocation();
+	if (!bStingdirCheck) {
+		UE_LOG(LogTemp, Log, TEXT("StingStart"));
+		direction = Target->GetActorLocation() - P0;
+		StingSpeed = direction.Size();
+		direction.Normalize();
+		bStingdirCheck = true;
+	}
+	if (currentTime<1.0)
+	{
+		//UE_LOG(LogTemp, Log, TEXT("Time=%f BSS1%f"),currentTime,BackStepSpeed);
+		FVector vt = direction * StingSpeed * GetWorld()->DeltaTimeSeconds;
+		FVector P = P0 + vt;
+		Me->SetActorLocation(P);
+	}
+	else if (currentTime<1.5)//후딜레이 0.5초
+	{
+
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("StingEnd"));
+		bStingdirCheck = false;
+		Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		mState = EEnemyState::Idle;
+		bSweepGoCheck = false;
+	}
+}
+
+void UPKM_OLDDSFSM::SweepAttackState()
+{
+	currentTime += GetWorld()->DeltaTimeSeconds;
+	if (currentTime < 1.0)
+	{
+		Me->spearComp->SetRelativeRotation(FRotator(0, 360*currentTime/1.0f, 0));
+	}
+	else if (currentTime < 1.5)//후딜레이 0.5초
+	{
+
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("SWeepEnd"));
+		bStingdirCheck = false;
+		Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		mState = EEnemyState::Idle;
+		bSweepGoCheck = false;
 	}
 }
 
