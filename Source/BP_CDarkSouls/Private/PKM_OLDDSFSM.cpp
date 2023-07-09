@@ -433,6 +433,9 @@ void UPKM_OLDDSFSM::BackStepState()
 		FVector P = P0 + vt;
 		Me->SetActorLocation(P);
 	}
+	else if (currentTime < 2) {
+
+	}
 	else
 	{
 		UE_LOG(LogTemp, Log, TEXT("BackSEnd"));
@@ -480,6 +483,9 @@ void UPKM_OLDDSFSM::RushAttackState()
 		FVector vt = direction * BackStepSpeed * GetWorld()->DeltaTimeSeconds;
 		FVector P = P0 + vt;
 		Me->SetActorLocation(P);
+	}
+	else if (currentTime < 2) {
+
 	}
 	else
 	{
@@ -540,7 +546,7 @@ void UPKM_OLDDSFSM::SweepAttackState()
 	}
 	if (currentTime < 0.5)
 	{
-		Me->spearComp->SetRelativeRotation(FRotator(0, 120+ (240* (currentTime-0.3) / 0.2f), 0));
+		Me->spearComp->SetRelativeRotation(FRotator(0, 120+(240* (currentTime-0.3) / 0.2f), 0));
 	}
 	else if (currentTime < 1.5)//ÈÄµô·¹ÀÌ 0.5ÃÊ
 	{
@@ -548,6 +554,7 @@ void UPKM_OLDDSFSM::SweepAttackState()
 	}
 	else
 	{
+		Me->spearComp->SetRelativeRotation(FRotator(0, 0, 0));
 		UE_LOG(LogTemp, Log, TEXT("SWeepEnd"));
 		bStingdirCheck = false;
 		Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -578,6 +585,9 @@ void UPKM_OLDDSFSM::SwingAttackState()
 	else if (currentTime < 1.2)
 	{
 		Me->spearComp->SetRelativeRotation(FRotator(0, -150 + (300 * (currentTime - 1.1) / 0.1f), -20 + (50 * (currentTime - 1.1) / 0.1f)));
+	}
+	else if (currentTime < 2) {
+
 	}
 	else
 	{
@@ -619,6 +629,9 @@ void UPKM_OLDDSFSM::RangeAttackState()
 					bRangeAttackHit = true;
 				}
 			}
+		}
+		else if (currentTime < 3) {
+
 		}
 		else
 		{
