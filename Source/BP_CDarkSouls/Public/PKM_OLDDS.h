@@ -28,7 +28,14 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	class USkeletalMeshComponent* springArmComp;
+	UPROPERTY(VisibleAnywhere)
+	class UCapsuleComponent* HitComp;
 
+	UPROPERTY(VisibleAnywhere)
+	class UStaticMeshComponent* spearComp;
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly)
 	class UPKM_OLDDSFSM* FSM;
+	UFUNCTION()
+	void OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
 };

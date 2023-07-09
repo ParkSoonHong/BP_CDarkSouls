@@ -38,6 +38,18 @@ AUPlayer::AUPlayer()
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0,4000,0);
 
+	//PKM Write
+	PlayerWeaponComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponMesh"));
+	PlayerWeaponComp->SetupAttachment(GetMesh());
+	ConstructorHelpers::FObjectFinder<UStaticMesh> TempSMesh(TEXT("/Script/Engine.StaticMesh'/Game/ParkKyoungMin/Model/Spear/Myspear.Myspear'"));
+	if (TempSMesh.Succeeded())
+	{
+		PlayerWeaponComp->SetStaticMesh(TempSMesh.Object);
+		PlayerWeaponComp->SetRelativeLocationAndRotation(FVector(0, 0, 140), FRotator(0, 0, 0));
+		PlayerWeaponComp->SetWorldScale3D(FVector(0.5, 0.5, 0.5));
+	}
+	PlayerWeaponComp->SetCollisionProfileName(TEXT("PlayerWeapon"));
+	PlayerWeaponComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 // Called when the game starts or when spawned
@@ -63,14 +75,16 @@ void AUPlayer::Tick(float DeltaTime)
 		//FVector BackstepLocation = GetActorLocation() + BackstepVector * BackstepDest; // 추후에 백스텝 천천히 하는걸로 교정
 		FVector BackstepLocation = GetActorLocation() + BackstepVector * BackstepDest; 
 		//10
-		BackstepDest += -0.25f;
+		BackstepDest += -1;
 		SetActorLocation(BackstepLocation);
+	
 		if (curTime >= backStepTime)
 		{
+			isNoWarlk = false;
 			isBackstep = false;
 // 			isPressedHorizontalMovekey = true;
 // 			isPressedVerticalMovekey = true;
-			isNoWarlk = false;
+
 			curTime = 0;
 			BackstepDest = -0; 
 			
@@ -87,7 +101,7 @@ void AUPlayer::Tick(float DeltaTime)
 		//FVector BackstepLocation = GetActorLocation() + BackstepVector * BackstepDest; // 추후에 백스텝 천천히 하는걸로 교정
 		FVector RollLocation = GetActorLocation() + RollVector * RollDest;
 		//10
-		RollDest += 0.25f;
+		RollDest += 1;
 		SetActorLocation(RollLocation);
 		UE_LOG(LogTemp, Warning, TEXT("Roll"));
 
@@ -96,7 +110,7 @@ void AUPlayer::Tick(float DeltaTime)
 			isRoll = false;
 			isNoWarlk = false;
 			curTime = 0;
-			RollDest = 10;
+			RollDest = 0;
 		
 		}
 	}
@@ -104,16 +118,30 @@ void AUPlayer::Tick(float DeltaTime)
 	if (isPressed)
 	{
 		pressedTime += DeltaTime;		
-			RollBackStepRun(pressedTime);
+		RollBackStepRun(pressedTime);
 	}
 
 	if (setTagetLook)
 	{
 		UpdateCamer();
-
 	}
 	
-
+	//PKMWtire
+	if (PlayingAttack)
+	{
+		PKMCurrentTime += DeltaTime;
+		if (PKMCurrentTime<0.3)
+		{
+			PlayerWeaponComp->SetRelativeRotation(FRotator(0, 360 * (PKMCurrentTime / 0.3), 0));
+		}
+		else
+		{
+			PlayerWeaponComp->SetRelativeRotation(FRotator(0, 0, 0));
+			PlayingAttack = false;
+			PKMCurrentTime = 0;
+			PlayerWeaponComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+	}
 }
 
 // Called to bind functionality to input
@@ -129,6 +157,9 @@ void AUPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction(TEXT("Roll/BackStep/Run"),IE_Released,this,&AUPlayer::ReleasedSpacebar);//땠을때
 
 	PlayerInputComponent->BindAction(TEXT("TagetLook"),IE_Pressed,this,&AUPlayer::TagetLook);// 타겟 지정 눌렀을때
+
+	//PKM Write
+	PlayerInputComponent->BindAction(TEXT("Attack"), IE_Pressed, this, &AUPlayer::Attack);//땠을때
 }
 
 void AUPlayer::Horizeontal(float value)
@@ -145,8 +176,8 @@ void AUPlayer::Horizeontal(float value)
 
 	if (!isNoWarlk)
 	{
-	FVector direction = FRotationMatrix(Controller->GetControlRotation()).GetUnitAxis(EAxis::Y);
-	AddMovementInput(direction, value);
+			FVector direction = FRotationMatrix(Controller->GetControlRotation()).GetUnitAxis(EAxis::Y);
+			AddMovementInput(direction, value);
 	}
 	
 	if (value == 0)
@@ -159,6 +190,7 @@ void AUPlayer::Horizeontal(float value)
 		
 		//UE_LOG(LogTemp,Warning,TEXT("On"));
 	}
+	
 	
 }
 
@@ -196,11 +228,10 @@ void AUPlayer::Vertical(float value)
 
 void AUPlayer::Turn(float value)
 {
-	if (setTagetLook == false)
-	{ 
+	
 	AddControllerYawInput(value);
-	UE_LOG(LogTemp, Warning, TEXT("Turn"));
-	}
+	//UE_LOG(LogTemp, Warning, TEXT("Turn"));
+	
 }
 
 void AUPlayer::LookUp(float value)
@@ -208,7 +239,7 @@ void AUPlayer::LookUp(float value)
 	if(setTagetLook == false)
 	{ 
 	AddControllerPitchInput(value);
-	UE_LOG(LogTemp, Warning, TEXT("LookUp"));
+	//UE_LOG(LogTemp, Warning, TEXT("LookUp"));
 	}
 }
 
@@ -217,18 +248,19 @@ void AUPlayer::RollBackStepRun(float Time)
 	UE_LOG(LogTemp, Warning, TEXT("%f"), Time);
 	if (isPressedHorizontalMovekey || isPressedVerticalMovekey)
 	{
-		if( Time>=0.1)
-		{ 
-			isNoRun = true;
-		}
+		
 			if (Time >= changeActionTime)
 			{
 				Run();
 				UE_LOG(LogTemp, Warning, TEXT("GOGO"));
+				UE_LOG(LogTemp, Warning, TEXT("Time : , %f"),Time);
 			}
-			else
+			else 
 			{	// 불값을 통해 롤이랑 
+				isNoRun = true;
 				Roll();
+				UE_LOG(LogTemp, Warning, TEXT("Roll"));
+				UE_LOG(LogTemp, Warning, TEXT("Time : , %f"), Time);
 			}
 	}
 	
@@ -240,7 +272,6 @@ void AUPlayer::PressedSpacebar() // 버튼이 눌렸을때
 	if (isPressedHorizontalMovekey == false && isPressedVerticalMovekey == false)
 	{
 		BackStep();
-		isNoWarlk = true;
 		UE_LOG(LogTemp, Warning, TEXT("Backstep"));
 	}
 	else
@@ -259,17 +290,11 @@ void AUPlayer::ReleasedSpacebar() // 버튼이 눌리지 않을때
 
 void AUPlayer::Roll() // 구르기
 {
-	if (isNoRun)
-	{
-		isRoll = false;
-		isNoWarlk = false;
-	}
-	else
-	{ 
+	
 	isRoll = true;
 	isRun = false;
 	isNoWarlk = true;
-	}
+	
 }
 
 void AUPlayer::BackStep() // 백스탭
@@ -294,6 +319,8 @@ void AUPlayer::TagetLook()
 	setTagetLook = true;
 	tagetLookNum++;
 	UE_LOG(LogTemp,Warning,TEXT("%d"),tagetLookNum);
+
+	GetCharacterMovement()->bOrientRotationToMovement = false;
 	if (setTagetLook)
 	{
 		tagetOldDs = Cast<APKM_OLDDS>(UGameplayStatics::GetActorOfClass(GetWorld(),APKM_OLDDS::StaticClass()));
@@ -301,6 +328,12 @@ void AUPlayer::TagetLook()
 
 	}
 
+	if (tagetLookNum > 1)
+	{
+		setTagetLook = false;
+		tagetLookNum = 0;
+		GetCharacterMovement()->bOrientRotationToMovement = true;
+	}
 	// 적을 지정한다.
 	// 카메라로 본다.
 }
@@ -308,58 +341,45 @@ void AUPlayer::TagetLook()
 
 void AUPlayer::UpdateCamer()
 {	
-	if (tagetPursuer != nullptr)
-	{
-		FVector saveCamerLocation = compCamera->GetComponentLocation();
-		compArm->SetWorldLocation(tagetPursuer->GetActorLocation());
-		//compCamera->SetRelativeLocation(saveCamerLocation);
+	if(tagetPursuer != nullptr)
+	{ 
+	FVector Direction = tagetPursuer->GetActorLocation() - GetActorLocation();
+	FRotator PlayerRot = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(),tagetPursuer->GetActorLocation());
+	GetController()->SetControlRotation(PlayerRot);
+	compCamera->SetRelativeRotation(PlayerRot);
 	}
-/*
-	UE_LOG(LogTemp, Warning, TEXT("TargetOn"));
 	if (tagetOldDs != nullptr)
 	{
-		FVector TargetLocation = tagetOldDs->GetActorLocation();
-		FVector camerLocation = GetActorLocation();
-
-		FVector directionToTaget = TargetLocation - camerLocation;
-		directionToTaget.Normalize();
-
-		FRotator NewcameraRotion = directionToTaget.Rotation();
-		FRotator currentCamerRotation = compCamera->GetComponentRotation();
-
-		FRotator InterpolatedRotation = FMath::RInterpTo(currentCamerRotation,NewcameraRotion,GetWorld()->GetDeltaSeconds(),5.0f);
-
-		compCamera->SetWorldRotation(InterpolatedRotation);
+		FVector Direction = tagetOldDs->GetActorLocation() - GetActorLocation();
+		FRotator PlayerRot = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), tagetOldDs->GetActorLocation());
+		GetController()->SetControlRotation(PlayerRot);
 	}
-
-	if (tagetPursuer!= nullptr)
-	{
-		FVector TargetLocation = tagetPursuer->GetActorLocation();
-		FVector camerLocation = GetActorLocation();
-
-		FVector directionToTaget = TargetLocation - camerLocation;
-		directionToTaget.Normalize();
-
-		FRotator NewcameraRotion = directionToTaget.Rotation();
-		FRotator currentCamerRotation = compCamera->GetComponentRotation();
-
-		FRotator InterpolatedRotation = FMath::RInterpTo(currentCamerRotation, NewcameraRotion, GetWorld()->GetDeltaSeconds(), 5.0f);
-
-		compCamera->SetWorldRotation(InterpolatedRotation);
-	}
-	*/
 }
 
 void AUPlayer::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {	
-	UE_LOG(LogTemp, Warning, TEXT("Overlap"));
-	curHp -= damge;
-	UE_LOG(LogTemp, Warning, TEXT("%d"), curHp);
-
-	if (curHp <= 0)
+	OverlapOldDs= Cast<APKM_OLDDS>(UGameplayStatics::GetActorOfClass(GetWorld(), APKM_OLDDS::StaticClass()));
+	if (OverlapOldDs!=nullptr)
 	{
-		Destroy();
+		OverlapOldDs->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		UE_LOG(LogTemp, Warning, TEXT("Overlap"));
+		curHp -= damge;
+		UE_LOG(LogTemp, Warning, TEXT("%d"), curHp);
+		if (curHp <= 0)
+		{
+			Destroy();
+		}
 	}
+	
 }
 
+void AUPlayer::Attack()
+{
+	if (PlayingAttack==false)
+	{
+		PlayerWeaponComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		PKMCurrentTime = 0;
+		PlayingAttack = true;
+	}
+}
 

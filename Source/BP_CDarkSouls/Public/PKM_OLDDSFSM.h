@@ -17,6 +17,8 @@ enum class EEnemyState : uint8
 	Die,
 	BackStep,
 	RushAttack,
+	StingAttack,
+	SweepAttack,
 };
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BP_CDARKSOULS_API UPKM_OLDDSFSM : public UActorComponent
@@ -43,6 +45,8 @@ public:
 	void Moving(float speed, FVector dir);
 	void BackStepState();
 	void RushAttackState();
+	void StingAttackState();
+	void SweepAttackState();
 	void ReciveDamage(float value);
 	float GiveDamage();
 	int32 MyAttacktype;
@@ -69,12 +73,14 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
 	float attackDelayTime = 2.0f;
 	float BackStepSpeed;
-	// 공격범위 시각화여부
+	float StingSpeed;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
-	int32 HP=100;
+	int32 HP=10;
 	UPROPERTY(EditAnywhere,Category="FSMDraw")
 	bool bDebugRange=false;
+	bool bStingdirCheck = false;
 	bool bRushdirCheck=false;
+	bool bSweepGoCheck = false;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
 	bool bBackStepAnimCheck = false;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
@@ -83,6 +89,6 @@ public:
 	bool bWalkAnimCheck = false;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
 	bool bRunAnimCheck = false;
-
+	int32 SweepRand;
 	float MovingSpeed=0;
 };
