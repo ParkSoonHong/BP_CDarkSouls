@@ -35,6 +35,7 @@ APKM_OLDDS::APKM_OLDDS()
 	HitComp->SetupAttachment(RootComponent);
 	HitComp->SetWorldScale3D(FVector(3, 3, 3));
 	HitComp->SetCollisionProfileName(TEXT("OLDDS"));
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 // Called when the game starts or when spawned

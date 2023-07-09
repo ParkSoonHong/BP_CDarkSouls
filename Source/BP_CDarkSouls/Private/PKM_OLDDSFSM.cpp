@@ -5,7 +5,7 @@
 #include "UPlayer.h"
 #include <Kismet/GameplayStatics.h>
 #include "PKM_OLDDS.h"
-
+#include "Components/CapsuleComponent.h"
 // Sets default values for this component's properties
 UPKM_OLDDSFSM::UPKM_OLDDSFSM()
 {
@@ -434,6 +434,7 @@ void UPKM_OLDDSFSM::RushAttackState()
 		direction = Target->GetActorLocation() - P0;
 		direction.Normalize();
 		bRushdirCheck = true;
+		Me->HitComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 	//FVector Forward = Me->GetActorForwardVector();
 	//Forward = FMath::Lerp<FVector, float>(Forward, direction, 5 * GetWorld()->DeltaTimeSeconds);
@@ -467,6 +468,7 @@ void UPKM_OLDDSFSM::RushAttackState()
 		bRushAnimCheck = false;
 		UE_LOG(LogTemp, Log, TEXT("RushEnd"));
 		Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Me->HitComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		mState = EEnemyState::Idle;
 		bSweepGoCheck = false;
 	}
