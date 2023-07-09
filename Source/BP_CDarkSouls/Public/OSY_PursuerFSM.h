@@ -18,6 +18,14 @@ enum class EEnmeyState :uint8
 	Die UMETA(DisplayName = "Die State")
 };
 
+UENUM(BlueprintType)
+enum class EEnmeyAttackState :uint8
+{
+	AttackBasic UMETA(DisplayName="Attack Basic State"),
+	Attack1 UMETA(DisplayName = "Attack1 State"),
+	Attack2 UMETA(DisplayName = "Attack2 State"),
+	Attack3 UMETA(DisplayName = "Attack3 State")
+};
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BP_CDARKSOULS_API UOSY_PursuerFSM : public UActorComponent
@@ -43,19 +51,18 @@ public:
 	// 필요속성 : 대기시간,경과시간
 	UPROPERTY(EditAnywhere, Category ="FSM")
 	float idleDelayTime = 2;
-	float currentTime = 0;
+	float currentTIme = 0;
 	UPROPERTY(EditAnywhere, Category ="FSM")
 	float delayTime ;
-	UPROPERTY(EditAnywhere, Category = "FSM")
-	float stopTime=1;
 	
+
 	// 필요속성 : 타겟, 이동속도, 방향
+	UPROPERTY(EditAnywhere, Category ="FSM")
+	float Backspeed;
 	UPROPERTY(EditAnywhere, Category ="FSM")
 	float Walkspeed = 3000;
 	UPROPERTY(EditAnywhere, Category ="FSM")
 	float Rushspeed;
-	UPROPERTY(EditAnywhere, Category ="FSM")
-	float Backspeed;
 	// 나를 소유하고 있는 액터
 	UPROPERTY()
 	class AOSY_Pursuer *me;
@@ -65,9 +72,9 @@ public:
 
 public:	 // 상태 함수
 	void IdleState();
+	void BackstepState();
 	void WalkState();
 	void RushState();
-	void BackstepState();
 	void AttackState();
 	void DamageState();
 	void DieState();
@@ -75,24 +82,23 @@ public:	 // 상태 함수
 public: //Idle 속성
 	// 필요속성 : 플레이어와의 거리, 대시거리, 무브거리,어택거리, 백스텝거리
 	float RushDistance = 5000;
-	float RushStartDistance = 500;
-	float AttackStartDistance = 200;
-	float BackstepStartDistance = 100;
+	float RushStartDistance = 1000;
+	float AttackStartDistance = 150;
+	float BackstepStartDistance = 70;
 
+
+public: // Attack 상태함수
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category ="FSM")
+	EEnmeyAttackState mAttackState = EEnmeyAttackState::AttackBasic;
+
+	void AttackBasic();
+	void Attack1();
+	void Attack2();
+	void Attack3();
 
 public: // Attack 속성
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void LowerAndRaiseWeapon1();
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void LowerAndRaiseWeapon2();
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void LowerAndRaiseWeapon3();
-
-public: // 딜레이 관련 함수
-	bool bIsAnimating = true;
-	float AttackTime = 0;
-
+	void LowerAndRaiseWeapon();
 	
-	
-	
+	bool isAnimPlay = false;
 };
