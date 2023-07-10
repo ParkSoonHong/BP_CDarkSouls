@@ -132,7 +132,7 @@ void AUPlayer::Tick(float DeltaTime)
 		PKMCurrentTime += DeltaTime;
 		if (PKMCurrentTime<0.3)
 		{
-			PlayerWeaponComp->SetRelativeRotation(FRotator(0, 360 * (PKMCurrentTime / 0.3), 0));
+			PlayerWeaponComp->SetRelativeRotation(FRotator(0, 360 * (PKMCurrentTime / 0.3), 360 * (PKMCurrentTime / 0.3)));
 		}
 		else
 		{
@@ -171,7 +171,7 @@ void AUPlayer::Horizeontal(float value)
 	}
 	else
 	{
-		GetCharacterMovement()->MaxWalkSpeed = 12000;
+		GetCharacterMovement()->MaxWalkSpeed = 1200;
 	}
 
 	if (!isNoWarlk)
@@ -255,13 +255,7 @@ void AUPlayer::RollBackStepRun(float Time)
 				UE_LOG(LogTemp, Warning, TEXT("GOGO"));
 				UE_LOG(LogTemp, Warning, TEXT("Time : , %f"),Time);
 			}
-			else 
-			{	// 불값을 통해 롤이랑 
-				isNoRun = true;
-				Roll();
-				UE_LOG(LogTemp, Warning, TEXT("Roll"));
-				UE_LOG(LogTemp, Warning, TEXT("Time : , %f"), Time);
-			}
+			
 	}
 	
 }
@@ -270,7 +264,8 @@ void AUPlayer::PressedSpacebar() // 버튼이 눌렸을때
 {
 
 	if (isPressedHorizontalMovekey == false && isPressedVerticalMovekey == false)
-	{
+	{	
+		isRoll = false;
 		BackStep();
 		UE_LOG(LogTemp, Warning, TEXT("Backstep"));
 	}
@@ -283,7 +278,15 @@ void AUPlayer::PressedSpacebar() // 버튼이 눌렸을때
 
 void AUPlayer::ReleasedSpacebar() // 버튼이 눌리지 않을때
 {
+	if (isPressed&&pressedTime < 0.5)
+	{	
+		isNoRun = true;
+		Roll();
+		UE_LOG(LogTemp, Warning, TEXT("Roll"));
+	}
 	pressedTime = 0;
+	isRun = false;
+	UE_LOG(LogTemp, Warning, TEXT("%f"),pressedTime);	
 	isPressed = false;
 	
 }
@@ -346,7 +349,7 @@ void AUPlayer::UpdateCamer()
 	FVector Direction = tagetPursuer->GetActorLocation() - GetActorLocation();
 	FRotator PlayerRot = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(),tagetPursuer->GetActorLocation());
 	GetController()->SetControlRotation(PlayerRot);
-	compCamera->SetRelativeRotation(PlayerRot);
+	//compCamera->SetRelativeRotation(PlayerRot);
 	}
 	if (tagetOldDs != nullptr)
 	{
