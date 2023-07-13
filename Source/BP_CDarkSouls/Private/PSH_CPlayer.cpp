@@ -18,6 +18,15 @@ APSH_CPlayer::APSH_CPlayer()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	ConstructorHelpers::FObjectFinder<USkeletalMesh>tempMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/ParkSoonHong/Animation/Falling_To_Roll.Falling_To_Roll'"));
+
+	if (tempMesh.Succeeded())
+	{
+		GetMesh()->SetSkeletalMesh(tempMesh.Object);
+		GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
+	}
+
 	LockonControlRotationRate = 10.f;
 	TargetSwitchMouseDelta = 3.f;
 	TargetSwitchAnalogValue = .8f;
@@ -182,3 +191,28 @@ void APSH_CPlayer::TickActor(float DeltaTime, enum ELevelTick TickType, FActorTi
 	}
 }
 
+//PKMWrite
+
+void APSH_CPlayer::Attack()
+{
+	if (PlayingAttack == false)
+	{
+		PlayerWeaponComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		PKMCurrentTime = 0;
+		PlayingAttack = true;
+	}
+}
+
+void APSH_CPlayer::Damaged(float value)
+{
+	if (curHp - value > 0)
+	{
+		curHp -= value;
+		UE_LOG(LogTemp, Warning, TEXT("%d"), curHp);
+	}
+	else
+	{
+		curHp = 0;
+		Destroy();
+	}
+}

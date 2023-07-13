@@ -2,7 +2,7 @@
 
 
 #include "PKM_OLDDSFSM.h"
-#include "UPlayer.h"
+#include "PSH_CPlayer.h"
 #include <Kismet/GameplayStatics.h>
 #include "PKM_OLDDS.h"
 #include "Components/CapsuleComponent.h"
@@ -23,7 +23,7 @@ void UPKM_OLDDSFSM::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-	Target = Cast<AUPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), AUPlayer::StaticClass()));
+	Target = Cast<APSH_CPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), APSH_CPlayer::StaticClass()));
 	Me = Cast<APKM_OLDDS>(GetOwner());
 	Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }

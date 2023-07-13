@@ -102,5 +102,19 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Lock On Camera")
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
+	//PKMWrite
+	UPROPERTY(EditAnywhere)
+	class APKM_OLDDS * OverlapOldDs;
+	UPROPERTY(VisibleAnywhere)
+	class UStaticMeshComponent* PlayerWeaponComp;
 
+	UFUNCTION()
+	void Attack();
+	float PKMCurrentTime;
+	bool PlayingAttack=false;
+		UPROPERTY(EditAnywhere)
+	int32 maxHp = 10;
+	UPROPERTY(EditAnywhere)
+	int32  curHp = 10;
+	void Damaged(float value);
 };

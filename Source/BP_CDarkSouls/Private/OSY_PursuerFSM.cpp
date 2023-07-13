@@ -3,7 +3,7 @@
 
 #include "OSY_PursuerFSM.h"
 #include "Templates/Casts.h"
-#include "UPlayer.h"
+#include "PSH_CPlayer.h"
 #include "Kismet/GameplayStatics.h"
 #include "OSY_Pursuer.h"
 #include "../BP_CDarkSouls.h"
@@ -27,7 +27,7 @@ void UOSY_PursuerFSM::BeginPlay()
 
 	// ...
 
-	Target = Cast<AUPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), AUPlayer::StaticClass()));
+	Target = Cast<APSH_CPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), APSH_CPlayer::StaticClass()));
 	me = Cast<AOSY_Pursuer>(GetOwner());
 	
 	

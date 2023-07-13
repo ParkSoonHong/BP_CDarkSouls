@@ -60,7 +60,7 @@ public:
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="FSM")
 	EEnemyState mState=EEnemyState::Idle;
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="FSM")
-	class AUPlayer* Target;
+	class APSH_CPlayer* Target;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
 	class APKM_OLDDS *Me;
 	FVector direction;

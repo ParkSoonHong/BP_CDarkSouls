@@ -4,7 +4,7 @@
 #include "OSY_Pursuer.h"
 #include "OSY_PursuerFSM.h"
 #include "Components/CapsuleComponent.h"
-#include "UPlayer.h"
+#include "PSH_CPlayer.h"
 
 // Sets default values
 AOSY_Pursuer::AOSY_Pursuer()

@@ -60,7 +60,7 @@ public:
 	class AOSY_Pursuer *me;
 	// 타겟 선언
 	UPROPERTY(EditAnywhere)
-	class AUPlayer *Target;
+	class APSH_CPlayer *Target;
 
 public:	 // 상태 함수
 	void IdleState();
