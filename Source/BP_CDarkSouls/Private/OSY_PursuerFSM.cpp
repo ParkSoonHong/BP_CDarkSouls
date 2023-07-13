@@ -267,7 +267,6 @@ void UOSY_PursuerFSM::DieState()
 
 void UOSY_PursuerFSM::AttackState()
 {
-	UE_LOG(LogTemp, Log, TEXT("hi"));
 	FVector Direction = Target->GetActorLocation() - me->GetActorLocation();
 	float distance = Direction.Length();
 	Direction.Normalize();
@@ -302,6 +301,7 @@ void UOSY_PursuerFSM::AttackState()
 
 void UOSY_PursuerFSM::LowerAndRaiseWeapon()
 {
+	
 	currentTIme += GetWorld()->DeltaTimeSeconds;
 	if (currentTIme<1)
 	{
