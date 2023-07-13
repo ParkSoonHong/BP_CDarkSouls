@@ -17,9 +17,9 @@ APKM_OLDDS::APKM_OLDDS()
 		GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
 		GetMesh()->SetWorldScale3D(FVector(0.5, 0.5, 0.5));
 	}
-	ConstructorHelpers::FObjectFinder<UStaticMesh> TempSMesh(TEXT("/Script/Engine.StaticMesh'/Game/ParkKyoungMin/Model/Spear/Myspear.Myspear'"));
+	ConstructorHelpers::FObjectFinder<UStaticMesh> TempSMesh(TEXT("/Script/Engine.StaticMesh'/Game/ParkKyoungMin/Model/Spear/MySpear2.MySpear2'"));
 	spearComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SpearMesh"));
-	spearComp->SetupAttachment(GetMesh());
+	spearComp->SetupAttachment(GetMesh(),TEXT("WeaponSocket"));
 	//spearComp->SetupAttachment(GetMesh());
 	if (TempSMesh.Succeeded())
 	{
