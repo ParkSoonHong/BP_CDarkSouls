@@ -119,6 +119,12 @@ public:
 	bool bTakeDownAttackAnimCheck = false;
 		UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
 	bool bTestAttackAnimCheck = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "FSM")
+	bool bTestAttackAnimPlayingEnd = false;
 	int32 SweepRand;
 	float MovingSpeed=0;
+	bool SweepLocCheck = false;
+	FVector SweepStartLoc;
+	//연속공격 변수
+	int32 SequenceAttack = 0;
 };
