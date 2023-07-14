@@ -55,6 +55,12 @@ AOSY_Pursuer::AOSY_Pursuer()
 	// FSM----------------------------------------------------------
 	FSM = CreateDefaultSubobject<UOSY_PursuerFSM>(TEXT("FSM"));
 
+	ConstructorHelpers::FClassFinder<UAnimInstance>tempclass(TEXT("/Script/Engine.AnimBlueprint'/Game/OhSeYoung/Blueprints/ABP_Pursuer.ABP_Pursuer_C'"));
+	if (tempclass.Succeeded())
+	{
+		GetMesh()->SetAnimInstanceClass(tempclass.Class);
+	}
+
 	HitComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("HitComp"));
 	HitComp->SetupAttachment(RootComponent);
 	HitComp->SetWorldScale3D(FVector(3, 3, 3));
