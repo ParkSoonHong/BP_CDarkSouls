@@ -12,6 +12,7 @@
 #include "GameFramework/Controller.h"
 #include "DSTargetComponent.h"
 #include "PlayerLockArmComponent.h"
+#include "PlayerAnim.h"
 
 // Sets default values
 APSH_CPlayer::APSH_CPlayer()
@@ -62,6 +63,12 @@ APSH_CPlayer::APSH_CPlayer()
 	// Create target component
 	TargetComponent = CreateDefaultSubobject<UDSTargetComponent>(TEXT("TargetComponent"));
 	TargetComponent->SetupAttachment(GetRootComponent());
+
+	ConstructorHelpers::FClassFinder<UPlayerAnim>tempEnemy(TEXT("/Script/Engine.BlendSpace'/Game/ParkSoonHong/Ani/BLend_PSHPlayer.BLend_PSHPlayer_C'"));
+	if (tempEnemy.Succeeded())
+	{
+		GetMesh()->SetAnimInstanceClass(tempEnemy.Class);
+	}
 }
 
 // Called when the game starts or when spawned
@@ -69,7 +76,9 @@ void APSH_CPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	
+	GetCharacterMovement()->MaxWalkSpeed = walkSpeed;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	curStamina = maxStamina;
 }
 
 // Called every frame
@@ -77,6 +86,26 @@ void APSH_CPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (curStamina <= 0) // 스테미나가 0일때
+	{	
+		curStamina = 0;
+		steminaOring();
+	}
+
+	if (isRest)
+	{
+		restTime();
+	}
+
+	if (isRun) // 달리는 상태면
+	{
+		Run();
+	}
+
+	if (isRoll)
+	{
+		Roll();
+	}
 }
 
 // Called to bind functionality to input
@@ -91,6 +120,8 @@ void APSH_CPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAxis("Turn", this, &APSH_CPlayer::Turn);
 	PlayerInputComponent->BindAxis("LookUp", this, &APSH_CPlayer::LookUp);
 
+	PlayerInputComponent->BindAction(TEXT("Roll/BackStep/Run"), IE_Pressed, this, &APSH_CPlayer::PressedSpacebar); // 눌렀을때
+	PlayerInputComponent->BindAction(TEXT("Roll/BackStep/Run"), IE_Released, this, &APSH_CPlayer::ReleasedSpacebar);//땠을때
 
 	// Action inputs
 	PlayerInputComponent->BindAction("TagetLook", IE_Pressed, CameraLockArm, &UPlayerLockArmComponent::ToggleCameraLock);
@@ -110,6 +141,15 @@ void APSH_CPlayer::MoveForward(float Val)
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		AddMovementInput(Direction, Val);
 	}
+
+	if (Val != 0) // 움직이고 있다.
+	{
+		isPressedForwardMovekey = true;
+	}
+	else if (Val == 0) // 움직이지 않는다.
+	{
+		isPressedForwardMovekey = false;
+	}
 }
 
 void APSH_CPlayer::MoveRight(float Val)
@@ -124,6 +164,16 @@ void APSH_CPlayer::MoveRight(float Val)
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		AddMovementInput(Direction, Val);
 	}
+
+	if (Val != 0) // 움직이고 있다.
+	{
+		isPressedRightMovekey = true;
+	}
+	else if (Val == 0) // 움직이지 않는다.
+	{
+		isPressedRightMovekey = false;
+	}
+
 }
 
 void APSH_CPlayer::Turn(float Val)
@@ -174,6 +224,7 @@ if(!TagetOn)
 
 
 
+
 void APSH_CPlayer::TickActor(float DeltaTime, enum ELevelTick TickType, FActorTickFunction& ThisTickFunction)
 {
 	Super::TickActor(DeltaTime, TickType, ThisTickFunction);
@@ -189,6 +240,8 @@ void APSH_CPlayer::TickActor(float DeltaTime, enum ELevelTick TickType, FActorTi
 		// Update control rotation to face target
 		GetController()->SetControlRotation(NewRot);
 	}
+	GetCharacterMovement()->MaxWalkSpeed = FMath::Lerp(GetCharacterMovement()->MaxWalkSpeed, retunSpeed, 2 * DeltaTime);
+
 }
 
 //PKMWrite
@@ -214,5 +267,59 @@ void APSH_CPlayer::Damaged(float value)
 	{
 		curHp = 0;
 		Destroy();
+	}
+}
+void APSH_CPlayer::PressedSpacebar()
+{
+	if (isPressedForwardMovekey || isPressedRightMovekey)
+	{
+		Roll();
+		UE_LOG(LogTemp, Warning, TEXT("Roll"));
+
+	}
+	retunSpeed = runSpeed;  // 걷기로 바꾸기
+	isRun = true;
+
+}
+
+void APSH_CPlayer::ReleasedSpacebar()
+{
+	
+	isRun = false;
+	isRest = true;
+	retunSpeed = walkSpeed;
+}
+
+void APSH_CPlayer::steminaOring()
+{
+	//스테미나가 0인 상태 걷기, 방어를 제외한 모든 활동을 정지한다
+	retunSpeed = walkSpeed;
+	isRun = false;
+	isRest = true;
+}
+
+void APSH_CPlayer::restTime()
+{
+	curStamina += 30 * GetWorld()->DeltaTimeSeconds;
+	if (curStamina >= maxStamina)
+	{
+		curStamina = 100;
+		isRest = false;
+	}
+}
+
+void APSH_CPlayer::Run()
+{
+	isRest = false;
+	curStamina -= 25 * GetWorld()->DeltaTimeSeconds;
+}
+
+void APSH_CPlayer::Roll()
+{
+	auto anim = Cast<UPlayerAnim>(GetMesh()->GetAnimInstance());
+	if (anim)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GoRoll"));
+		anim->PlayRollAnimation();
 	}
 }
