@@ -89,6 +89,9 @@ void UPKM_OLDDSFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	case  EEnemyState::TakeDownAttack:
 		TakeDownAttackState();
 		break;
+	case  EEnemyState::TestAttack:
+		TestAttackState();
+		break;
 	default:
 		break;
 	}
@@ -330,7 +333,7 @@ void UPKM_OLDDSFSM::AttackState()
 	{
 		//공격시작
 		int32 RandAttack = FMath::RandRange(1, 4);
-		RandAttack = 5;
+		RandAttack = 8;
 		if (RandAttack == 1)
 		{
 			currentTime = 0;
@@ -379,6 +382,12 @@ void UPKM_OLDDSFSM::AttackState()
 			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			bRangeAttackHit = false;
 			mState = EEnemyState::TakeDownAttack;
+		}
+		else {
+			currentTime = 0;
+			bStingdirCheck = false;
+			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			mState = EEnemyState::TestAttack;
 		}
 		//공격종료or 피함
 	}
@@ -792,6 +801,47 @@ void UPKM_OLDDSFSM::TakeDownAttackState()
 		bTakeDownAttackAnimCheck = false;
 		//Me->spearComp->SetRelativeRotation(FRotator(0, 0, 0));
 		UE_LOG(LogTemp, Log, TEXT("SWingEnd"));
+		bStingdirCheck = false;
+		Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		mState = EEnemyState::Idle;
+		bSweepGoCheck = false;
+	}
+}
+
+void UPKM_OLDDSFSM::TestAttackState()
+{
+	currentTime += GetWorld()->DeltaTimeSeconds;
+	FVector P0 = Me->GetActorLocation();
+	if (!bStingdirCheck) {
+		bTestAttackAnimCheck = true;
+		UE_LOG(LogTemp, Log, TEXT("TEstStingStart"));
+		direction = Target->GetActorLocation() - P0;
+		StingSpeed = 3000;
+		direction.Normalize();
+		bStingdirCheck = true;
+	}
+	else if (currentTime < 0.1)
+	{
+		//UE_LOG(LogTemp, Log, TEXT("Time=%f BSS1%f"),currentTime,BackStepSpeed);
+		FVector vt = direction * (StingSpeed * currentTime / 0.1) * GetWorld()->DeltaTimeSeconds;
+		FVector P = P0 + vt;
+		Me->SetActorLocation(P);
+	}
+	else if (currentTime < 0.5)
+	{
+		//UE_LOG(LogTemp, Log, TEXT("Time=%f BSS1%f"),currentTime,BackStepSpeed);
+		FVector vt = direction * StingSpeed * GetWorld()->DeltaTimeSeconds;
+		FVector P = P0 + vt;
+		Me->SetActorLocation(P);
+	}
+	else if (currentTime < 1.5)//후딜레이 0.5초
+	{
+
+	}
+	else
+	{
+		bTestAttackAnimCheck = false;
+		UE_LOG(LogTemp, Log, TEXT("StingEnd"));
 		bStingdirCheck = false;
 		Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		mState = EEnemyState::Idle;

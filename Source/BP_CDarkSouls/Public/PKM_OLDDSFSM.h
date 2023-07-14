@@ -24,6 +24,7 @@ enum class EEnemyState : uint8
 	RangeAttack,
 	RaiseAttack,
 	TakeDownAttack,
+	TestAttack,
 
 };
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -58,6 +59,7 @@ public:
 	void RangeAttackState();
 	void RaiseAttackState();
 	void TakeDownAttackState();
+	void TestAttackState();
 	void ReciveDamage(float value);
 	float GiveDamage();
 	int32 MyAttacktype;
@@ -115,6 +117,8 @@ public:
 	bool bRaiseAttackAnimCheck = false;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
 	bool bTakeDownAttackAnimCheck = false;
+		UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
+	bool bTestAttackAnimCheck = false;
 	int32 SweepRand;
 	float MovingSpeed=0;
 };
