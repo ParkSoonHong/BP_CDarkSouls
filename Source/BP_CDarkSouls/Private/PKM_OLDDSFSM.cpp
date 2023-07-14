@@ -823,18 +823,18 @@ void UPKM_OLDDSFSM::TestAttackState()
 	else if (currentTime < 0.1)
 	{
 		//UE_LOG(LogTemp, Log, TEXT("Time=%f BSS1%f"),currentTime,BackStepSpeed);
-		FVector vt = direction * (StingSpeed * currentTime / 0.1) * GetWorld()->DeltaTimeSeconds;
+	/*	FVector vt = direction * (StingSpeed * currentTime / 0.1) * GetWorld()->DeltaTimeSeconds;
 		FVector P = P0 + vt;
-		Me->SetActorLocation(P);
+		Me->SetActorLocation(P);*/
 	}
 	else if (currentTime < 0.5)
 	{
-		//UE_LOG(LogTemp, Log, TEXT("Time=%f BSS1%f"),currentTime,BackStepSpeed);
-		FVector vt = direction * StingSpeed * GetWorld()->DeltaTimeSeconds;
-		FVector P = P0 + vt;
-		Me->SetActorLocation(P);
+		////UE_LOG(LogTemp, Log, TEXT("Time=%f BSS1%f"),currentTime,BackStepSpeed);
+		//FVector vt = direction * StingSpeed * GetWorld()->DeltaTimeSeconds;
+		//FVector P = P0 + vt;
+		//Me->SetActorLocation(P);
 	}
-	else if (currentTime < 1.5)//ÈÄµô·¹ÀÌ 0.5ÃÊ
+	else if (currentTime < 4.23)//ÈÄµô·¹ÀÌ 0.5ÃÊ
 	{
 
 	}
