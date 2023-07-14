@@ -46,7 +46,7 @@ APSH_CPlayer::APSH_CPlayer()
 
 	// Configure character movement
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
-	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 2000.0f, 0.0f); // ...at this rotation rate
 	GetCharacterMovement()->JumpZVelocity = 600.f;
 	GetCharacterMovement()->AirControl = 0.2f;
 
@@ -79,9 +79,12 @@ void APSH_CPlayer::BeginPlay()
 	GetCharacterMovement()->MaxWalkSpeed = walkSpeed;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	curStamina = maxStamina;
+
+	anim = Cast<UPlayerAnim>(GetMesh()->GetAnimInstance());
 }
 
 // Called every frame
+
 void APSH_CPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -105,6 +108,11 @@ void APSH_CPlayer::Tick(float DeltaTime)
 	if (isRoll)
 	{
 		Roll();
+	}
+
+	if (isTimeOn)
+	{
+		curTime += DeltaTime;
 	}
 }
 
@@ -215,11 +223,11 @@ if(!TagetOn)
 
 void APSH_CPlayer::LookUp(float Val)
 {
-if(!TagetOn)
-{ 
-	if (!CameraLockArm->IsCameraLockedToTarget())
-		AddControllerPitchInput(Val);
-}
+	if(!TagetOn)
+	{ 
+		if (!CameraLockArm->IsCameraLockedToTarget())
+			AddControllerPitchInput(Val);
+	}
 }
 
 
@@ -271,20 +279,30 @@ void APSH_CPlayer::Damaged(float value)
 }
 void APSH_CPlayer::PressedSpacebar()
 {
+	isTimeOn = true;
 	if (isPressedForwardMovekey || isPressedRightMovekey)
 	{
-		Roll();
-		UE_LOG(LogTemp, Warning, TEXT("Roll"));
-
+		if (curTime >= runTime)
+		{
+			retunSpeed = runSpeed;  // 달리기로 바꾸기
+			isRun = true;
+		}
+		
 	}
-	retunSpeed = runSpeed;  // 걷기로 바꾸기
-	isRun = true;
-
+	else
+	{
+		BackStep();
+	}
+	
 }
 
 void APSH_CPlayer::ReleasedSpacebar()
 {
-	
+	if (isPressedForwardMovekey || isPressedRightMovekey)
+	{
+	Roll();
+	}
+
 	isRun = false;
 	isRest = true;
 	retunSpeed = walkSpeed;
@@ -315,11 +333,13 @@ void APSH_CPlayer::Run()
 }
 
 void APSH_CPlayer::Roll()
+{	
+	anim->PlayRollAnimation();
+	curStamina -= 30;
+}
+
+void APSH_CPlayer::BackStep()
 {
-	auto anim = Cast<UPlayerAnim>(GetMesh()->GetAnimInstance());
-	if (anim)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("GoRoll"));
-		anim->PlayRollAnimation();
-	}
+	anim->PlayBackStepAnimation();
+	curStamina -= 20;
 }
