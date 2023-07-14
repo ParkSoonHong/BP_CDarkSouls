@@ -126,10 +126,6 @@ void UPlayerLockArmComponent::LockToTarget(UDSTargetComponent* NewTargetComponen
 	CameraTarget = NewTargetComponent;
 	bEnableCameraRotationLag = true;
 	player->GetCharacterMovement()->bOrientRotationToMovement = false;
-
-	FVector Direction = CameraTarget->GetComponentLocation() - player->GetActorLocation();
- 	FRotator PlayerRot = UKismetMathLibrary::FindLookAtRotation(player->GetActorLocation(), CameraTarget->GetComponentLocation());
-	//player->GetController()->SetControlRotation(PlayerRot);
 	
 }
 
