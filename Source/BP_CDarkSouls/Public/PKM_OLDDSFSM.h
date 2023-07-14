@@ -18,9 +18,14 @@ enum class EEnemyState : uint8
 	BackStep,
 	RushAttack,
 	StingAttack,
+	StingTwoAttack,
 	SweepAttack,
 	SwingAttack,
 	RangeAttack,
+	RaiseAttack,
+	TakeDownAttack,
+	TestAttack,
+
 };
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BP_CDARKSOULS_API UPKM_OLDDSFSM : public UActorComponent
@@ -48,9 +53,13 @@ public:
 	void BackStepState();
 	void RushAttackState();
 	void StingAttackState();
+	void StingTwoAttackState();
 	void SweepAttackState();
 	void SwingAttackState();
 	void RangeAttackState();
+	void RaiseAttackState();
+	void TakeDownAttackState();
+	void TestAttackState();
 	void ReciveDamage(float value);
 	float GiveDamage();
 	int32 MyAttacktype;
@@ -94,6 +103,22 @@ public:
 	bool bWalkAnimCheck = false;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
 	bool bRunAnimCheck = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
+	bool bRangeAttackAnimCheck = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
+	bool bStingAttackAnimCheck = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
+	bool bStingTwoAttackAnimCheck = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
+	bool bSwingAttackAnimCheck = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
+	bool bSweepAttackAnimCheck = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
+	bool bRaiseAttackAnimCheck = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
+	bool bTakeDownAttackAnimCheck = false;
+		UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
+	bool bTestAttackAnimCheck = false;
 	int32 SweepRand;
 	float MovingSpeed=0;
 };

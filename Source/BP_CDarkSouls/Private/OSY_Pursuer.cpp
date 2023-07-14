@@ -23,31 +23,43 @@ AOSY_Pursuer::AOSY_Pursuer()
 	}
 
 	// 소드----------------------------------------------------------
+
+	// 소켓(sword)에 소드를 넣고싶다
+	// 필요속성: 소드, 소켓
+	// 소드를 생성하고 싶다
+	// 소켓에 상속해서
 	compSword = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("compSword"));
-	compSword->SetupAttachment(GetCapsuleComponent());
-	compSword->SetRelativeLocation(FVector(0,90,20));
-	compSword->SetRelativeRotation(FRotator(0,90,00));
-	compSword->SetRelativeScale3D(FVector(1));
+
+	compSword->SetupAttachment(GetMesh(),TEXT("Sword"));
 
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TempSwordMesh(TEXT("/Script/Engine.StaticMesh'/Game/OhSeYoung/Asset/The_Pursuer/PC_Computer_-_Dark_Souls_II_-_The_Pursuer/The_Pursuer/sword.sword'"));
 	if (TempSwordMesh.Succeeded())
 	{
 		compSword->SetStaticMesh(TempSwordMesh.Object);
+		compSword->SetRelativeLocation(FVector(5,-31,5));
+		compSword->SetRelativeRotation(FRotator(-75,90,0));
+		compSword->SetRelativeScale3D(FVector(1));
 	}
 	// 실드----------------------------------------------------------
 	compShield = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("compShield"));
-	compShield->SetupAttachment(GetCapsuleComponent());
-	compShield->SetRelativeLocation(FVector(0, -80, -30));
-	compShield->SetRelativeRotation(FRotator(0, -90, 00));
-	compShield->SetRelativeScale3D(FVector(1));
+	compShield->SetupAttachment(GetMesh(),TEXT("Shield"));
 
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TempShieldMesh(TEXT("/Script/Engine.StaticMesh'/Game/OhSeYoung/Asset/The_Pursuer/PC_Computer_-_Dark_Souls_II_-_The_Pursuer/The_Pursuer/shield.shield'"));
 	if (TempShieldMesh.Succeeded())
 	{
 		compShield->SetStaticMesh(TempShieldMesh.Object);
+		compShield->SetRelativeLocation(FVector(-2, -85, 93));
+		compShield->SetRelativeRotation(FRotator(-70.7f, 10, 79.6f));
+		compShield->SetRelativeScale3D(FVector(1));
 	}
 	// FSM----------------------------------------------------------
 	FSM = CreateDefaultSubobject<UOSY_PursuerFSM>(TEXT("FSM"));
+
+	ConstructorHelpers::FClassFinder<UAnimInstance>tempclass(TEXT("/Script/Engine.AnimBlueprint'/Game/OhSeYoung/Blueprints/ABP_Pursuer.ABP_Pursuer_C'"));
+	if (tempclass.Succeeded())
+	{
+		GetMesh()->SetAnimInstanceClass(tempclass.Class);
+	}
 
 	HitComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("HitComp"));
 	HitComp->SetupAttachment(RootComponent);

@@ -11,9 +11,10 @@ enum class EEnmeyState :uint8
 {
 	Idle UMETA(DisplayName = "Idle State"),
 	Walk UMETA(DisplayName = "Walk State"),
-	Rush UMETA(DisplayName = "Rush State"),
+	RushAttack UMETA(DisplayName = "RushAttack State"),
 	Backstep UMETA(DisplayName = "Backstep State"),
-	Attack UMETA(DisplayName = "Attack State"),
+	Attack1 UMETA(DisplayName = "Attack1 State"),
+	Attack2 UMETA(DisplayName = "Attack2 State"),
 	Damage UMETA(DisplayName = "Damage State"),
 	Die UMETA(DisplayName = "Die State")
 };
@@ -66,8 +67,9 @@ public:	 // 상태 함수
 	void IdleState();
 	void BackstepState();
 	void WalkState();
-	void RushState();
-	void AttackState();
+	void RushAttackState();
+	void Attack1State();
+	void Attack2State();
 	void DamageState();
 	void DieState();
 
@@ -95,4 +97,9 @@ public: //피격 속성
 	void ReciveDamage(float value);
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
 	int32 HP=10;
+
+public:	//애니관련
+	UPROPERTY()
+	class UOSY_AnimInstance*anim;
+	
 };
