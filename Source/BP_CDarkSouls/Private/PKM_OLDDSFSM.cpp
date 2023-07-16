@@ -37,7 +37,7 @@ void UPKM_OLDDSFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 
 	DrawDebugSphere(GetWorld(), Me->GetActorLocation(), BackRange, 100, FColor::Black, false, -1, 0, 2);
 	DrawDebugSphere(GetWorld(), Me->GetActorLocation(), attackRange, 100, FColor::Red, false, -1, 0, 2);
-	DrawDebugSphere(GetWorld(), Me->GetActorLocation(), MoveRange, 100, FColor::Yellow, false, -1, 0, 2);
+	DrawDebugSphere(GetWorld(), Me->GetActorLocation(), Range, 100, FColor::Yellow, false, -1, 0, 2);
 	DrawDebugSphere(GetWorld(), Me->GetActorLocation(), RunRange, 100, FColor::Blue, false, -1, 0, 2);
 
 	}*/
@@ -88,6 +88,9 @@ void UPKM_OLDDSFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 		break;
 	case  EEnemyState::TakeDownAttack:
 		TakeDownAttackState();
+		break;
+	case  EEnemyState::TestAttack:
+		TestAttackState();
 		break;
 	default:
 		break;
@@ -330,7 +333,7 @@ void UPKM_OLDDSFSM::AttackState()
 	{
 		//공격시작
 		int32 RandAttack = FMath::RandRange(1, 4);
-		RandAttack = 5;
+		RandAttack = 8;
 		if (RandAttack == 1)
 		{
 			currentTime = 0;
@@ -380,6 +383,12 @@ void UPKM_OLDDSFSM::AttackState()
 			bRangeAttackHit = false;
 			mState = EEnemyState::TakeDownAttack;
 		}
+		else {
+			currentTime = 0;
+			bStingdirCheck = false;
+			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			mState = EEnemyState::TestAttack;
+		}
 		//공격종료or 피함
 	}
 }
@@ -423,7 +432,8 @@ void UPKM_OLDDSFSM::Moving(float speed, FVector dir)
 	FVector P = P0 + vt;
 	FVector Forward = Me->GetActorForwardVector();
 	Forward = FMath::Lerp<FVector, float>(Forward, dir, 5 * GetWorld()->DeltaTimeSeconds);
-	GetOwner()->SetActorRotation(Forward.Rotation());
+	//GetOwner()->SetActorRotation(Forward.Rotation());
+	GetOwner()->SetActorRotation(dir.Rotation());
 	GetOwner()->SetActorLocation(P);
 }
 
@@ -614,6 +624,12 @@ void UPKM_OLDDSFSM::StingTwoAttackState()
 
 void UPKM_OLDDSFSM::SweepAttackState()
 {
+	if (!SweepLocCheck)
+	{
+		SweepStartLoc = Me->GetActorLocation();
+		SweepLocCheck = true;
+		
+	}
 	currentTime += GetWorld()->DeltaTimeSeconds;
 	if (currentTime < 0.3)
 	{
@@ -631,11 +647,14 @@ void UPKM_OLDDSFSM::SweepAttackState()
 	{
 		bSweepAttackAnimCheck = false;
 		//Me->spearComp->SetRelativeRotation(FRotator(0, 0, 0));
+		FVector P = SweepStartLoc+319*Me->GetActorForwardVector();
+		Me->SetActorLocation(P);
 		UE_LOG(LogTemp, Log, TEXT("SWeepEnd"));
 		bStingdirCheck = false;
 		Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		mState = EEnemyState::Idle;
 		bSweepGoCheck = false;
+		SweepLocCheck = false;
 	}
 }
 
@@ -796,6 +815,51 @@ void UPKM_OLDDSFSM::TakeDownAttackState()
 		Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		mState = EEnemyState::Idle;
 		bSweepGoCheck = false;
+	}
+}
+
+void UPKM_OLDDSFSM::TestAttackState()
+{
+	currentTime += GetWorld()->DeltaTimeSeconds;
+	FVector P0 = Me->GetActorLocation();
+	if (!bStingdirCheck) {
+		bTestAttackAnimCheck = true;
+		UE_LOG(LogTemp, Log, TEXT("TEstStingStart"));
+		direction = Target->GetActorLocation() - P0;
+		StingSpeed = 3000;
+		direction.Normalize();
+		bStingdirCheck = true;
+		bTestAttackAnimPlayingEnd = false;
+	}
+	else if (currentTime < 0.1)
+	{
+		//UE_LOG(LogTemp, Log, TEXT("Time=%f BSS1%f"),currentTime,BackStepSpeed);
+	/*	FVector vt = direction * (StingSpeed * currentTime / 0.1) * GetWorld()->DeltaTimeSeconds;
+		FVector P = P0 + vt;
+		Me->SetActorLocation(P);*/
+	}
+	else if (currentTime < 4.23)
+	{
+		////UE_LOG(LogTemp, Log, TEXT("Time=%f BSS1%f"),currentTime,BackStepSpeed);
+		//FVector vt = direction * StingSpeed * GetWorld()->DeltaTimeSeconds;
+		//FVector P = P0 + vt;
+		//Me->SetActorLocation(P);
+	}
+	else
+	{
+		if (bTestAttackAnimPlayingEnd)
+		{
+			bTestAttackAnimCheck = false;
+			UE_LOG(LogTemp, Log, TEXT("StingEnd"));
+			bStingdirCheck = false;
+			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			FVector vt = direction * 1398.4; // 1300 임의값
+			FVector P = P0 + vt;
+				//UE_LOG(LogTemp, Log, TEXT("dis%f"),) ;
+			Me->SetActorLocation(P);
+			mState = EEnemyState::Idle;
+			bSweepGoCheck = false;
+		}
 	}
 }
 

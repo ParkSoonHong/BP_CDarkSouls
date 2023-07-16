@@ -81,6 +81,45 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Setings")
+	float walkSpeed = 600;
+	// 뛰기 속도
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Setings")
+	float runSpeed = 800;
+
+	// 다시 바뀔 속도
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Setings")
+	float retunSpeed=600;
+
+	UPROPERTY(EditAnywhere,Category = "Setings")
+	bool isRun=false;
+
+	UPROPERTY(EditAnywhere,Category = "status")
+	float maxStamina = 100;
+
+	UPROPERTY(EditAnywhere,Category = "status")
+	float curStamina = 0;
+
+	UPROPERTY(EditAnywhere,Category = "status")
+	bool isRest = false;	// 스테미나 회복시간
+	UPROPERTY(EditAnywhere,Category = "status")
+	bool isOring = false;	// 스테미나 회복시간
+
+	UPROPERTY(EditAnywhere,Category = "Time") // 달리기 시작 타임
+	float runTime = 0.5f; 
+
+	UPROPERTY(EditAnywhere,Category = "Time")
+	float curTime = 0;
+
+	UPROPERTY(EditAnywhere,Category = "Time")
+	bool isTimeOn = false;
+
+	UPROPERTY(EditAnywhere,Category = "status")
+	bool isRoll = false;	// 스테미나 회복시간
+
+	bool isPressedForwardMovekey = false;
+	bool isPressedRightMovekey = false;
+
 	/** Called for forwards/backward input */
 	void MoveForward(float Value);
 	/** Called for side to side input */
@@ -90,6 +129,22 @@ public:
 	void Turn(float Val);
 	/* Handle vertical mouse input */
 	void LookUp(float Val);
+
+	// 스페이스바가 눌렸을때
+	void PressedSpacebar();
+
+	// 스페이스바가 때졌을때
+	void ReleasedSpacebar();
+
+	void steminaOring();
+
+	void restTime();
+
+	void Run();
+
+	void Roll();
+
+	void BackStep();
 
 	/* Tick every frame */
 	virtual void TickActor(float DeltaTime, enum ELevelTick TickType, FActorTickFunction& ThisTickFunction) override;
@@ -107,6 +162,9 @@ public:
 	class APKM_OLDDS * OverlapOldDs;
 	UPROPERTY(VisibleAnywhere)
 	class UStaticMeshComponent* PlayerWeaponComp;
+
+	UPROPERTY(EditAnywhere)
+	class UPlayerAnim * anim;
 
 	UFUNCTION()
 	void Attack();
