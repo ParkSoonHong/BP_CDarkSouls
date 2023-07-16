@@ -10,9 +10,10 @@ UENUM(BlueprintType)
 enum class EEnmeyState :uint8
 {
 	Idle UMETA(DisplayName = "Idle State"),
-	Walk UMETA(DisplayName = "Walk State"),
-	RushAttack UMETA(DisplayName = "RushAttack State"),
 	Backstep UMETA(DisplayName = "Backstep State"),
+	Walk UMETA(DisplayName = "Walk State"),
+	Rush UMETA(DisplayName = "Rush State"),
+	RushAttack UMETA(DisplayName = "RushAttack State"),
 	Attack1 UMETA(DisplayName = "Attack1 State"),
 	Attack2 UMETA(DisplayName = "Attack2 State"),
 	Damage UMETA(DisplayName = "Damage State"),
@@ -67,6 +68,7 @@ public:	 // 상태 함수
 	void IdleState();
 	void BackstepState();
 	void WalkState();
+	void RushState();
 	void RushAttackState();
 	void Attack1State();
 	void Attack2State();
@@ -76,7 +78,8 @@ public:	 // 상태 함수
 public: //Idle 속성
 	// 필요속성 : 플레이어와의 거리, 대시거리, 무브거리,어택거리, 백스텝거리
 	float RushDistance = 5000;
-	float RushStartDistance = 1000;
+	float RushStartDistance = 2000;
+	float RushAttackDistance = 500;
 	float AttackStartDistance = 400;
 	float BackstepStartDistance = 200;
 
@@ -99,7 +102,7 @@ public: //피격 속성
 	int32 HP=10;
 
 public:	//애니관련
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	class UOSY_AnimInstance*anim;
 	
 };

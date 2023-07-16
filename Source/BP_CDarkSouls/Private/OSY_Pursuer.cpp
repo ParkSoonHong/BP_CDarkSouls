@@ -24,20 +24,15 @@ AOSY_Pursuer::AOSY_Pursuer()
 
 	// 소드----------------------------------------------------------
 
-	// 소켓(sword)에 소드를 넣고싶다
-	// 필요속성: 소드, 소켓
-	// 소드를 생성하고 싶다
-	// 소켓에 상속해서
 	compSword = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("compSword"));
-
 	compSword->SetupAttachment(GetMesh(),TEXT("Sword"));
 
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TempSwordMesh(TEXT("/Script/Engine.StaticMesh'/Game/OhSeYoung/Asset/The_Pursuer/PC_Computer_-_Dark_Souls_II_-_The_Pursuer/The_Pursuer/sword.sword'"));
 	if (TempSwordMesh.Succeeded())
 	{
 		compSword->SetStaticMesh(TempSwordMesh.Object);
-		compSword->SetRelativeLocation(FVector(5,-31,5));
-		compSword->SetRelativeRotation(FRotator(-75,90,0));
+		compSword->SetRelativeLocation(FVector(-26.13f,-3.71f,4.42f));
+		compSword->SetRelativeRotation(FRotator(9.41f,87.2f,-91.55f));
 		compSword->SetRelativeScale3D(FVector(1));
 	}
 	// 실드----------------------------------------------------------
@@ -48,8 +43,8 @@ AOSY_Pursuer::AOSY_Pursuer()
 	if (TempShieldMesh.Succeeded())
 	{
 		compShield->SetStaticMesh(TempShieldMesh.Object);
-		compShield->SetRelativeLocation(FVector(-2, -85, 93));
-		compShield->SetRelativeRotation(FRotator(-70.7f, 10, 79.6f));
+		compShield->SetRelativeLocation(FVector(70.99f, -9.63f, 11.37f));
+		compShield->SetRelativeRotation(FRotator(-11.42f, 77.09f, 101.18f));
 		compShield->SetRelativeScale3D(FVector(1));
 	}
 	// FSM----------------------------------------------------------
