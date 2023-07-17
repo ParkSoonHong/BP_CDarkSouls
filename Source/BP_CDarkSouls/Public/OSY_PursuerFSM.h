@@ -12,6 +12,7 @@ enum class EEnmeyState :uint8
 	Idle UMETA(DisplayName = "Idle State"),
 	Backstep UMETA(DisplayName = "Backstep State"),
 	Walk UMETA(DisplayName = "Walk State"),
+	Attack UMETA(DisplayName = "Attack State"),
 	Rush UMETA(DisplayName = "Rush State"),
 	RushAttack UMETA(DisplayName = "RushAttack State"),
 	Attack1 UMETA(DisplayName = "Attack1 State"),
@@ -46,7 +47,9 @@ public:
 	float idleDelayTime = 2;
 	float currentTIme = 0;
 	UPROPERTY(EditAnywhere, Category ="FSM")
-	float delayTime ;
+	float delayTime;
+	float DelayTime= 2;
+	float RushDelayTime= 1;
 	float stopTime=2;
 	
 
@@ -68,6 +71,7 @@ public:	 // 상태 함수
 	void IdleState();
 	void BackstepState();
 	void WalkState();
+	void AttackState();
 	void RushState();
 	void RushAttackState();
 	void Attack1State();
@@ -78,19 +82,13 @@ public:	 // 상태 함수
 public: //Idle 속성
 	// 필요속성 : 플레이어와의 거리, 대시거리, 무브거리,어택거리, 백스텝거리
 	float RushDistance = 5000;
-	float RushStartDistance = 2000;
-	float RushAttackDistance = 500;
-	float AttackStartDistance = 400;
+	float AttackStartDistance = 2000;
 	float BackstepStartDistance = 200;
+	float RushStartDistance = 1000;
+	float RushAttackDistance = 500;
 
 public: // Attack 속성
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void LowerAndRaiseWeapon();
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void LowerAndRaiseWeapon2();
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void LowerAndRaiseWeapon3();
-	
+
 	bool bAttackSelect = false;
 	float pattern;
 	bool bAttackdirOk = false;
@@ -104,5 +102,7 @@ public: //피격 속성
 public:	//애니관련
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	class UOSY_AnimInstance*anim;
+	
+
 	
 };

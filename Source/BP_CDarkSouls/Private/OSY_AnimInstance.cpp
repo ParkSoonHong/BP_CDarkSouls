@@ -5,6 +5,8 @@
 #include "OSY_PursuerFSM.h"
 #include "OSY_Pursuer.h"
 
+
+
 void UOSY_AnimInstance::OnRushAttackEndAnim()
 {
 	bRushAttackPlay= false;
