@@ -94,8 +94,6 @@ void UOSY_PursuerFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 
 void UOSY_PursuerFSM::IdleState()
 {
-	UE_LOG(LogTemp,Error,TEXT("IDLE"))
-
 	FVector Direction = Target->GetActorLocation()-me->GetActorLocation();
 	float distance = Direction.Length();
 	Direction.Normalize();
@@ -109,8 +107,7 @@ void UOSY_PursuerFSM::IdleState()
 	else if (distance > AttackStartDistance)
 	{
 	// 러시상태로 넘어가고
-		anim->bRushPlay= false;
-		anim->bRushAttackPlay=false;
+		
 		currentTIme = 0;
 		Rushspeed = 0;
 		mState = EEnmeyState::Rush;
@@ -143,27 +140,22 @@ void UOSY_PursuerFSM::IdleState()
 // 플레이어와의 거리가 백스텝 거리보다 작으면 백스텝을 실행하고 아이들상태로 돌아가
 void UOSY_PursuerFSM::WalkState()
 {
-	UE_LOG(LogTemp, Error, TEXT("WALK"))
 	FVector Direction = Target->GetActorLocation() - me->GetActorLocation();
 	float distance = Direction.Length();
 	Direction.Normalize();
 
-
-	//만약 플레이어와의 거리가 러시거리보다 크면 무브를 하고 그렇지 않으면 아이들로 돌아가
-	//1. 만약 플레이어와의 거리가 러시거리보다 크면
-	if (distance > RushStartDistance)
-	{
-	//2. 무브를 실행하고
+	// 무브를 실행하고
+	// 만약 distance가 RushStartDistace보다 짧아지면 아이들로 돌아가
 		FVector P = me->GetActorLocation() + Direction * Walkspeed * GetWorld()->DeltaRealTimeSeconds;
 		me->SetActorLocation(P);
-	}
-	//3. 그렇지 않다면
-	else
-	{
+
+		if (distance < RushStartDistance)
+		{
 		mState = EEnmeyState::Idle;
 		anim->animState = mState;
 
-	}
+		}
+	
 }
 
 void UOSY_PursuerFSM::RushState()
@@ -173,10 +165,9 @@ void UOSY_PursuerFSM::RushState()
 	float distance = Direction.Length();
 	Direction.Normalize();
 
+	// 러프하게 다가가
+	// 만약  distance가 AttackstartDistance보다 짧아지면 아이들로 돌아가
 
-	if (distance > AttackStartDistance)
-	{
-		anim->bRushPlay = true;
 		currentTIme += GetWorld()->DeltaTimeSeconds;
 		float FastTime = 0.1;
 		float SlowTime = 0.8;
@@ -203,31 +194,16 @@ void UOSY_PursuerFSM::RushState()
 			FVector P = me->GetActorLocation() + Direction * Rushspeed * GetWorld()->DeltaRealTimeSeconds;
 			me->SetActorLocation(P);
 		}
-	}
-	else
-	{
 
-		delayTime += GetWorld()->DeltaRealTimeSeconds * 1000;
-		anim->bRushPlay=false;
-		UE_LOG(LogTemp, Error, TEXT("RushAttack"))
-		anim->bRushAttackPlay = true;
+	if (distance < AttackStartDistance)
+	{
 		currentTIme = 0;
-		//만약 러시어택이 끝났다면 아이들로 돌아가
-		if (anim->bRushAttackPlay)
-		{
-		UE_LOG(LogTemp, Error, TEXT("True"))
-		}
-		else
-		{
-		UE_LOG(LogTemp, Error, TEXT("False"))
-		}
-		if (anim->bRushAttackPlay==false)
-		{
-		mState = EEnmeyState::Idle;
-		delayTime = 0;
 		anim->animState = mState;
-		}
+		mState = EEnmeyState::RushAttack;
+		
+		anim->bRushAttackPlay= true; 
 	}
+
 }
 
 void UOSY_PursuerFSM::RushAttackState()
@@ -236,19 +212,24 @@ void UOSY_PursuerFSM::RushAttackState()
 	FVector Direction = Target->GetActorLocation() - me->GetActorLocation();
 	float distance = Direction.Length();
 	Direction.Normalize();
-	anim->bRushPlay= false;
-	if (distance > RushAttackDistance)
-	{
-	UE_LOG(LogTemp, Error, TEXT("RushAttackOK"))
 
-	anim->bRushAttackPlay= true;
-	}
-	else
-	{
-		mState=EEnmeyState::Idle;
-		anim->animState = mState;	
-	}
+
 	anim->animState = mState;
+
+	if (anim->bRushAttackPlay == false)
+	{
+	UE_LOG(LogTemp, Error, TEXT("RushAttack2222"))
+		mState = EEnmeyState::Idle;
+		anim->animState = mState;
+	}
+	//mState = EEnmeyState::Idle;
+	//UE_LOG(LogTemp, Error, TEXT("RushAttack"))
+
+	// 러쉬 어택을 실행해
+	// 만약 노티파이로 러시어택엔드가 찍혔다면 아이들로 돌아가
+
+	
+	
 	
 }
 
@@ -260,7 +241,6 @@ void UOSY_PursuerFSM::Attack1State()
 	Direction.Normalize();
 	anim->animState = mState;
 	
-	anim->bAttack11Play= true;
 	
 	//어택11은 무조건 재생하고, 랜덤한 확률로 2를 재생하고, 또 랜덤한 확률로 3을 재생한다.
 	// 필요속성, 2를 재생할 확률, 3을 재생할 확률
@@ -270,27 +250,19 @@ void UOSY_PursuerFSM::Attack1State()
 	if(Attack12>2)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Attack1-2"))
-		anim->bAttack11Play= false;
-		anim->bAttack12Play= true;
-		anim->bAttack13Play = false;
+		
 		if (Attack13 > 2)
 		{
 			UE_LOG(LogTemp, Error, TEXT("Attack1-3"))
-			anim->bAttack11Play = false;
-			anim->bAttack12Play = false;
-			anim->bAttack13Play= true;
+			
 		}
 		else
 		{
-			anim->bAttack11Play = false;
-			anim->bAttack12Play = false;
-			anim->bAttack13Play = false;
+			
 		
 			mState= EEnmeyState::Idle;
 		}
-			anim->bAttack11Play = false;
-			anim->bAttack12Play = false;
-			anim->bAttack13Play = false;
+			
 			mState= EEnmeyState::Idle;
 	}
 
