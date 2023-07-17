@@ -36,3 +36,13 @@ void UPlayerAnim::PlayRollAnimation()
 {
 	Montage_Play(RollMontage);
 }
+
+void UPlayerAnim::PlayBackStepAnimation()
+{
+	Montage_Play(BackStepMontage);
+}
+
+void UPlayerAnim::PlayAttackAnimation()
+{
+	Montage_Play(AttackMontage);
+}

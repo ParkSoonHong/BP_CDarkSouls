@@ -105,8 +105,14 @@ public:
 	UPROPERTY(EditAnywhere,Category = "status")
 	bool isOring = false;	// 스테미나 회복시간
 
+	UPROPERTY(EditAnywhere,Category = "Time") // 달리기 시작 타임
+	float runTime = 0.5f; 
+
 	UPROPERTY(EditAnywhere,Category = "Time")
 	float curTime = 0;
+
+	UPROPERTY(EditAnywhere,Category = "Time")
+	bool isTimeOn = false;
 
 	UPROPERTY(EditAnywhere,Category = "status")
 	bool isRoll = false;	// 스테미나 회복시간
@@ -138,6 +144,8 @@ public:
 
 	void Roll();
 
+	void BackStep();
+
 	/* Tick every frame */
 	virtual void TickActor(float DeltaTime, enum ELevelTick TickType, FActorTickFunction& ThisTickFunction) override;
 	
@@ -154,6 +162,9 @@ public:
 	class APKM_OLDDS * OverlapOldDs;
 	UPROPERTY(VisibleAnywhere)
 	class UStaticMeshComponent* PlayerWeaponComp;
+
+	UPROPERTY(EditAnywhere)
+	class UPlayerAnim * anim;
 
 	UFUNCTION()
 	void Attack();

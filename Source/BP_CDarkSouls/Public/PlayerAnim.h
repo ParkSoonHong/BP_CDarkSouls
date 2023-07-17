@@ -27,5 +27,13 @@ public:
 	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
 	class UAnimMontage* RollMontage;
 
+	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
+	class UAnimMontage* BackStepMontage;
+
+	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
+	class UAnimMontage* AttackMontage;
+
 	void PlayRollAnimation();
+	void PlayBackStepAnimation();
+	void PlayAttackAnimation();
 };
