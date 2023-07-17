@@ -160,7 +160,7 @@ void UOSY_PursuerFSM::WalkState()
 
 void UOSY_PursuerFSM::RushState()
 {
-	UE_LOG(LogTemp, Error, TEXT("RUSH"))
+	//UE_LOG(LogTemp, Error, TEXT("RUSH"))
 	FVector Direction = Target->GetActorLocation() - me->GetActorLocation();
 	float distance = Direction.Length();
 	Direction.Normalize();
@@ -218,12 +218,16 @@ void UOSY_PursuerFSM::RushAttackState()
 
 	if (anim->bRushAttackPlay == false)
 	{
-	UE_LOG(LogTemp, Error, TEXT("RushAttack2222"))
+	UE_LOG(LogTemp, Error, TEXT("Succes"))
 		mState = EEnmeyState::Idle;
 		anim->animState = mState;
 	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("NoFix"))
+	}
 	//mState = EEnmeyState::Idle;
-	//UE_LOG(LogTemp, Error, TEXT("RushAttack"))
+	////UE_LOG(LogTemp, Error, TEXT("RushAttack"))
 
 	// 러쉬 어택을 실행해
 	// 만약 노티파이로 러시어택엔드가 찍혔다면 아이들로 돌아가
@@ -235,7 +239,7 @@ void UOSY_PursuerFSM::RushAttackState()
 
 void UOSY_PursuerFSM::Attack1State()
 {
-	UE_LOG(LogTemp, Error, TEXT("Attack1-1"))
+	//UE_LOG(LogTemp, Error, TEXT("Attack1-1"))
 	FVector Direction = Target->GetActorLocation() - me->GetActorLocation();
 	float distance = Direction.Length();
 	Direction.Normalize();
@@ -249,11 +253,11 @@ void UOSY_PursuerFSM::Attack1State()
 
 	if(Attack12>2)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Attack1-2"))
+		//UE_LOG(LogTemp, Error, TEXT("Attack1-2"))
 		
 		if (Attack13 > 2)
 		{
-			UE_LOG(LogTemp, Error, TEXT("Attack1-3"))
+			//UE_LOG(LogTemp, Error, TEXT("Attack1-3"))
 			
 		}
 		else
@@ -273,7 +277,7 @@ void UOSY_PursuerFSM::Attack1State()
 
 void UOSY_PursuerFSM::Attack2State()
 {
-	UE_LOG(LogTemp, Error, TEXT("Attack2"))
+	//UE_LOG(LogTemp, Error, TEXT("Attack2"))
 	FVector Direction = Target->GetActorLocation() - me->GetActorLocation();
 	float distance = Direction.Length();
 	Direction.Normalize();
@@ -283,7 +287,7 @@ void UOSY_PursuerFSM::Attack2State()
 
 void UOSY_PursuerFSM::BackstepState()
 {
-	UE_LOG(LogTemp, Error, TEXT("BACKSTEP"))
+	//UE_LOG(LogTemp, Error, TEXT("BACKSTEP"))
 	FVector Direction = Target->GetActorLocation() - me->GetActorLocation();
 	float distance = Direction.Length();
 	Direction.Normalize();
@@ -434,7 +438,7 @@ void UOSY_PursuerFSM::ReciveDamage(float value)
 	if (HP - value > 0)
 	{
 		HP -= value;
-		UE_LOG(LogTemp, Log, TEXT("OLDDS HP=%d"), HP);
+		//UE_LOG(LogTemp, Log, TEXT("OLDDS HP=%d"), HP);
 	}
 	else
 	{
