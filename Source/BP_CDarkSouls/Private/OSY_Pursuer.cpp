@@ -26,7 +26,7 @@ AOSY_Pursuer::AOSY_Pursuer()
 
 	compSword = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("compSword"));
 	compSword->SetupAttachment(GetMesh(),TEXT("Sword"));
-
+	compSword->SetCollisionProfileName(TEXT("OSYSword"));
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TempSwordMesh(TEXT("/Script/Engine.StaticMesh'/Game/OhSeYoung/Asset/The_Pursuer/PC_Computer_-_Dark_Souls_II_-_The_Pursuer/The_Pursuer/sword.sword'"));
 	if (TempSwordMesh.Succeeded())
 	{
@@ -61,6 +61,7 @@ AOSY_Pursuer::AOSY_Pursuer()
 	HitComp->SetupAttachment(RootComponent);
 	HitComp->SetWorldScale3D(FVector(3, 3, 3));
 	HitComp->SetCollisionProfileName(TEXT("Pursuer"));
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 // Called when the game starts or when spawned
