@@ -63,6 +63,7 @@ void APKM_OLDDS::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 
 void APKM_OLDDS::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	UE_LOG(LogTemp, Log, TEXT("OVerlap"));
 	if (FSM->Target->PlayingAttack)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Player->Hit"));

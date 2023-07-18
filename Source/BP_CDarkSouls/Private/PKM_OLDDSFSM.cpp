@@ -299,6 +299,7 @@ void UPKM_OLDDSFSM::AttackState()
 		7 래인지어택
 		*/
 		int32 RandAttack = FMath::RandRange(1, 7);
+		RandAttack = 2;
 		if (RandAttack == 1)
 		{
 			currentTime = 0;
@@ -409,6 +410,7 @@ void UPKM_OLDDSFSM::BackStepState()
 	float EndTime = 1;
 	FVector P0 = Me->GetActorLocation();
 	direction = Target->GetActorLocation() - P0;
+	direction.Z = 0;
 	//FVector Forward = Me->GetActorForwardVector();
 	//Forward = FMath::Lerp<FVector, float>(Forward, direction, 5 * GetWorld()->DeltaTimeSeconds);
 	//GetOwner()->SetActorRotation(Forward.Rotation());
@@ -454,6 +456,7 @@ void UPKM_OLDDSFSM::RushAttackState()
 	FVector P0 = Me->GetActorLocation();
 	if (!bRushdirCheck) {
 		direction = Target->GetActorLocation() - P0;
+		direction.Z = 0;
 		direction.Normalize();
 		bRushdirCheck = true;
 		Me->HitComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -518,6 +521,7 @@ void UPKM_OLDDSFSM::StingAttackState()
 		bStingAttackAnimCheck = true;
 		UE_LOG(LogTemp, Log, TEXT("StingStart"));
 		direction = Target->GetActorLocation() - P0;
+		direction.Z = 0;
 		StingSpeed = 500;
 		direction.Normalize();
 		bStingdirCheck = true;
@@ -549,6 +553,7 @@ void UPKM_OLDDSFSM::StingAttackState()
 		if (ComboCount < 1)
 		{
 			int32 RandCombo = FMath::RandRange(1, 7);
+			RandCombo = 2;
 			if (RandCombo == 1)
 			{
 				ComboCount++;
@@ -631,6 +636,7 @@ void UPKM_OLDDSFSM::StingTwoAttackState()
 		bStingTwoAttackAnimCheck = true;
 		UE_LOG(LogTemp, Log, TEXT("StingStart"));
 		direction = Target->GetActorLocation() - P0;
+		direction.Z = 0;
 		Me->SetActorRotation(direction.Rotation());
 		StingSpeed = 1000;
 		direction.Normalize();
@@ -744,6 +750,7 @@ void UPKM_OLDDSFSM::SwingAttackState()
 	{	
 		bSwingAttackAnimCheck = true;
 		direction = Target->GetActorLocation() - Me->GetActorLocation();
+		direction.Z = 0;
 		Me->SetActorRotation(direction.Rotation() * (currentTime / 0.4));
 		//Me->spearComp->SetRelativeRotation(FRotator(0, 150 * currentTime / 0.4f, -20 * currentTime / 0.4f));
 	}
@@ -1019,6 +1026,7 @@ void UPKM_OLDDSFSM::TakeDownAttackState()
 	{
 		bTakeDownAttackAnimCheck = true;
 		direction = Target->GetActorLocation() - Me->GetActorLocation();
+		direction.Z = 0;
 		Me->SetActorRotation(direction.Rotation()*(currentTime/0.4));
 		//Me->spearComp->SetRelativeRotation(FRotator(0, 150 * currentTime / 0.4f, -20 * currentTime / 0.4f));
 	}
