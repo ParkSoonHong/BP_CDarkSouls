@@ -6,6 +6,7 @@
 #include <Kismet/GameplayStatics.h>
 #include "PKM_OLDDS.h"
 #include "Components/CapsuleComponent.h"
+#include <Particles/ParticleSystemComponent.h>
 // Sets default values for this component's properties
 UPKM_OLDDSFSM::UPKM_OLDDSFSM()
 {
@@ -41,34 +42,6 @@ void UPKM_OLDDSFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	DrawDebugSphere(GetWorld(), Me->GetActorLocation(), RunRange, 100, FColor::Blue, false, -1, 0, 2);
 
 	}*/
-	//if (bSwingAttackAnimCheck)
-	//{
-	//	UE_LOG(LogTemp,Log,TEXT("SwingOn"));
-	//}
-	//if (bStingAttackAnimCheck)
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("StingOn"));
-	//}
-	//if (bStingTwoAttackAnimCheck)
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("Sting2On"));
-	//}
-	//if (bRaiseAttackAnimCheck)
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("RaiseOn"));
-	//}
-	//if (bTakeDownAttackAnimCheck)
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("TakeDownOn"));
-	//}
-	//if (bRunAnimCheck)
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("RunOn"));
-	//}
-	//if (bWalkAnimCheck)
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("WalkOn"));
-	//}
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	switch (mState)
 	{
@@ -326,13 +299,13 @@ void UPKM_OLDDSFSM::AttackState()
 		7 ·¡ÀÎÁö¾îÅÃ
 		*/
 		int32 RandAttack = FMath::RandRange(1, 7);
+		RandAttack = 6;
 		if (RandAttack == 1)
 		{
 			currentTime = 0;
 			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 			mState = EEnemyState::SwingAttack;
 		}
-		
 		else if (RandAttack==2)
 		{
 			currentTime = 0;
@@ -485,6 +458,11 @@ void UPKM_OLDDSFSM::RushAttackState()
 		direction.Normalize();
 		bRushdirCheck = true;
 		Me->HitComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		FVector MyLoc = Me->GetActorLocation();
+		FVector RushELoc = MyLoc;
+		RushELoc.Z = RushELoc.Z + 60;
+		RushAttackEffect = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), RushAttackFactory, RushELoc);
+		RushAttackEffect->SetWorldScale3D(FVector(0,0,0));
 	}
 	//FVector Forward = Me->GetActorForwardVector();
 	//Forward = FMath::Lerp<FVector, float>(Forward, direction, 5 * GetWorld()->DeltaTimeSeconds);
@@ -492,6 +470,7 @@ void UPKM_OLDDSFSM::RushAttackState()
 	if (currentTime<=RushDelay)
 	{
 		bRushAnimCheck = true;
+		RushAttackEffect->SetWorldScale3D(FVector(3*(currentTime/0.3),3* (currentTime / 0.3),3* (currentTime / 0.3)));
 	}
 	else if (currentTime <= FastTime)// 0~0.1
 	{
@@ -500,6 +479,7 @@ void UPKM_OLDDSFSM::RushAttackState()
 		FVector vt = direction * BackStepSpeed * GetWorld()->DeltaTimeSeconds;
 		FVector P = P0 + vt;
 		Me->SetActorLocation(P);
+		RushAttackEffect->SetWorldLocation(FVector(P.X,P.Y,P.Z+60));
 	}
 	else if (currentTime < SlowTime)// 0.1~0.8
 	{
@@ -507,6 +487,7 @@ void UPKM_OLDDSFSM::RushAttackState()
 		FVector vt = direction * BackStepSpeed * GetWorld()->DeltaTimeSeconds;
 		FVector P = P0 + vt;
 		Me->SetActorLocation(P);
+		RushAttackEffect->SetWorldLocation(FVector(P.X, P.Y, P.Z + 60));
 	}
 	else if (currentTime < EndTime)// 0.8<= CT<1.0
 	{	//				1000 * (1-x2)
@@ -515,10 +496,11 @@ void UPKM_OLDDSFSM::RushAttackState()
 		FVector vt = direction * BackStepSpeed * GetWorld()->DeltaTimeSeconds;
 		FVector P = P0 + vt;
 		Me->SetActorLocation(P);
+		RushAttackEffect->SetWorldLocation(FVector(P.X, P.Y, P.Z + 60));
 	}
 	else if (currentTime < 3) {
-		UE_LOG(LogTemp, Log, TEXT("goIdle"));
 		bRushAnimCheck = false;
+		RushAttackEffect->SetWorldScale3D(FVector(3-3*(currentTime-0.8)/2.2,3-3*(currentTime - 0.8) / 2.2,3-3* (currentTime - 0.8) / 2.2));
 	}
 	else
 	{
@@ -872,36 +854,64 @@ void UPKM_OLDDSFSM::RangeAttackState()
 	if (Target!=nullptr)
 	{
 		FVector RangeDistance = Me->GetActorLocation() - Target->GetActorLocation();
-		if (currentTime < 1)//¹ú¸®±â
+		if (currentTime<1)
+		{
+			//ÀÌÆåÆ® »ý¼º 
+			if (!bRangeAttackEffect)
+			{
+				FVector MyLoc = Me->GetActorLocation();
+				FVector StormLoc = MyLoc;
+				StormLoc.Z = StormLoc.Z - 90;
+				FVector BallLoc = MyLoc;
+				BallLoc.Z = BallLoc.Z + 50;
+				RangeAttackEffect=UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), RangeAttackFactory,StormLoc);
+				RangeBallEffect = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), RangeAttackBallFactory,BallLoc);
+				bRangeAttackEffect = true;
+			}
+			RangeAttackEffect->SetWorldScale3D(FVector(0.3*currentTime, 0.3*currentTime, 1));
+			RangeBallEffect->SetWorldScale3D(FVector(2*currentTime, 2*currentTime, 1));
+		}
+		else if (currentTime < 2)//¹ú¸®±â
 		{
 			bRangeAttackAnimCheck = true;
-			DrawDebugSphere(GetWorld(), Me->GetActorLocation(), 500 * (currentTime / 1), 100, FColor::Red, false, -1, 0, 2);
+			RangeAttackEffect->SetWorldScale3D(FVector(4* ((currentTime - 1) / 1), 4* ((currentTime - 1) / 1), 1));
+			FVector BallP0 = RangeBallEffect->GetComponentLocation();
+			FVector Balldis = Me->GetActorForwardVector();
+			FVector Ballvt=180*Balldis*GetWorld()->DeltaRealTimeSeconds;
+			FVector BallP=BallP0+Ballvt;
+			RangeBallEffect->SetWorldLocation(BallP);
 			if (!bRangeAttackHit)
 			{
-				if (RangeDistance.Size() < 500 * (currentTime / 1))
+				if (RangeDistance.Size() < 800 * ((currentTime - 1) / 1))
 				{
 					Target->Damaged(1);
 					bRangeAttackHit = true;
 				}
 			}
 		}
-		else if (currentTime < 2)//Á¼È÷±â
+		else if (currentTime < 3)//Á¼È÷±â
 		{
-			DrawDebugSphere(GetWorld(), Me->GetActorLocation(), 500 - 500 * ((currentTime - 1) / 1), 100, FColor::Red, false, -1, 0, 2);
+			RangeAttackEffect->SetWorldScale3D(FVector(4-4 * ((currentTime - 2) / 1), 4-4 * ((currentTime - 2) / 1), 1));
 			if (!bRangeAttackHit)
 			{
-				if (RangeDistance.Size() < 500 - 500 * ((currentTime - 1) / 1))
+				if (RangeDistance.Size() < 800 - 800 * ((currentTime - 2) / 1))
 				{
 					Target->Damaged(1);
 					bRangeAttackHit = true;
 				}
 			}
 		}
-		else if (currentTime < 3) {
+		else if (currentTime < 4) {
+			RangeBallEffect->SetWorldScale3D(FVector(2-2 * ((currentTime-3)/1), 2-2 * ((currentTime - 3) / 1), 1-1*((currentTime - 3) / 1)));
+			//ÈÄµô1ÃÊ
+			RangeAttackEffect->DestroyComponent();
 
 		}
 		else
 		{
+			RangeBallEffect->DestroyComponent();
+			bRangeAttackEffect = false;
+			//RangeAttackEffect->FinishDestroy();
 			bRangeAttackAnimCheck = false;
 			UE_LOG(LogTemp, Log, TEXT("RangeEnd"));
 			mState = EEnemyState::Idle;
