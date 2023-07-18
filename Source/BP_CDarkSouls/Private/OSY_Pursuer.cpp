@@ -94,8 +94,9 @@ void AOSY_Pursuer::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedCompon
 		UE_LOG(LogTemp, Log, TEXT("Good"));
 		if (FSM->Target->PlayingAttack)
 		{
+			UE_LOG(LogTemp, Log, TEXT("Player->Hit"));
 			FSM->ReciveDamage(1);
-			FSM->Target->PlayerWeaponComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			FSM->Target->compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		}
 	}
 	else

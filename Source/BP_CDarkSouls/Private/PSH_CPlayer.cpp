@@ -101,8 +101,6 @@ APSH_CPlayer::APSH_CPlayer()
 	}
 	GetMesh()->SetCollisionProfileName("Player");
 	compSword->SetCollisionProfileName("PlayerWeapon");
-	
-
 	PlayingAttack = false;
 	compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	compShield->SetCollisionEnabled(ECollisionEnabled::NoCollision);
