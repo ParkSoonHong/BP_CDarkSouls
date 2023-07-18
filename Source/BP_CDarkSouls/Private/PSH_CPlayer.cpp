@@ -13,6 +13,9 @@
 #include "DSTargetComponent.h"
 #include "PlayerLockArmComponent.h"
 #include "PlayerAnim.h"
+#include "Kismet/GameplayStatics.h"
+#include "PKM_OLDDS.h"
+#include "OSY_Pursuer.h"
 
 // Sets default values
 APSH_CPlayer::APSH_CPlayer()
@@ -95,6 +98,7 @@ APSH_CPlayer::APSH_CPlayer()
 	{
 		GetMesh()->SetAnimInstanceClass(tempEnemy.Class);
 	}
+	GetMesh()->SetCollisionProfileName("Player");
 }
 
 // Called when the game starts or when spawned
@@ -280,6 +284,26 @@ void APSH_CPlayer::TickActor(float DeltaTime, enum ELevelTick TickType, FActorTi
 	}
 	GetCharacterMovement()->MaxWalkSpeed = FMath::Lerp(GetCharacterMovement()->MaxWalkSpeed, retunSpeed, 2 * DeltaTime);
 
+}
+
+void APSH_CPlayer::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	OverlapOldDs = Cast<APKM_OLDDS>(UGameplayStatics::GetActorOfClass(GetWorld(), APKM_OLDDS::StaticClass()));
+	if (OverlapOldDs != nullptr)
+	{
+		OverlapOldDs->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		UE_LOG(LogTemp, Warning, TEXT("Overlap"));
+		Damaged(1);
+		UE_LOG(LogTemp, Warning, TEXT("%d"), curHp);
+
+	}
+	tagetPursuer = Cast<AOSY_Pursuer>(UGameplayStatics::GetActorOfClass(GetWorld(), AOSY_Pursuer::StaticClass()));
+	if (tagetPursuer != nullptr)
+	{
+		tagetPursuer->compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		UE_LOG(LogTemp, Warning, TEXT("Overlap"));
+		Damaged(1);
+	}
 }
 
 //PKMWrite

@@ -139,6 +139,9 @@ public:
 	class UStaticMeshComponent* compSword;
 
 	//PKMWrite
+
+	UPROPERTY(EditAnywhere)
+	class AOSY_Pursuer * tagetPursuer;
 	UPROPERTY(EditAnywhere)
 	class APKM_OLDDS * OverlapOldDs;
 	UPROPERTY(VisibleAnywhere)
