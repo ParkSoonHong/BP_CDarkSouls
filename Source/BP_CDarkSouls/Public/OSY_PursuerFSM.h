@@ -15,7 +15,9 @@ enum class EEnmeyState :uint8
 	Attack UMETA(DisplayName = "Attack State"),
 	Rush UMETA(DisplayName = "Rush State"),
 	RushAttack UMETA(DisplayName = "RushAttack State"),
-	Attack1 UMETA(DisplayName = "Attack1 State"),
+	Attack1_1 UMETA(DisplayName = "Attack1_1 State"),
+	Attack1_2 UMETA(DisplayName = "Attack1_2 State"),
+	Attack1_3 UMETA(DisplayName = "Attack1_3 State"),
 	Attack2 UMETA(DisplayName = "Attack2 State"),
 	Damage UMETA(DisplayName = "Damage State"),
 	Die UMETA(DisplayName = "Die State")
@@ -74,7 +76,9 @@ public:	 // 상태 함수
 	void AttackState();
 	void RushState();
 	void RushAttackState();
-	void Attack1State();
+	void Attack1_1State();
+	void Attack1_2State();
+	void Attack1_3State();
 	void Attack2State();
 	void DamageState();
 	void DieState();
