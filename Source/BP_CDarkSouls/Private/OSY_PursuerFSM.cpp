@@ -68,6 +68,9 @@ void UOSY_PursuerFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 	case EEnmeyState::Walk:
 		WalkState();
 		break;
+	case EEnmeyState::Attack:
+		AttackState();
+		break;
 	case EEnmeyState::Rush:
 		RushState();
 		break;
@@ -91,51 +94,40 @@ void UOSY_PursuerFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 	}
 
 }
-
+// 아이들에 있다가 어택으로 넘어가
+// 어택에서 만약 러쉬스타트보다 크면 러쉬로 넘어가
+// 그렇지 않다면 어택을 실행해
 void UOSY_PursuerFSM::IdleState()
 {
 	FVector Direction = Target->GetActorLocation()-me->GetActorLocation();
 	float distance = Direction.Length();
 	Direction.Normalize();
+	currentTIme+=me->GetWorld()->DeltaTimeSeconds;
+	UE_LOG(LogTemp,Error,TEXT("NowIDLE"))
 
-	if (distance > RushStartDistance)
+	// 만약 2초가 흘렀다면
+	if (currentTIme > DelayTime)
 	{
-		mState = EEnmeyState::Walk;
-		anim->animState=mState;
+		// 만약 어택거리보다 크면 
+		if (distance > AttackStartDistance)
+		{
+		//워크 스테이트로 가
+			mState= EEnmeyState::Walk;
+		}
+		//그렇지 않고 백스텝보다 크면
+		else if (distance > BackstepStartDistance)
+		{
+		// 어택스테이트로 가
+			mState= EEnmeyState::Attack;
+		}
+		// 모두 아니면
+		else
+		{
+		// 백스텝 스테이트로 가
+			mState= EEnmeyState::Backstep;
+		}
 	}
-	// 그렇지 않고 어택거리보다 크면 러시로 가
-	else if (distance > AttackStartDistance)
-	{
-	// 러시상태로 넘어가고
-		
-		currentTIme = 0;
-		Rushspeed = 0;
-		mState = EEnmeyState::Rush;
-		anim->animState=mState;
-	}
-	// 그렇지 않고 백스텝거리보다 크면 어택으로 가
-	else if(distance > BackstepStartDistance)
-	{
-		int Random = FMath::RandRange(1,2);
-			if (Random == 1)
-			{
-				mState = EEnmeyState::Attack1;
-				anim->animState=mState;
-			}
-			else
-			{
-				mState = EEnmeyState::Attack2;
-				anim->animState = mState;
-			}
-	}
-	// 다 아니라면 백스텝으로 가
-	else
-	{
-		currentTIme = 0;
-		Backspeed = 0;
-		mState = EEnmeyState::Backstep;
-		anim->animState=mState;
-	}
+	
 }
 // 플레이어와의 거리가 백스텝 거리보다 작으면 백스텝을 실행하고 아이들상태로 돌아가
 void UOSY_PursuerFSM::WalkState()
@@ -143,67 +135,104 @@ void UOSY_PursuerFSM::WalkState()
 	FVector Direction = Target->GetActorLocation() - me->GetActorLocation();
 	float distance = Direction.Length();
 	Direction.Normalize();
+	UE_LOG(LogTemp, Error, TEXT("NowWalk"))
+	
+	// 여기로 오면 워크해
+	FVector P = me->GetActorLocation() + Direction * Walkspeed * GetWorld()->DeltaRealTimeSeconds;
+	me->SetActorLocation(P);
+	if (distance < AttackStartDistance)
+	{
+	currentTIme=0;
+	mState= EEnmeyState::Attack;
+	}
 
-	// 무브를 실행하고
-	// 만약 distance가 RushStartDistace보다 짧아지면 아이들로 돌아가
-		FVector P = me->GetActorLocation() + Direction * Walkspeed * GetWorld()->DeltaRealTimeSeconds;
-		me->SetActorLocation(P);
-
-		if (distance < RushStartDistance)
-		{
-		mState = EEnmeyState::Idle;
-		anim->animState = mState;
-
-		}
 	
 }
 
-void UOSY_PursuerFSM::RushState()
+void UOSY_PursuerFSM::AttackState()
 {
-	//UE_LOG(LogTemp, Error, TEXT("RUSH"))
 	FVector Direction = Target->GetActorLocation() - me->GetActorLocation();
 	float distance = Direction.Length();
 	Direction.Normalize();
 
-	// 러프하게 다가가
-	// 만약  distance가 AttackstartDistance보다 짧아지면 아이들로 돌아가
-
-		currentTIme += GetWorld()->DeltaTimeSeconds;
-		float FastTime = 0.1;
-		float SlowTime = 0.8;
-		float EndTime = 2;
-		// 만약 현재시간이 페스트타임보다 작거나 같다면
-		if (currentTIme <= FastTime)
+	UE_LOG(LogTemp, Error, TEXT("NowAttack"))
+	currentTIme+=me->GetWorld()->DeltaTimeSeconds;
+	if (currentTIme > RushDelayTime)
+	{
+		if (distance > RushStartDistance)
 		{
+			currentTIme=0;
+			mState= EEnmeyState::Rush;
+			anim->animState = mState;
+		}
+		// 그렇지 않으면 랜덤값을 찾아서 어택1을 할지 , 어택2로 갈지 결정하고 스테이트 바꿔
+		else
+		{
+			int percent= FMath::RandRange(1,5);
+			if (percent > 3)
+			{
+				// attack1로가
+				mState= EEnmeyState::Attack1;
+				anim->animState = mState;
+			}
+			else if (percent > 1)
+			{
+				// attack2로가
+				mState= EEnmeyState::Attack2;
+
+				anim->animState = mState;
+			}
+			else
+			{
+				// Idle로가
+				mState=EEnmeyState::Idle;
+				anim->animState = mState;
+				}
+		}
+	}
+}
+
+void UOSY_PursuerFSM::RushState()
+{
+	FVector Direction = Target->GetActorLocation() - me->GetActorLocation();
+	float distance = Direction.Length();
+	Direction.Normalize();
+	UE_LOG(LogTemp, Error, TEXT("NowRUSH"))
+	
+	currentTIme += GetWorld()->DeltaTimeSeconds;
+	float FastTime = 0.1;
+	float SlowTime = 0.8;
+	float EndTime = 2;
+	// 만약 현재시간이 페스트타임보다 작거나 같다면
+	if (currentTIme <= FastTime)
+	{
 			// 러시스피드를 살짝 느리게 한다
 			Rushspeed = 2500 * sqrt(currentTIme / FastTime);
 			FVector P = me->GetActorLocation() + Direction * Rushspeed * GetWorld()->DeltaRealTimeSeconds;
 			me->SetActorLocation(P);
-		}
+	}
 		// 그렇지 않으면서 현재 시간이 슬로우타임보다 작다면 정속도로 움직인다.
-		else if (currentTIme < SlowTime)
-		{
+	else if (currentTIme < SlowTime)
+	{
 			Rushspeed = 2500;
 			FVector P = me->GetActorLocation() + Direction * Rushspeed * GetWorld()->DeltaRealTimeSeconds;
 			me->SetActorLocation(P);
-		}
+	}
 		// 그것도 아니고 엔드타임보다 작다면 다시 느리게 움직인다.
-		else
-		{
+	else
+	{
 			Rushspeed = 2500 * (1 - FMath::Pow(((currentTIme / SlowTime) - (currentTIme / SlowTime)), 2));
 			FVector P = me->GetActorLocation() + Direction * Rushspeed * GetWorld()->DeltaRealTimeSeconds;
 			me->SetActorLocation(P);
-		}
-
-	if (distance < AttackStartDistance)
-	{
-		currentTIme = 0;
-		anim->animState = mState;
-		mState = EEnmeyState::RushAttack;
-		
-		anim->bRushAttackPlay= true; 
 	}
+	if (distance < RushAttackDistance&& currentTIme>RushDelayTime)
+	{
+		mState = EEnmeyState::RushAttack;
+		anim->bRushAttackPlay = true;
+		anim->animState = mState;
 
+	}
+		
 }
 
 void UOSY_PursuerFSM::RushAttackState()
@@ -213,26 +242,19 @@ void UOSY_PursuerFSM::RushAttackState()
 	float distance = Direction.Length();
 	Direction.Normalize();
 
-
-	anim->animState = mState;
-
+	UE_LOG(LogTemp, Error, TEXT("NowRUSHATTACK"))
+	// 러시어택을 플레이한다.
+	
+	// 러시어택이 끝나면 대기로 돌아간다.
+	// 노티파이가 찍히면 스테이트를 바꿔라
 	if (anim->bRushAttackPlay == false)
 	{
 	UE_LOG(LogTemp, Error, TEXT("Succes"))
+		
 		mState = EEnmeyState::Idle;
 		anim->animState = mState;
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("NoFix"))
-	}
-	//mState = EEnmeyState::Idle;
-	////UE_LOG(LogTemp, Error, TEXT("RushAttack"))
-
-	// 러쉬 어택을 실행해
-	// 만약 노티파이로 러시어택엔드가 찍혔다면 아이들로 돌아가
-
 	
+	}
 	
 	
 }
@@ -245,7 +267,7 @@ void UOSY_PursuerFSM::Attack1State()
 	Direction.Normalize();
 	anim->animState = mState;
 	
-	
+	UE_LOG(LogTemp, Error, TEXT("NowAttack_1"))
 	//어택11은 무조건 재생하고, 랜덤한 확률로 2를 재생하고, 또 랜덤한 확률로 3을 재생한다.
 	// 필요속성, 2를 재생할 확률, 3을 재생할 확률
 	int Attack12 = FMath::RandRange(1,5);
@@ -277,7 +299,7 @@ void UOSY_PursuerFSM::Attack1State()
 
 void UOSY_PursuerFSM::Attack2State()
 {
-	//UE_LOG(LogTemp, Error, TEXT("Attack2"))
+	UE_LOG(LogTemp, Error, TEXT("NowAttack_2"))
 	FVector Direction = Target->GetActorLocation() - me->GetActorLocation();
 	float distance = Direction.Length();
 	Direction.Normalize();
@@ -338,99 +360,6 @@ void UOSY_PursuerFSM::DieState()
 	GetOwner()->Destroy();
 }
 
-
-void UOSY_PursuerFSM::LowerAndRaiseWeapon()
-{
-	
-	currentTIme += GetWorld()->DeltaTimeSeconds;
-	if (currentTIme<1)
-	{
-		FVector P0=me->GetActorLocation();
-		if (!bAttackdirOk)
-		{
-			Attackdir = me->GetActorRightVector();
-			Attackdir.Z=0;
-			bAttackdirOk=true;
-
-		}
-		Attackdir.Normalize();
-		FVector vt=Attackdir*100*GetWorld()->DeltaTimeSeconds;
-		FVector P=P0+vt;
-		me->SetActorLocation(P);
-	}
-	// 2초동안 내렸다가
-	else if (currentTIme < 2)
-	{ // 1초동안은 내려가세요							y	z		x
-		me->compSword->SetRelativeRotation(FRotator(0, 90-20*((currentTIme-1)/1), -90 * ((currentTIme-1) / 1)));
-	}
-	else if (currentTIme < 3)
-	{ // 2~3초 동안 까지 올라가세요					y	z		x
-		me->compSword->SetRelativeRotation(FRotator(0, 70+20*((currentTIme-2)/1), -90 + (90 * ((currentTIme - 2) / 1))));
-		// 1초동안 위로 올려
-	}
-	else
-	{
-		mState = EEnmeyState::Idle;
-	}
-	
-}
-
-void UOSY_PursuerFSM::LowerAndRaiseWeapon2()
-{
-	currentTIme += GetWorld()->DeltaTimeSeconds;
-	if (currentTIme < 1)
-	{
-		FVector P0 = me->GetActorLocation();
-		if (!bAttackdirOk)
-		{
-			Attackdir = me->GetActorRightVector() * -1;
-			Attackdir.Z = 0;
-			bAttackdirOk = true;
-
-		}
-		Attackdir.Normalize();
-		FVector vt = Attackdir * 100 * GetWorld()->DeltaTimeSeconds;
-		FVector P = P0 + vt;
-		me->SetActorLocation(P);
-	}
-	// 2초동안 내렸다가
-	else if (currentTIme < 2)
-	{ // 1초동안은 내려가세요							y	z		x
-		me->compSword->SetRelativeRotation(FRotator(0, 90 - 20 * ((currentTIme - 1) / 1), -90 * ((currentTIme - 1) / 1)));
-	}
-	else if (currentTIme < 3)
-	{ // 2~3초 동안 까지 올라가세요					y	z		x
-		me->compSword->SetRelativeRotation(FRotator(0, 70 + 20 * ((currentTIme - 2) / 1), -90 + (90 * ((currentTIme - 2) / 1))));
-		// 1초동안 위로 올려
-	}
-	else
-	{
-		mState = EEnmeyState::Idle;
-	}
-}
-
-void UOSY_PursuerFSM::LowerAndRaiseWeapon3()
-{
-	currentTIme += GetWorld()->DeltaTimeSeconds;
-	if (currentTIme < 1)
-	{
-		
-	}
-	// 2초동안 내렸다가
-	else if (currentTIme < 2)
-	{ // 1초동안은 내려가세요							y	z		x
-		me->compSword->SetRelativeRotation(FRotator(0, 90 - 20 * ((currentTIme - 1) / 1), -90 * ((currentTIme - 1) / 1)));
-	}
-	else if (currentTIme < 3)
-	{ // 2~3초 동안 까지 올라가세요					y	z		x
-		me->compSword->SetRelativeRotation(FRotator(0, 70 + 20 * ((currentTIme - 2) / 1), -90 + (90 * ((currentTIme - 2) / 1))));
-		// 1초동안 위로 올려
-	}
-	else
-	{
-		mState = EEnmeyState::Idle;
-	}
-}
 
 //-------------------------피격----------------------//
 void UOSY_PursuerFSM::ReciveDamage(float value)
