@@ -77,8 +77,14 @@ void UOSY_PursuerFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 	case EEnmeyState::RushAttack:
 		RushAttackState();
 		break;
-	case EEnmeyState::Attack1:
-		Attack1State();
+	case EEnmeyState::Attack1_1:
+		Attack1_1State();
+		break;
+	case EEnmeyState::Attack1_2:
+		Attack1_2State();
+		break;
+	case EEnmeyState::Attack1_3:
+		Attack1_3State();
 		break;
 	case EEnmeyState::Attack2:
 		Attack2State();
@@ -112,19 +118,23 @@ void UOSY_PursuerFSM::IdleState()
 		if (distance > AttackStartDistance)
 		{
 		//워크 스테이트로 가
+			currentTIme=0;
 			mState= EEnmeyState::Walk;
 		}
 		//그렇지 않고 백스텝보다 크면
 		else if (distance > BackstepStartDistance)
 		{
 		// 어택스테이트로 가
+			currentTIme = 0;
 			mState= EEnmeyState::Attack;
 		}
 		// 모두 아니면
 		else
 		{
 		// 백스텝 스테이트로 가
+			currentTIme=0;
 			mState= EEnmeyState::Backstep;
+			anim->animState = mState;
 		}
 	}
 	
@@ -168,18 +178,19 @@ void UOSY_PursuerFSM::AttackState()
 		// 그렇지 않으면 랜덤값을 찾아서 어택1을 할지 , 어택2로 갈지 결정하고 스테이트 바꿔
 		else
 		{
-			int percent= FMath::RandRange(1,5);
-			if (percent > 3)
+			int percent= FMath::RandRange(1,3);
+			if (percent > 2)
 			{
 				// attack1로가
-				mState= EEnmeyState::Attack1;
+				anim->bAttack1_1Play= true;
+				mState= EEnmeyState::Attack1_1;
 				anim->animState = mState;
 			}
 			else if (percent > 1)
 			{
 				// attack2로가
+				anim->bAttack2Play=true;
 				mState= EEnmeyState::Attack2;
-
 				anim->animState = mState;
 			}
 			else
@@ -187,7 +198,7 @@ void UOSY_PursuerFSM::AttackState()
 				// Idle로가
 				mState=EEnmeyState::Idle;
 				anim->animState = mState;
-				}
+			}
 		}
 	}
 }
@@ -259,7 +270,7 @@ void UOSY_PursuerFSM::RushAttackState()
 	
 }
 
-void UOSY_PursuerFSM::Attack1State()
+void UOSY_PursuerFSM::Attack1_1State()
 {
 	//UE_LOG(LogTemp, Error, TEXT("Attack1-1"))
 	FVector Direction = Target->GetActorLocation() - me->GetActorLocation();
@@ -267,34 +278,71 @@ void UOSY_PursuerFSM::Attack1State()
 	Direction.Normalize();
 	anim->animState = mState;
 	
-	UE_LOG(LogTemp, Error, TEXT("NowAttack_1"))
-	//어택11은 무조건 재생하고, 랜덤한 확률로 2를 재생하고, 또 랜덤한 확률로 3을 재생한다.
-	// 필요속성, 2를 재생할 확률, 3을 재생할 확률
-	int Attack12 = FMath::RandRange(1,5);
-	int Attack13 = FMath::RandRange(1,5);
-
-	if(Attack12>2)
+	UE_LOG(LogTemp, Error, TEXT("NowAttack1_1"))
+	// Attack1_2로 갈 확률
+	if (anim->bAttack1_1Play == false)
 	{
-		//UE_LOG(LogTemp, Error, TEXT("Attack1-2"))
-		
-		if (Attack13 > 2)
+		int Attack1_2Random=FMath::RandRange(1,2);
+		if (Attack1_2Random > 1)
 		{
-			//UE_LOG(LogTemp, Error, TEXT("Attack1-3"))
-			
+			UE_LOG(LogTemp, Error, TEXT("?????"))
+			anim->bAttack1_2Play= true;
+			mState=EEnmeyState::Attack1_2;
+			anim->animState= mState;
 		}
 		else
 		{
+			anim->animState= mState;
+			mState=EEnmeyState::Idle;
 			
-		
-			mState= EEnmeyState::Idle;
 		}
-			
-			mState= EEnmeyState::Idle;
+	}
+	
+
+
+}
+
+void UOSY_PursuerFSM::Attack1_2State()
+{
+	FVector Direction = Target->GetActorLocation() - me->GetActorLocation();
+	float distance = Direction.Length();
+	Direction.Normalize();
+	anim->animState = mState;
+	UE_LOG(LogTemp, Error, TEXT("NowAttack1_2"))
+
+	int Attack1_3Random = FMath::RandRange(1, 2);
+	if (anim->bAttack1_2Play == false)
+	{
+		if (Attack1_3Random > 1)
+		{
+			anim->bAttack1_3Play = true;
+			mState = EEnmeyState::Attack1_3;
+			anim->animState = mState;
+		}
+		else
+		{
+			mState = EEnmeyState::Idle;
+			anim->animState = mState;
+			anim->bAttack1_1Play=true;
+			anim->bAttack1_2Play = true;
+		}
 	}
 
+}
 
-	mState= EEnmeyState::Idle;
+void UOSY_PursuerFSM::Attack1_3State()
+{
+	FVector Direction = Target->GetActorLocation() - me->GetActorLocation();
+	float distance = Direction.Length();
+	Direction.Normalize();
+	anim->animState = mState;
+	UE_LOG(LogTemp, Error, TEXT("NowAttack1_3"))
 
+	if (anim->bAttack1_3Play == false)
+	{
+		mState = EEnmeyState::Idle;
+		anim->animState = mState;
+	}
 }
 
 void UOSY_PursuerFSM::Attack2State()
@@ -304,16 +352,20 @@ void UOSY_PursuerFSM::Attack2State()
 	float distance = Direction.Length();
 	Direction.Normalize();
 
-	mState = EEnmeyState::Idle;
+	if (anim->bAttack2Play == false)
+	{
+
+		mState = EEnmeyState::Idle;
+		anim->animState = mState;
+	}
 }
 
 void UOSY_PursuerFSM::BackstepState()
 {
-	//UE_LOG(LogTemp, Error, TEXT("BACKSTEP"))
+	UE_LOG(LogTemp, Error, TEXT("NowBACKSTEP"))
 	FVector Direction = Target->GetActorLocation() - me->GetActorLocation();
 	float distance = Direction.Length();
 	Direction.Normalize();
-
 	// 타겟방향으로 회전하기
 	// forward vector가 direction이 되고 싶다
 	Direction.Z = 0;
@@ -322,6 +374,10 @@ void UOSY_PursuerFSM::BackstepState()
 	// Enemy forward 벡터가 direction 방향으로 일치시키고 싶다.
 	me->SetActorRotation(forward.Rotation());
 
+
+
+	anim->animState = mState;
+	
 	currentTIme +=GetWorld()->DeltaRealTimeSeconds;
 	float FastTime = 0.1f;
 	float SlowTime = 0.8f;
@@ -329,24 +385,24 @@ void UOSY_PursuerFSM::BackstepState()
 	// 만약 현재시간이 패스트타임보다 작거나같으면,
 	if (currentTIme <= FastTime)
 	{
-	Backspeed = 500* sqrt(currentTIme/FastTime);
-	FVector P = me->GetActorLocation()+Direction*-1* Backspeed *GetWorld()->DeltaRealTimeSeconds;
-	me->SetActorLocation(P);
+		Backspeed = 500* sqrt(currentTIme/FastTime);
+		FVector P = me->GetActorLocation()+Direction*-1* Backspeed *GetWorld()->DeltaRealTimeSeconds;
+		me->SetActorLocation(P);
 	}
 	else if (currentTIme < SlowTime)
 	{
-	Backspeed = 500;
-	FVector P = me->GetActorLocation() + Direction * -1 * Backspeed * GetWorld()->DeltaRealTimeSeconds;
-	me->SetActorLocation(P);
+		Backspeed = 500;
+		FVector P = me->GetActorLocation() + Direction * -1 * Backspeed * GetWorld()->DeltaRealTimeSeconds;
+		me->SetActorLocation(P);
 	}
 	else if (currentTIme < EndTime)
 	{
-	Backspeed = 500*(1-FMath::Pow(((currentTIme-SlowTime)/EndTime-SlowTime),2));
+		Backspeed = 500*(1-FMath::Pow(((currentTIme-SlowTime)/EndTime-SlowTime),2));
 	}
 	else
 	{
-	mState = EEnmeyState::Idle;
-	anim->animState = mState;
+		mState = EEnmeyState::Idle;
+		anim->animState = mState;
 	}
 }
 
