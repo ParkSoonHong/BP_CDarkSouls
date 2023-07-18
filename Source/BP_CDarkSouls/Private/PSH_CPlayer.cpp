@@ -16,6 +16,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "PKM_OLDDS.h"
 #include "OSY_Pursuer.h"
+#include "Components/CapsuleComponent.h"
 
 // Sets default values
 APSH_CPlayer::APSH_CPlayer()
@@ -109,8 +110,8 @@ void APSH_CPlayer::BeginPlay()
 	GetCharacterMovement()->MaxWalkSpeed = walkSpeed;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	curStamina = maxStamina;
-
 	anim = Cast<UPlayerAnim>(GetMesh()->GetAnimInstance());
+	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &APSH_CPlayer::OnComponentBeginOverlap);
 }
 
 // Called every frame
