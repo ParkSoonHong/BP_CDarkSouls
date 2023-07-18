@@ -20,7 +20,33 @@ APSH_CPlayer::APSH_CPlayer()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	ConstructorHelpers::FObjectFinder<USkeletalMesh>tempMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/ParkSoonHong/Animation/Falling_To_Roll.Falling_To_Roll'"));
+	compShield = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Shield"));
+	compShieldHendle = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ShieldHendle"));
+	compSword = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Sword"));
+	compShield->SetupAttachment(GetMesh(),TEXT("S_Shield"));
+	compShieldHendle->SetupAttachment(compShield);
+	compSword->SetupAttachment(GetMesh(),TEXT("S_Sword"));
+
+	ConstructorHelpers::FObjectFinder<UStaticMesh> tempShield(TEXT("/Script/Engine.StaticMesh'/Game/ParkSoonHong/Asset/Shield/shild_mesh0.shild_mesh0'"));
+	if (tempShield.Succeeded())
+	{
+		compShield->SetStaticMesh(tempShield.Object);
+	}
+
+	ConstructorHelpers::FObjectFinder<UStaticMesh> tempShieldHendle(TEXT("/Script/Engine.StaticMesh'/Game/ParkSoonHong/Asset/Shield/shild_mesh1.shild_mesh1'"));
+
+	if (tempShieldHendle.Succeeded())
+	{
+		compShieldHendle->SetStaticMesh(tempShieldHendle.Object);
+	}
+	
+	ConstructorHelpers::FObjectFinder<UStaticMesh> tempSword(TEXT("/Script/Engine.StaticMesh'/Game/ParkSoonHong/Asset/Sword/sowrd.sowrd'"));
+	if (tempShield.Succeeded())
+	{
+		compSword->SetStaticMesh(tempSword.Object);
+	}
+
+	ConstructorHelpers::FObjectFinder<USkeletalMesh>tempMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/Fallen_Knight/Mesh/SK_Fallen_Knight.SK_Fallen_Knight'"));
 
 	if (tempMesh.Succeeded())
 	{
@@ -134,6 +160,10 @@ void APSH_CPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	// Action inputs
 	PlayerInputComponent->BindAction("TagetLook", IE_Pressed, CameraLockArm, &UPlayerLockArmComponent::ToggleCameraLock);
 	PlayerInputComponent->BindAction("TagetLook", IE_Pressed, CameraLockArm, &UPlayerLockArmComponent::ToggleSoftLock);
+
+	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &APSH_CPlayer::Attack);
+	PlayerInputComponent->BindAction("HardAttack", IE_Pressed, this, &APSH_CPlayer::HardAttack);
+	PlayerInputComponent->BindAction("Parry", IE_Pressed, this, &APSH_CPlayer::Parry);
 }
 
 
@@ -258,10 +288,23 @@ void APSH_CPlayer::Attack()
 {
 	if (PlayingAttack == false)
 	{
-		PlayerWeaponComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		PKMCurrentTime = 0;
-		PlayingAttack = true;
+		anim->PlayAttackAnimation();
 	}
+}
+
+void APSH_CPlayer::HardAttack()
+{
+	anim->PlayHardAttackAnimation();
+}
+
+void APSH_CPlayer::Parry()
+{
+	anim->PlayParryAnimation();
+}
+
+void APSH_CPlayer::Shild()
+{
+	anim->PlayShildAnimation();
 }
 
 void APSH_CPlayer::Damaged(float value)
@@ -280,9 +323,9 @@ void APSH_CPlayer::Damaged(float value)
 void APSH_CPlayer::PressedSpacebar()
 {
 	isTimeOn = true;
-	if (isPressedForwardMovekey || isPressedRightMovekey)
+	if (isPressedForwardMovekey || isPressedRightMovekey) //입력이 있을때
 	{
-		if (curTime >= runTime)
+		if (curTime >= runTime) 
 		{
 			retunSpeed = runSpeed;  // 달리기로 바꾸기
 			isRun = true;
@@ -298,13 +341,17 @@ void APSH_CPlayer::PressedSpacebar()
 
 void APSH_CPlayer::ReleasedSpacebar()
 {
-	if (isPressedForwardMovekey || isPressedRightMovekey)
-	{
-	Roll();
+	if (isPressedForwardMovekey || isPressedRightMovekey) // 입력이 있을때
+	{	
+		if (curTime < runTime)
+		{
+			Roll();
+		}
 	}
-
+	curTime = 0;
 	isRun = false;
 	isRest = true;
+	isTimeOn = false;
 	retunSpeed = walkSpeed;
 }
 
@@ -314,6 +361,7 @@ void APSH_CPlayer::steminaOring()
 	retunSpeed = walkSpeed;
 	isRun = false;
 	isRest = true;
+	isTimeOn = false;
 }
 
 void APSH_CPlayer::restTime()

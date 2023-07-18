@@ -33,7 +33,22 @@ public:
 	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
 	class UAnimMontage* AttackMontage;
 
+	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
+	class UAnimMontage* HardAttackMontage;
+
+	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
+	class UAnimMontage* parryMontage;
+
+	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
+	class UAnimMontage* ShildMontage;
+
 	void PlayRollAnimation();
 	void PlayBackStepAnimation();
 	void PlayAttackAnimation();
+	void PlayHardAttackAnimation();
+	void PlayShildAnimation();
+	void PlayParryAnimation();
+
+public:
+	UPlayerAnim();
 };

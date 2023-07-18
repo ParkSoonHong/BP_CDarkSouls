@@ -4,6 +4,46 @@
 #include "PlayerAnim.h"
 #include "PSH_CPlayer.h"
 
+UPlayerAnim::UPlayerAnim()
+{
+	ConstructorHelpers::FObjectFinder<UAnimMontage>tempRoll(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/Ani/MT_PSH_Roll.MT_PSH_Roll_C'"));
+	if (tempRoll.Succeeded())
+	{
+		RollMontage = tempRoll.Object;
+	}
+
+	ConstructorHelpers::FObjectFinder<UAnimMontage>tempBackStep(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/Ani/MT_PSH_BackStep.MT_PSH_BackStep_C'"));
+	if (tempBackStep.Succeeded())
+	{
+		BackStepMontage = tempBackStep.Object;
+	}
+
+	ConstructorHelpers::FObjectFinder<UAnimMontage>tempAttack(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/Ani/MT_PSH_Attck.MT_PSH_Attck_C'"));
+	if (tempAttack.Succeeded())
+	{
+		AttackMontage = tempAttack.Object;
+	}
+
+	ConstructorHelpers::FObjectFinder<UAnimMontage>tempShild(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/Ani/MT_PSH_Shild.MT_PSH_Shild_C'"));
+	if (tempShild.Succeeded())
+	{
+		ShildMontage = tempShild.Object;
+	}
+
+	ConstructorHelpers::FObjectFinder<UAnimMontage>tempHardAttack(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/Ani/MT_PSH_HArdAttack.MT_PSH_HArdAttack_C'"));
+	if (tempHardAttack.Succeeded())
+	{
+		HardAttackMontage = tempHardAttack.Object;
+	}
+
+	ConstructorHelpers::FObjectFinder<UAnimMontage>tempParry(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/Ani/MT_PSH_Parry.MT_PSH_Parry_C'"));
+	if (tempParry.Succeeded())
+	{
+		parryMontage = tempParry.Object;
+	}
+
+
+}
 void UPlayerAnim::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
@@ -44,5 +84,22 @@ void UPlayerAnim::PlayBackStepAnimation()
 
 void UPlayerAnim::PlayAttackAnimation()
 {
-	Montage_Play(AttackMontage);
+	Montage_Play(AttackMontage); // 변경필요
 }
+
+void UPlayerAnim::PlayHardAttackAnimation()
+{
+	Montage_Play(HardAttackMontage);
+}
+
+void UPlayerAnim::PlayShildAnimation()
+{
+	Montage_Play(ShildMontage);
+}
+
+void UPlayerAnim::PlayParryAnimation()
+{
+	Montage_Play(parryMontage);
+}
+
+

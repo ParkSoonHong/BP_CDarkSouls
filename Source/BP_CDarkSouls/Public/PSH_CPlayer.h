@@ -120,6 +120,32 @@ public:
 	bool isPressedForwardMovekey = false;
 	bool isPressedRightMovekey = false;
 
+	
+public:
+	/** Returns CameraBoom subobject **/
+	UFUNCTION(BlueprintCallable, Category = "Lock On Camera")
+	FORCEINLINE class UPlayerLockArmComponent* GetCameraBoom() const { return CameraLockArm; }
+	/** Returns FollowCamera subobject **/
+	UFUNCTION(BlueprintCallable, Category = "Lock On Camera")
+	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	UPROPERTY(EditAnywhere)
+	class UStaticMeshComponent* compShield;
+
+	UPROPERTY(EditAnywhere)
+	class UStaticMeshComponent* compShieldHendle;
+
+	UPROPERTY(EditAnywhere)
+	class UStaticMeshComponent* compSword;
+
+	//PKMWrite
+	UPROPERTY(EditAnywhere)
+	class APKM_OLDDS * OverlapOldDs;
+	UPROPERTY(VisibleAnywhere)
+	class UStaticMeshComponent* PlayerWeaponComp;
+	UPROPERTY(EditAnywhere)
+	class UPlayerAnim * anim;
+
 	/** Called for forwards/backward input */
 	void MoveForward(float Value);
 	/** Called for side to side input */
@@ -146,29 +172,25 @@ public:
 
 	void BackStep();
 
+	void Attack();
+
+	void HardAttack();
+
+	void Parry();
+
+	void Shild();
+
+
+
 	/* Tick every frame */
 	virtual void TickActor(float DeltaTime, enum ELevelTick TickType, FActorTickFunction& ThisTickFunction) override;
-	
-public:
-	/** Returns CameraBoom subobject **/
-	UFUNCTION(BlueprintCallable, Category = "Lock On Camera")
-	FORCEINLINE class UPlayerLockArmComponent* GetCameraBoom() const { return CameraLockArm; }
-	/** Returns FollowCamera subobject **/
-	UFUNCTION(BlueprintCallable, Category = "Lock On Camera")
-	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-
-	//PKMWrite
-	UPROPERTY(EditAnywhere)
-	class APKM_OLDDS * OverlapOldDs;
-	UPROPERTY(VisibleAnywhere)
-	class UStaticMeshComponent* PlayerWeaponComp;
-
-	UPROPERTY(EditAnywhere)
-	class UPlayerAnim * anim;
 
 	UFUNCTION()
-	void Attack();
+	void OnComponentBeginOverlap (UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+public:
 	float PKMCurrentTime;
+
 	bool PlayingAttack=false;
 		UPROPERTY(EditAnywhere)
 	int32 maxHp = 10;

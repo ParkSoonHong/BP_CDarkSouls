@@ -6,6 +6,7 @@
 #include <Kismet/GameplayStatics.h>
 #include "PKM_OLDDS.h"
 #include "Components/CapsuleComponent.h"
+#include <Particles/ParticleSystemComponent.h>
 // Sets default values for this component's properties
 UPKM_OLDDSFSM::UPKM_OLDDSFSM()
 {
@@ -71,9 +72,6 @@ void UPKM_OLDDSFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	case  EEnemyState::StingAttack:
 		StingAttackState();
 		break;
-	case  EEnemyState::SweepAttack:
-		SweepAttackState();
-		break;
 	case  EEnemyState::SwingAttack:
 		SwingAttackState();
 		break;
@@ -106,6 +104,7 @@ void UPKM_OLDDSFSM::IdleState()
 		direction = Target->GetActorLocation() - Me->GetActorLocation();
 		distance = direction.Size();
 	}
+
 	if (distance < BackRange) {
 		if (FVector::DotProduct(direction, Me->GetActorForwardVector()) >= 0) {
 			UE_LOG(LogTemp, Log, TEXT("Go BackStep"));
@@ -118,25 +117,12 @@ void UPKM_OLDDSFSM::IdleState()
 
 			UE_LOG(LogTemp, Log, TEXT("memset Time=%f"), currentTime);
 		}
-		else {
-			if (!bSweepGoCheck)
-			{
-				SweepRand = FMath::RandRange(1, 10);
-				bSweepGoCheck = true;
-			}
-			if (SweepRand > 0)
-			{
-				currentTime = 0;
-				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-				mState = EEnemyState::SweepAttack;
-			}
-			else
-			{	//방향돌리기
+		else 
+		{	//방향돌리기
 				FVector Forward = Me->GetActorForwardVector();
 				Forward = FMath::Lerp<FVector, float>(Forward, direction, 0.1 * GetWorld()->DeltaTimeSeconds);
 				GetOwner()->SetActorRotation(Forward.Rotation());
 				UE_LOG(LogTemp, Log, TEXT("Turn.."));
-			}
 		}
 	}
 	else if (distance < attackRange)
@@ -180,24 +166,10 @@ void UPKM_OLDDSFSM::RunState()
 			UE_LOG(LogTemp, Log, TEXT("memset Time=%f"), currentTime);
 		}
 		else {
-			if (!bSweepGoCheck)
-			{
-				SweepRand = FMath::RandRange(1, 10);
-				bSweepGoCheck = true;
-			}
-			if (SweepRand > 0)
-			{
-				currentTime = 0;
-				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-				mState = EEnemyState::SweepAttack;
-			}
-			else
-			{	//방향돌리기
 				FVector Forward = Me->GetActorForwardVector();
 				Forward = FMath::Lerp<FVector, float>(Forward, direction, 0.1 * GetWorld()->DeltaTimeSeconds);
 				GetOwner()->SetActorRotation(Forward.Rotation());
 				UE_LOG(LogTemp, Log, TEXT("Turn.."));
-			}
 		}
 	}
 	else if (distance < attackRange)
@@ -221,7 +193,6 @@ void UPKM_OLDDSFSM::RunState()
 		UE_LOG(LogTemp, Log, TEXT("switchIdle"));
 		bRunAnimCheck = false;
 		mState = EEnemyState::Idle;
-		bSweepGoCheck = false;
 	}
 
 }
@@ -247,29 +218,16 @@ void UPKM_OLDDSFSM::MoveState()
 			//방향 완전히 돌려라
 			GetOwner()->SetActorRotation(direction.Rotation());
 			//--------------------------------------------------------------------------------------------
+			bWalkAnimCheck = false;
 			mState = EEnemyState::BackStep;
 
 			UE_LOG(LogTemp, Log, TEXT("memset Time=%f"), currentTime);
 		}
 		else {
-			if (!bSweepGoCheck)
-			{
-				SweepRand = FMath::RandRange(1, 10);
-				bSweepGoCheck = true;
-			}
-			if (SweepRand > 0)
-			{
-				currentTime = 0;
-				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-				mState = EEnemyState::SweepAttack;
-			}
-			else
-			{	//방향돌리기
 				FVector Forward = Me->GetActorForwardVector();
 				Forward = FMath::Lerp<FVector, float>(Forward, direction, 0.1 * GetWorld()->DeltaTimeSeconds);
 				GetOwner()->SetActorRotation(Forward.Rotation());
 				UE_LOG(LogTemp, Log, TEXT("Turn.."));
-			}
 		}
 	}
 	else if (distance < attackRange)
@@ -297,7 +255,6 @@ void UPKM_OLDDSFSM::MoveState()
 		UE_LOG(LogTemp, Log, TEXT("switchIdle"));
 		bWalkAnimCheck = false;
 		mState = EEnemyState::Idle;
-		bSweepGoCheck = false;
 	}
 	/*else {
 		direction.Normalize();
@@ -332,15 +289,22 @@ void UPKM_OLDDSFSM::AttackState()
 	else
 	{
 		//공격시작
-		int32 RandAttack = FMath::RandRange(1, 4);
-		RandAttack = 8;
+		/*
+		1 스윙
+		2 스팅
+		3 투핸드스팅
+		4 레이즈업
+		5 테이크다운
+		6 러쉬
+		7 래인지어택
+		*/
+		int32 RandAttack = FMath::RandRange(1, 7);
+		RandAttack = 6;
 		if (RandAttack == 1)
 		{
 			currentTime = 0;
-			bRushdirCheck = false;
 			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-			mState = EEnemyState::RushAttack;
-
+			mState = EEnemyState::SwingAttack;
 		}
 		else if (RandAttack==2)
 		{
@@ -349,39 +313,39 @@ void UPKM_OLDDSFSM::AttackState()
 			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 			mState = EEnemyState::StingAttack;
 		}
-		else if(RandAttack==3)
+		else if (RandAttack == 3)
 		{
 			currentTime = 0;
+			bStingdirCheck = false;
 			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-			mState = EEnemyState::SwingAttack;
+			mState = EEnemyState::StingTwoAttack;
 		}
 		else if (RandAttack == 4)
 		{
 			currentTime = 0;
-			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			bRangeAttackHit = false;
-			mState = EEnemyState::RangeAttack;
+			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			mState = EEnemyState::RaiseAttack;
 		}
 		else if (RandAttack == 5)
 		{
 			currentTime = 0;
-			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			bRangeAttackHit = false;
-			mState = EEnemyState::StingTwoAttack;
+			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			mState = EEnemyState::TakeDownAttack;
 		}
 		else if (RandAttack == 6)
 		{
 			currentTime = 0;
-			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			bRangeAttackHit = false;
-			mState = EEnemyState::RaiseAttack;
+			bRushdirCheck = false;
+			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			mState = EEnemyState::RushAttack;
+
 		}
 		else if (RandAttack == 7)
 		{
 			currentTime = 0;
 			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			bRangeAttackHit = false;
-			mState = EEnemyState::TakeDownAttack;
+			mState = EEnemyState::RangeAttack;
 		}
 		else {
 			currentTime = 0;
@@ -474,41 +438,48 @@ void UPKM_OLDDSFSM::BackStepState()
 		FVector P = P0 + vt;
 		Me->SetActorLocation(P);
 	}
-	else if (currentTime < 2) {
-
-	}
 	else
 	{
 		UE_LOG(LogTemp, Log, TEXT("BackSEnd"));
 		bBackStepAnimCheck = false;
 		mState = EEnemyState::Idle;
-		bSweepGoCheck = false;
 	}
 }
 void UPKM_OLDDSFSM::RushAttackState()
 {
 	currentTime += GetWorld()->DeltaTimeSeconds;
-	float FastTime = 0.2;
-	float SlowTime = 0.4;
-	float EndTime = 0.5;
+	float RushDelay = 0.3;
+	float FastTime = 0.5;
+	float SlowTime = 0.7;
+	float EndTime = 0.8;
 	FVector P0 = Me->GetActorLocation();
 	if (!bRushdirCheck) {
 		direction = Target->GetActorLocation() - P0;
 		direction.Normalize();
 		bRushdirCheck = true;
 		Me->HitComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		FVector MyLoc = Me->GetActorLocation();
+		FVector RushELoc = MyLoc;
+		RushELoc.Z = RushELoc.Z + 60;
+		RushAttackEffect = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), RushAttackFactory, RushELoc);
+		RushAttackEffect->SetWorldScale3D(FVector(0,0,0));
 	}
 	//FVector Forward = Me->GetActorForwardVector();
 	//Forward = FMath::Lerp<FVector, float>(Forward, direction, 5 * GetWorld()->DeltaTimeSeconds);
 	//GetOwner()->SetActorRotation(Forward.Rotation());
-	if (currentTime <= FastTime)// 0~0.1
+	if (currentTime<=RushDelay)
 	{
 		bRushAnimCheck = true;
+		RushAttackEffect->SetWorldScale3D(FVector(3*(currentTime/0.3),3* (currentTime / 0.3),3* (currentTime / 0.3)));
+	}
+	else if (currentTime <= FastTime)// 0~0.1
+	{
 		BackStepSpeed = 2000 * sqrt(currentTime / FastTime);
 		//UE_LOG(LogTemp, Log, TEXT("Time=%f BSS1%f"),currentTime,BackStepSpeed);
 		FVector vt = direction * BackStepSpeed * GetWorld()->DeltaTimeSeconds;
 		FVector P = P0 + vt;
 		Me->SetActorLocation(P);
+		RushAttackEffect->SetWorldLocation(FVector(P.X,P.Y,P.Z+60));
 	}
 	else if (currentTime < SlowTime)// 0.1~0.8
 	{
@@ -516,6 +487,7 @@ void UPKM_OLDDSFSM::RushAttackState()
 		FVector vt = direction * BackStepSpeed * GetWorld()->DeltaTimeSeconds;
 		FVector P = P0 + vt;
 		Me->SetActorLocation(P);
+		RushAttackEffect->SetWorldLocation(FVector(P.X, P.Y, P.Z + 60));
 	}
 	else if (currentTime < EndTime)// 0.8<= CT<1.0
 	{	//				1000 * (1-x2)
@@ -524,18 +496,18 @@ void UPKM_OLDDSFSM::RushAttackState()
 		FVector vt = direction * BackStepSpeed * GetWorld()->DeltaTimeSeconds;
 		FVector P = P0 + vt;
 		Me->SetActorLocation(P);
+		RushAttackEffect->SetWorldLocation(FVector(P.X, P.Y, P.Z + 60));
 	}
-	else if (currentTime < 2) {
-
+	else if (currentTime < 3) {
+		bRushAnimCheck = false;
+		RushAttackEffect->SetWorldScale3D(FVector(3-3*(currentTime-0.8)/2.2,3-3*(currentTime - 0.8) / 2.2,3-3* (currentTime - 0.8) / 2.2));
 	}
 	else
 	{
-		bRushAnimCheck = false;
 		UE_LOG(LogTemp, Log, TEXT("RushEnd"));
 		Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		Me->HitComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		mState = EEnemyState::Idle;
-		bSweepGoCheck = false;
 	}
 }
 
@@ -547,12 +519,16 @@ void UPKM_OLDDSFSM::StingAttackState()
 		bStingAttackAnimCheck = true;
 		UE_LOG(LogTemp, Log, TEXT("StingStart"));
 		direction = Target->GetActorLocation() - P0;
-		StingSpeed = 1000;
+		StingSpeed = 500;
 		direction.Normalize();
 		bStingdirCheck = true;
+		Me->SetActorRotation(direction.Rotation()*(currentTime/0.1));
 	}
 	else if (currentTime < 0.1)
 	{
+		direction = Target->GetActorLocation() - P0;
+		direction.Normalize();
+		Me->SetActorRotation(direction.Rotation());
 		//UE_LOG(LogTemp, Log, TEXT("Time=%f BSS1%f"),currentTime,BackStepSpeed);
 		FVector vt = direction * (StingSpeed*currentTime/0.1) * GetWorld()->DeltaTimeSeconds;
 		FVector P = P0 + vt;
@@ -570,13 +546,80 @@ void UPKM_OLDDSFSM::StingAttackState()
 
 	}
 	else
-	{
-		bStingAttackAnimCheck = false;
-		UE_LOG(LogTemp, Log, TEXT("StingEnd"));
-		bStingdirCheck = false;
-		Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		mState = EEnemyState::Idle;
-		bSweepGoCheck = false;
+	{	
+		if (ComboCount < 1)
+		{
+			int32 RandCombo = FMath::RandRange(1, 7);
+			if (RandCombo == 1)
+			{
+				ComboCount++;
+				bStingAttackAnimCheck = false;
+				bStingdirCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				//스윙으로가
+				currentTime = 0;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				mState = EEnemyState::SwingAttack;
+			}
+			else if (RandCombo == 2)
+			{
+				ComboCount = 0;
+				bStingAttackAnimCheck = false;
+				bStingdirCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				mState = EEnemyState::Idle;
+			}
+			else if (RandCombo == 3)
+			{
+				ComboCount++;
+				bStingAttackAnimCheck = false;
+				bStingdirCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				//투핸드가
+				currentTime = 0;
+				bStingdirCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				mState = EEnemyState::StingTwoAttack;
+			}
+			else if (RandCombo == 4)
+			{
+				ComboCount++;
+				bStingAttackAnimCheck = false;
+				bStingdirCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				//raiseup으로가
+				currentTime = 0;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				mState = EEnemyState::RaiseAttack;
+			}
+			else if (RandCombo == 5)
+			{
+				ComboCount++;
+				bStingAttackAnimCheck = false;
+				bStingdirCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				//테이크다운으로가
+				currentTime = 0;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				mState = EEnemyState::TakeDownAttack;
+			}
+			else
+			{
+				ComboCount = 0;
+				bStingAttackAnimCheck = false;
+				bStingdirCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				mState = EEnemyState::Idle;
+			}
+		}
+		else
+		{
+			ComboCount = 0;
+			bStingAttackAnimCheck = false;
+			bStingdirCheck = false;
+			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			mState = EEnemyState::Idle;
+		}
 	}
 }
 
@@ -589,16 +632,21 @@ void UPKM_OLDDSFSM::StingTwoAttackState()
 		bStingTwoAttackAnimCheck = true;
 		UE_LOG(LogTemp, Log, TEXT("StingStart"));
 		direction = Target->GetActorLocation() - P0;
+		Me->SetActorRotation(direction.Rotation());
 		StingSpeed = 1000;
 		direction.Normalize();
 		bStingdirCheck = true;
 	}
 	else if (currentTime < 0.1)
 	{
+		direction = Target->GetActorLocation() - P0;
+		direction.Normalize();
 		//UE_LOG(LogTemp, Log, TEXT("Time=%f BSS1%f"),currentTime,BackStepSpeed);
 		FVector vt = direction * (StingSpeed * currentTime / 0.1) * GetWorld()->DeltaTimeSeconds;
 		FVector P = P0 + vt;
 		Me->SetActorLocation(P);
+
+		Me->SetActorRotation(direction.Rotation()*(currentTime/0.1));
 	}
 	else if (currentTime < 0.5)
 	{
@@ -607,54 +655,86 @@ void UPKM_OLDDSFSM::StingTwoAttackState()
 		FVector P = P0 + vt;
 		Me->SetActorLocation(P);
 	}
-	else if (currentTime < 1.5)//후딜레이 0.5초
+	else if (currentTime < 1.4)//후딜레이 0.5초
 	{
 
 	}
 	else
 	{
-		bStingTwoAttackAnimCheck = false;
-		UE_LOG(LogTemp, Log, TEXT("StingEnd"));
-		bStingdirCheck = false;
-		Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		mState = EEnemyState::Idle;
-		bSweepGoCheck = false;
-	}
-}
-
-void UPKM_OLDDSFSM::SweepAttackState()
-{
-	if (!SweepLocCheck)
-	{
-		SweepStartLoc = Me->GetActorLocation();
-		SweepLocCheck = true;
-		
-	}
-	currentTime += GetWorld()->DeltaTimeSeconds;
-	if (currentTime < 0.3)
-	{
-		bSweepAttackAnimCheck = true;
-	}
-	if (currentTime < 0.5)
-	{
-		//Me->spearComp->SetRelativeRotation(FRotator(0, 120+(240* (currentTime-0.3) / 0.2f), 0));
-	}
-	else if (currentTime < 1.5)//후딜레이 0.5초
-	{
-
-	}
-	else
-	{
-		bSweepAttackAnimCheck = false;
-		//Me->spearComp->SetRelativeRotation(FRotator(0, 0, 0));
-		FVector P = SweepStartLoc+319*Me->GetActorForwardVector();
-		Me->SetActorLocation(P);
-		UE_LOG(LogTemp, Log, TEXT("SWeepEnd"));
-		bStingdirCheck = false;
-		Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		mState = EEnemyState::Idle;
-		bSweepGoCheck = false;
-		SweepLocCheck = false;
+		if (ComboCount<1)
+		{
+			int32 RandCombo = FMath::RandRange(1,7);
+			if (RandCombo==1)
+			{
+				ComboCount++;
+				bStingTwoAttackAnimCheck = false;
+				bStingdirCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				//스윙으로가
+				currentTime = 0;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				mState = EEnemyState::SwingAttack;
+			}
+			else if (RandCombo==2)
+			{
+				ComboCount++;
+				bStingTwoAttackAnimCheck = false;
+				bStingdirCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				//스팅1으로가
+				currentTime = 0;
+				bStingdirCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				mState = EEnemyState::StingAttack;
+			}
+			else if (RandCombo == 3)
+			{
+				ComboCount = 0;
+				bStingTwoAttackAnimCheck = false;
+				bStingdirCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				mState = EEnemyState::Idle;
+			}
+			else if (RandCombo==4)
+			{
+				ComboCount++;
+				bStingTwoAttackAnimCheck = false;
+				bStingdirCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				//raiseup으로가
+				currentTime = 0;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				mState = EEnemyState::RaiseAttack;
+			}
+			else if (RandCombo == 5)
+			{
+				ComboCount++;
+				bStingTwoAttackAnimCheck = false;
+				bStingdirCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				//테이크다운으로가
+				currentTime = 0;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				mState = EEnemyState::TakeDownAttack;
+			}
+			else
+			{
+				ComboCount = 0;
+				bStingTwoAttackAnimCheck = false;
+				bStingdirCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				mState = EEnemyState::Idle;
+			}
+		}
+		else
+		{
+			ComboCount = 0;
+			bStingTwoAttackAnimCheck = false;
+			UE_LOG(LogTemp, Log, TEXT("StingEnd"));
+			bStingdirCheck = false;
+			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			mState = EEnemyState::Idle;
+		}
 	}
 }
 
@@ -664,6 +744,8 @@ void UPKM_OLDDSFSM::SwingAttackState()
 	if (currentTime < 0.4)//들어올리기
 	{	
 		bSwingAttackAnimCheck = true;
+		direction = Target->GetActorLocation() - Me->GetActorLocation();
+		Me->SetActorRotation(direction.Rotation() * (currentTime / 0.4));
 		//Me->spearComp->SetRelativeRotation(FRotator(0, 150 * currentTime / 0.4f, -20 * currentTime / 0.4f));
 	}
 	else if (currentTime < 0.5)//휘두르기
@@ -682,18 +764,87 @@ void UPKM_OLDDSFSM::SwingAttackState()
 	{
 		//Me->spearComp->SetRelativeRotation(FRotator(0, -150 + (300 * (currentTime - 1.1) / 0.1f), -20 + (50 * (currentTime - 1.1) / 0.1f)));
 	}
-	else if (currentTime < 2) {
+	else if (currentTime < 1.06) {
 
 	}
 	else
 	{
-		bSwingAttackAnimCheck = false;
-		//Me->spearComp->SetRelativeRotation(FRotator(0, 0, 0));
-		UE_LOG(LogTemp, Log, TEXT("SWingEnd"));
-		bStingdirCheck = false;
-		Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		mState = EEnemyState::Idle;
-		bSweepGoCheck = false;
+
+		if (ComboCount < 1)
+		{
+			int32 RandCombo = FMath::RandRange(1, 7);
+			if (RandCombo == 1)
+			{
+				ComboCount = 0;
+				bSwingAttackAnimCheck = false;
+				bStingdirCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				mState = EEnemyState::Idle;
+				//스윙으로가
+			}
+			else if (RandCombo == 2)
+			{
+				ComboCount++;
+				bSwingAttackAnimCheck = false;
+				bStingdirCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				//스팅1으로가
+				currentTime = 0;
+				bStingdirCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				mState = EEnemyState::StingAttack;
+			}
+			else if (RandCombo == 3)
+			{
+				ComboCount++;
+				bSwingAttackAnimCheck = false;
+				bStingdirCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				//투핸드어택가
+				currentTime = 0;
+				bStingdirCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				mState = EEnemyState::StingTwoAttack;
+			}
+			else if (RandCombo == 4)
+			{
+				ComboCount++;
+				bSwingAttackAnimCheck = false;
+				bStingdirCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				//raiseup으로가
+				currentTime = 0;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				mState = EEnemyState::RaiseAttack;
+			}
+			else if (RandCombo == 5)
+			{
+				ComboCount++;
+				bSwingAttackAnimCheck = false;
+				bStingdirCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				//테이크다운으로가
+				currentTime = 0;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				mState = EEnemyState::TakeDownAttack;
+			}
+			else
+			{
+				ComboCount = 0;
+				bSwingAttackAnimCheck = false;
+				bStingdirCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				mState = EEnemyState::Idle;
+			}
+		}
+		else
+		{
+			ComboCount = 0;
+			bSwingAttackAnimCheck = false;
+			bStingdirCheck = false;
+			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			mState = EEnemyState::Idle;
+		}
 	}
 }
 
@@ -703,36 +854,64 @@ void UPKM_OLDDSFSM::RangeAttackState()
 	if (Target!=nullptr)
 	{
 		FVector RangeDistance = Me->GetActorLocation() - Target->GetActorLocation();
-		if (currentTime < 1)//벌리기
+		if (currentTime<1)
+		{
+			//이펙트 생성 
+			if (!bRangeAttackEffect)
+			{
+				FVector MyLoc = Me->GetActorLocation();
+				FVector StormLoc = MyLoc;
+				StormLoc.Z = StormLoc.Z - 90;
+				FVector BallLoc = MyLoc;
+				BallLoc.Z = BallLoc.Z + 50;
+				RangeAttackEffect=UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), RangeAttackFactory,StormLoc);
+				RangeBallEffect = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), RangeAttackBallFactory,BallLoc);
+				bRangeAttackEffect = true;
+			}
+			RangeAttackEffect->SetWorldScale3D(FVector(0.3*currentTime, 0.3*currentTime, 1));
+			RangeBallEffect->SetWorldScale3D(FVector(2*currentTime, 2*currentTime, 1));
+		}
+		else if (currentTime < 2)//벌리기
 		{
 			bRangeAttackAnimCheck = true;
-			DrawDebugSphere(GetWorld(), Me->GetActorLocation(), 500 * (currentTime / 1), 100, FColor::Red, false, -1, 0, 2);
+			RangeAttackEffect->SetWorldScale3D(FVector(4* ((currentTime - 1) / 1), 4* ((currentTime - 1) / 1), 1));
+			FVector BallP0 = RangeBallEffect->GetComponentLocation();
+			FVector Balldis = Me->GetActorForwardVector();
+			FVector Ballvt=180*Balldis*GetWorld()->DeltaRealTimeSeconds;
+			FVector BallP=BallP0+Ballvt;
+			RangeBallEffect->SetWorldLocation(BallP);
 			if (!bRangeAttackHit)
 			{
-				if (RangeDistance.Size() < 500 * (currentTime / 1))
+				if (RangeDistance.Size() < 800 * ((currentTime - 1) / 1))
 				{
 					Target->Damaged(1);
 					bRangeAttackHit = true;
 				}
 			}
 		}
-		else if (currentTime < 2)//좁히기
+		else if (currentTime < 3)//좁히기
 		{
-			DrawDebugSphere(GetWorld(), Me->GetActorLocation(), 500 - 500 * ((currentTime - 1) / 1), 100, FColor::Red, false, -1, 0, 2);
+			RangeAttackEffect->SetWorldScale3D(FVector(4-4 * ((currentTime - 2) / 1), 4-4 * ((currentTime - 2) / 1), 1));
 			if (!bRangeAttackHit)
 			{
-				if (RangeDistance.Size() < 500 - 500 * ((currentTime - 1) / 1))
+				if (RangeDistance.Size() < 800 - 800 * ((currentTime - 2) / 1))
 				{
 					Target->Damaged(1);
 					bRangeAttackHit = true;
 				}
 			}
 		}
-		else if (currentTime < 3) {
+		else if (currentTime < 4) {
+			RangeBallEffect->SetWorldScale3D(FVector(2-2 * ((currentTime-3)/1), 2-2 * ((currentTime - 3) / 1), 1-1*((currentTime - 3) / 1)));
+			//후딜1초
+			RangeAttackEffect->DestroyComponent();
 
 		}
 		else
 		{
+			RangeBallEffect->DestroyComponent();
+			bRangeAttackEffect = false;
+			//RangeAttackEffect->FinishDestroy();
 			bRangeAttackAnimCheck = false;
 			UE_LOG(LogTemp, Log, TEXT("RangeEnd"));
 			mState = EEnemyState::Idle;
@@ -746,6 +925,8 @@ void UPKM_OLDDSFSM::RaiseAttackState()
 	if (currentTime < 0.4)//들어올리기
 	{
 		bRaiseAttackAnimCheck = true;
+		direction = Target->GetActorLocation() - Me->GetActorLocation();
+		Me->SetActorRotation(direction.Rotation()*(currentTime/0.4));
 		//Me->spearComp->SetRelativeRotation(FRotator(0, 150 * currentTime / 0.4f, -20 * currentTime / 0.4f));
 	}
 	else if (currentTime < 0.5)//휘두르기
@@ -756,65 +937,162 @@ void UPKM_OLDDSFSM::RaiseAttackState()
 	{
 
 	}
-	else if (currentTime < 1.1)
+	else if (currentTime < 1)
 	{
 		//Me->spearComp->SetRelativeRotation(FRotator(0, -150, 30-(50*(currentTime-0.7)/0.2f)));
 	}
-	else if (currentTime < 1.2)
-	{
-		//Me->spearComp->SetRelativeRotation(FRotator(0, -150 + (300 * (currentTime - 1.1) / 0.1f), -20 + (50 * (currentTime - 1.1) / 0.1f)));
-	}
-	else if (currentTime < 2) {
-
-	}
 	else
 	{
-		bRaiseAttackAnimCheck = false;
-		//Me->spearComp->SetRelativeRotation(FRotator(0, 0, 0));
-		UE_LOG(LogTemp, Log, TEXT("SWingEnd"));
-		bStingdirCheck = false;
-		Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		mState = EEnemyState::Idle;
-		bSweepGoCheck = false;
+		if (ComboCount < 1)
+		{
+			int32 RandCombo = FMath::RandRange(1, 7);
+			if (RandCombo == 1)
+			{
+				ComboCount++;
+				bRaiseAttackAnimCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				//스윙으로가
+				currentTime = 0;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				mState = EEnemyState::SwingAttack;
+			}
+			else if (RandCombo == 2)
+			{
+				ComboCount++;
+				bRaiseAttackAnimCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				//스팅1으로가
+				currentTime = 0;
+				bStingdirCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				mState = EEnemyState::StingAttack;
+			}
+			else if (RandCombo == 3)
+			{
+				ComboCount++;
+				bRaiseAttackAnimCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				//스팅2으로가
+				currentTime = 0;
+				bStingdirCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				mState = EEnemyState::StingTwoAttack;
+			}
+			else if (RandCombo == 4)
+			{
+				ComboCount = 0;
+				bRaiseAttackAnimCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				mState = EEnemyState::Idle;
+			}
+			else if (RandCombo == 5)
+			{
+				ComboCount++;
+				bRaiseAttackAnimCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				//테이크다운으로가
+				currentTime = 0;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				mState = EEnemyState::TakeDownAttack;
+			}
+			else
+			{
+				ComboCount = 0;
+				bRaiseAttackAnimCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				mState = EEnemyState::Idle;
+			}
+		}
+		else
+		{
+			ComboCount = 0;
+			bRaiseAttackAnimCheck = false;
+			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			mState = EEnemyState::Idle;
+		}
 	}
 }
 
 void UPKM_OLDDSFSM::TakeDownAttackState()
 {
 	currentTime += GetWorld()->DeltaTimeSeconds;
-	if (currentTime < 0.4)//들어올리기
+	if (currentTime < 0.8)//들어올리기
 	{
 		bTakeDownAttackAnimCheck = true;
+		direction = Target->GetActorLocation() - Me->GetActorLocation();
+		Me->SetActorRotation(direction.Rotation()*(currentTime/0.4));
 		//Me->spearComp->SetRelativeRotation(FRotator(0, 150 * currentTime / 0.4f, -20 * currentTime / 0.4f));
-	}
-	else if (currentTime < 0.5)//휘두르기
-	{
-		//Me->spearComp->SetRelativeRotation(FRotator(0, 150 -(300* (currentTime-0.4) / 0.1f), -20 +(50* (currentTime - 0.4) / 0.1f)));
-	}
-	else if (currentTime < 0.7)//후딜레이 0.2초
-	{
-
-	}
-	else if (currentTime < 1.1)
-	{
-		//Me->spearComp->SetRelativeRotation(FRotator(0, -150, 30-(50*(currentTime-0.7)/0.2f)));
-	}
-	else if (currentTime < 1.2)
-	{
-		//Me->spearComp->SetRelativeRotation(FRotator(0, -150 + (300 * (currentTime - 1.1) / 0.1f), -20 + (50 * (currentTime - 1.1) / 0.1f)));
-	}
-	else if (currentTime < 2) {
-
 	}
 	else
 	{
-		bTakeDownAttackAnimCheck = false;
-		//Me->spearComp->SetRelativeRotation(FRotator(0, 0, 0));
-		UE_LOG(LogTemp, Log, TEXT("SWingEnd"));
-		bStingdirCheck = false;
-		Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		mState = EEnemyState::Idle;
-		bSweepGoCheck = false;
+		if (ComboCount < 1)
+		{
+			int32 RandCombo = FMath::RandRange(1, 7);
+			if (RandCombo == 1)
+			{
+				ComboCount++;
+				bTakeDownAttackAnimCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				//스윙으로가
+				currentTime = 0;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				mState = EEnemyState::SwingAttack;
+			}
+			else if (RandCombo == 2)
+			{
+				ComboCount++;
+				bTakeDownAttackAnimCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				//스팅1으로가
+				currentTime = 0;
+				bStingdirCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				mState = EEnemyState::StingAttack;
+			}
+			else if (RandCombo == 3)
+			{
+				ComboCount++;
+				bTakeDownAttackAnimCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				//스팅2으로가
+				currentTime = 0;
+				bStingdirCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				mState = EEnemyState::StingTwoAttack;
+			}
+			else if (RandCombo == 4)
+			{
+				ComboCount++;
+				bTakeDownAttackAnimCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				//raise으로가
+				currentTime = 0;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				mState = EEnemyState::RaiseAttack;
+			
+			}
+			else if (RandCombo == 5)
+			{
+				ComboCount = 0;
+				bTakeDownAttackAnimCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				mState = EEnemyState::Idle;
+			}
+			else
+			{
+				ComboCount = 0;
+				bTakeDownAttackAnimCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				mState = EEnemyState::Idle;
+			}
+		}
+		else
+		{
+			ComboCount = 0;
+			bTakeDownAttackAnimCheck = false;
+			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			mState = EEnemyState::Idle;
+		}
 	}
 }
 
@@ -858,7 +1136,6 @@ void UPKM_OLDDSFSM::TestAttackState()
 				//UE_LOG(LogTemp, Log, TEXT("dis%f"),) ;
 			Me->SetActorLocation(P);
 			mState = EEnemyState::Idle;
-			bSweepGoCheck = false;
 		}
 	}
 }
