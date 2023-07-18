@@ -100,9 +100,13 @@ APSH_CPlayer::APSH_CPlayer()
 		GetMesh()->SetAnimInstanceClass(tempEnemy.Class);
 	}
 	GetMesh()->SetCollisionProfileName("Player");
+	compSword->SetCollisionProfileName("PlayerWeapon");
+	
 
 	PlayingAttack = false;
 	compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	compShield->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	compShieldHendle->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 // Called when the game starts or when spawned
@@ -154,7 +158,7 @@ void APSH_CPlayer::Tick(float DeltaTime)
 		compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		PlayingAttack = false;
 		anim->hardAttackEnd =false;
-		UE_LOG(LogTemp, Warning, TEXT("AttackEnd"));
+		
 	}
 }
 
@@ -328,15 +332,15 @@ void APSH_CPlayer::Attack()
 		PlayingAttack = true;
 		compSword->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	}
+
+//	curTime += GetWorld()->del
 }
 
 void APSH_CPlayer::HardAttack()
 {
 	anim->PlayHardAttackAnimation();
 	PlayingAttack = true;
-	compSword->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	UE_LOG(LogTemp, Warning, TEXT("AttackEnd"));
-	
+	compSword->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);	
 	//애니메이션 재생끝나면 노티파이로 compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision); PlayingAttack=false;
 }
 

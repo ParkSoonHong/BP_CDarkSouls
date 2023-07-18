@@ -75,12 +75,13 @@ void UPlayerAnim::NativeUpdateAnimation(float DeltaSeconds)
 void UPlayerAnim::AnimNotify_Attack1()
 {
 	Attack1 = true;
+	UE_LOG(LogTemp, Warning, TEXT("LastAttack"));
 }
 
 void UPlayerAnim::AnimNotify_endHardAttack()
 {
 	hardAttackEnd = true;
-	UE_LOG(LogTemp,Warning,TEXT("LastAttack"));
+	
 }
 
 void UPlayerAnim::PlayRollAnimation()
