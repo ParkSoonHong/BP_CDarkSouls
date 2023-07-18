@@ -100,6 +100,9 @@ APSH_CPlayer::APSH_CPlayer()
 		GetMesh()->SetAnimInstanceClass(tempEnemy.Class);
 	}
 	GetMesh()->SetCollisionProfileName("Player");
+
+	PlayingAttack = false;
+	compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 // Called when the game starts or when spawned
@@ -314,12 +317,17 @@ void APSH_CPlayer::Attack()
 	if (PlayingAttack == false)
 	{
 		anim->PlayAttackAnimation();
+		PlayingAttack = true;
+		compSword->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	}
 }
 
 void APSH_CPlayer::HardAttack()
 {
 	anim->PlayHardAttackAnimation();
+	PlayingAttack = true;
+	compSword->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	//애니메이션 재생끝나면 노티파이로 compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision); PlayingAttack=false;
 }
 
 void APSH_CPlayer::Parry()

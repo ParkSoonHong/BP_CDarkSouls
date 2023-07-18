@@ -299,7 +299,6 @@ void UPKM_OLDDSFSM::AttackState()
 		7 래인지어택
 		*/
 		int32 RandAttack = FMath::RandRange(1, 7);
-		RandAttack = 6;
 		if (RandAttack == 1)
 		{
 			currentTime = 0;
@@ -500,13 +499,13 @@ void UPKM_OLDDSFSM::RushAttackState()
 	}
 	else if (currentTime < 3) {
 		bRushAnimCheck = false;
+		Me->HitComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		RushAttackEffect->SetWorldScale3D(FVector(3-3*(currentTime-0.8)/2.2,3-3*(currentTime - 0.8) / 2.2,3-3* (currentTime - 0.8) / 2.2));
 	}
 	else
 	{
 		UE_LOG(LogTemp, Log, TEXT("RushEnd"));
 		Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		Me->HitComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		mState = EEnemyState::Idle;
 	}
 }
