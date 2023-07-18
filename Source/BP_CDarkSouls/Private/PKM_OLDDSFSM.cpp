@@ -299,7 +299,6 @@ void UPKM_OLDDSFSM::AttackState()
 		7 래인지어택
 		*/
 		int32 RandAttack = FMath::RandRange(1, 7);
-		RandAttack = 2;
 		if (RandAttack == 1)
 		{
 			currentTime = 0;
@@ -553,7 +552,7 @@ void UPKM_OLDDSFSM::StingAttackState()
 		if (ComboCount < 1)
 		{
 			int32 RandCombo = FMath::RandRange(1, 7);
-			RandCombo = 2;
+	
 			if (RandCombo == 1)
 			{
 				ComboCount++;
