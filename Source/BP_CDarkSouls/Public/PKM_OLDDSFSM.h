@@ -19,7 +19,6 @@ enum class EEnemyState : uint8
 	RushAttack,
 	StingAttack,
 	StingTwoAttack,
-	SweepAttack,
 	SwingAttack,
 	RangeAttack,
 	RaiseAttack,
@@ -54,7 +53,6 @@ public:
 	void RushAttackState();
 	void StingAttackState();
 	void StingTwoAttackState();
-	void SweepAttackState();
 	void SwingAttackState();
 	void RangeAttackState();
 	void RaiseAttackState();
@@ -93,7 +91,6 @@ public:
 	bool bDebugRange=false;
 	bool bStingdirCheck = false;
 	bool bRushdirCheck=false;
-	bool bSweepGoCheck = false;
 	bool bRangeAttackHit = false;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
 	bool bBackStepAnimCheck = false;
@@ -112,8 +109,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
 	bool bSwingAttackAnimCheck = false;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
-	bool bSweepAttackAnimCheck = false;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
 	bool bRaiseAttackAnimCheck = false;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
 	bool bTakeDownAttackAnimCheck = false;
@@ -121,10 +116,30 @@ public:
 	bool bTestAttackAnimCheck = false;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "FSM")
 	bool bTestAttackAnimPlayingEnd = false;
-	int32 SweepRand;
+
 	float MovingSpeed=0;
-	bool SweepLocCheck = false;
-	FVector SweepStartLoc;
+	int32 ComboCount = 0;
 	//연속공격 변수
 	int32 SequenceAttack = 0;
+
+	bool bRangeAttackEffect=false;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystem *RushAttackFactory;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystemComponent *RushAttackEffect;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystem *RangeAttackBallFactory;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystemComponent *RangeBallEffect;
+   
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystem *RangeAttackFactory;
+   
+   UPROPERTY(EditDefaultsOnly,Category="Effect")
+   class UParticleSystemComponent *RangeAttackEffect;
+
 };

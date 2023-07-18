@@ -14,13 +14,16 @@ UCLASS()
 class BP_CDARKSOULS_API UOSY_AnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
+		
 public:
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="FSM")
 	EEnmeyState animState;
-	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite,Category="FSM")
-	bool bAttackPlay= false;
 
-	UFUNCTION(BlueprintImplementableEvent,Category="FSMEvent")
-	void PlayRushAttackAnim(FName sectionName); 
+	//RushAttack할지말지 여부
+	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite,Category="FSM")
+	bool bRushAttackPlay =false;
+	//러쉬 어택이 끝나는 이벤트 함수
+	UFUNCTION(BlueprintCallable,Category="FSMEVENT")
+	void OnRushAttackEndAnim();
 
 };
