@@ -42,6 +42,16 @@ public:
 	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
 	class UAnimMontage* ShildMontage;
 
+	UPROPERTY(EditAnywhere)
+	bool Attack1 = false;
+	UPROPERTY(EditAnywhere)
+	bool hardAttackEnd = false;
+
+	UFUNCTION()
+	void AnimNotify_Attack1();
+	UFUNCTION()
+	void AnimNotify_endHardAttack();
+
 	void PlayRollAnimation();
 	void PlayBackStepAnimation();
 	void PlayAttackAnimation();

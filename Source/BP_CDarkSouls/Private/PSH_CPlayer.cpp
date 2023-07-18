@@ -148,6 +148,14 @@ void APSH_CPlayer::Tick(float DeltaTime)
 	{
 		curTime += DeltaTime;
 	}
+
+	if (anim->hardAttackEnd)
+	{
+		compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		PlayingAttack = false;
+		anim->hardAttackEnd =false;
+		UE_LOG(LogTemp, Warning, TEXT("AttackEnd"));
+	}
 }
 
 // Called to bind functionality to input
@@ -327,6 +335,8 @@ void APSH_CPlayer::HardAttack()
 	anim->PlayHardAttackAnimation();
 	PlayingAttack = true;
 	compSword->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	UE_LOG(LogTemp, Warning, TEXT("AttackEnd"));
+	
 	//애니메이션 재생끝나면 노티파이로 compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision); PlayingAttack=false;
 }
 
