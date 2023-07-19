@@ -108,6 +108,24 @@ public: //乔拜 加己
 public:	//局聪包访
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	class UOSY_AnimInstance*anim;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystem *DieFactory;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystemComponent *DieEffect;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystem *DieEndStartFactory;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystemComponent *DieEndStartEffect;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystem *DieEndFactory;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystemComponent *DieEndEffect;
 	
 
 	

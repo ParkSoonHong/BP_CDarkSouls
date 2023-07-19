@@ -52,6 +52,9 @@ public:
 	// Attack1_2가 끝나는 이벤트 함수
 	UFUNCTION(BlueprintCallable,Category="FSMEVENT")
 	void OnAttack2EndAnim();
+	//----------------------------------------
+	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite,Category="FSM")
+	bool bDiePlay = false;
 
 
 };

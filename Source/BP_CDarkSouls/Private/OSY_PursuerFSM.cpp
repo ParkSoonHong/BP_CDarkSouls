@@ -9,6 +9,8 @@
 #include "../BP_CDarkSouls.h"
 #include "Chaos/Vector.h"
 #include "OSY_AnimInstance.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Components/CapsuleComponent.h"
 
 // Sets default values for this component's properties
 UOSY_PursuerFSM::UOSY_PursuerFSM()
@@ -424,21 +426,62 @@ void UOSY_PursuerFSM::DamageState()
 
 void UOSY_PursuerFSM::DieState()
 {
-	GetOwner()->Destroy();
+	currentTIme += GetWorld()->DeltaRealTimeSeconds;
+	if (currentTIme > 1)
+	{
+		if (DieEndEffect == nullptr)
+		{
+			FVector DEELoc = me->GetActorLocation();
+			DEELoc.Z -= 200;
+			DieEndEffect = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DieEndFactory, DEELoc);
+			DieEndEffect->SetWorldScale3D(FVector(2, 2, 2));
+		}
+	}
+	if (currentTIme > 6)
+	{
+
+		DieEndStartEffect = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DieEndStartFactory, me->GetActorLocation());
+		DieEndStartEffect->SetWorldScale3D(FVector(10, 10, 0.1));
+		//DieEndEffect->DestroyComponent();
+		//DieEndEffect->EndPlay(EEndPlayReason::Destroyed);
+		me->Destroy();
+	}
 }
 
 
 //-------------------------ÇÇ°Ý----------------------//
 void UOSY_PursuerFSM::ReciveDamage(float value)
 {
+// 	if (PURSUERHP - value > 0)
+// 	{
+// 		PURSUERHP -= value;
+// 		//UE_LOG(LogTemp, Log, TEXT("PURSUER PURSUERHP=%d"), PURSUERHP);
+// 	}
+// 	else
+// 	{
+// 		PURSUERHP = 0;
+// 		mState = EEnmeyState::Die;
+// 	}
+
 	if (PURSUERHP - value > 0)
 	{
 		PURSUERHP -= value;
-		//UE_LOG(LogTemp, Log, TEXT("OLDDS PURSUERHP=%d"), PURSUERHP);
+		UE_LOG(LogTemp, Log, TEXT("PURSUER PURSUERHP=%d"), PURSUERHP);
 	}
 	else
 	{
 		PURSUERHP = 0;
+		anim->bAttack1_1Play = false;
+		anim->bAttack1_2Play = false;
+		anim->bAttack1_3Play = false;
+		anim->bAttack2Play = false;
+		anim->bRushAttackPlay = false;
+		anim->bDiePlay = true;
+		DieEffect = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DieFactory, me->GetActorLocation());
+		//me->HitComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		
+		currentTIme = 0;
+		UE_LOG(LogTemp, Log, TEXT("go die"));
 		mState = EEnmeyState::Die;
 	}
 }
