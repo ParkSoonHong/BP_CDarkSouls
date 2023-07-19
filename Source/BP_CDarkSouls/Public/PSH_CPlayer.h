@@ -94,11 +94,11 @@ public:
 	UPROPERTY(EditAnywhere,Category = "Setings")
 	bool isRun=false;
 
-	UPROPERTY(EditAnywhere,Category = "status")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly,Category = "status")
 	float maxStamina = 100;
 
-	UPROPERTY(EditAnywhere,Category = "status")
-	float curStamina = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly,Category = "status")
+	float curStamina = 100;
 
 	UPROPERTY(EditAnywhere,Category = "status")
 	bool isRest = false;	// 스테미나 회복시간
@@ -205,9 +205,9 @@ public:
 	float PKMCurrentTime;
 		UPROPERTY(EditAnywhere)
 	bool PlayingAttack=false;
-		UPROPERTY(EditAnywhere)
-	int32 maxHp = 10;
-	UPROPERTY(EditAnywhere)
-	int32  curHp = 10;
+	UPROPERTY(EditAnywhere,BlueprintReadOnly)
+	float maxHp = 10;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float  curHp = 10;
 	void Damaged(float value);
 };
