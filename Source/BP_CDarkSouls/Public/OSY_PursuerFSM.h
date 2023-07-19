@@ -101,7 +101,9 @@ public: //乔拜 加己
 	UFUNCTION()
 	void ReciveDamage(float value);
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
-	int32 HP=10;
+	int32 PURSUERHP=10;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
+	int32 PURSUERMAXHP=10;
 
 public:	//局聪包访
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)

@@ -431,14 +431,14 @@ void UOSY_PursuerFSM::DieState()
 //-------------------------ÇÇ°Ý----------------------//
 void UOSY_PursuerFSM::ReciveDamage(float value)
 {
-	if (HP - value > 0)
+	if (PURSUERHP - value > 0)
 	{
-		HP -= value;
-		//UE_LOG(LogTemp, Log, TEXT("OLDDS HP=%d"), HP);
+		PURSUERHP -= value;
+		//UE_LOG(LogTemp, Log, TEXT("OLDDS PURSUERHP=%d"), PURSUERHP);
 	}
 	else
 	{
-		HP = 0;
+		PURSUERHP = 0;
 		mState = EEnmeyState::Die;
 	}
 }
