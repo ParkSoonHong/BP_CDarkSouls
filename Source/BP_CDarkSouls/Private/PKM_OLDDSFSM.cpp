@@ -1103,14 +1103,14 @@ void UPKM_OLDDSFSM::TestAttackState()
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 void UPKM_OLDDSFSM::ReciveDamage(float value)
 {
-		if (HP - value > 0)
+		if (OLDDSHP - value > 0)
 		{
-			HP -= value;
-			UE_LOG(LogTemp, Log, TEXT("OLDDS HP=%d"),HP);
+			OLDDSHP -= value;
+			UE_LOG(LogTemp, Log, TEXT("OLDDS OLDDSHP=%d"),OLDDSHP);
 		}
 		else
 		{
-			HP = 0;
+			OLDDSHP = 0;
 			bBackStepAnimCheck = false;
 			bRushAnimCheck = false;
 			bWalkAnimCheck = false;

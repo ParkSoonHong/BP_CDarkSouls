@@ -86,7 +86,9 @@ public:
 	float BackStepSpeed;
 	float StingSpeed;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
-	int32 HP=2;
+	int32 OLDDSHP=10;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
+	int32 OLDDSMAXHP=10;
 	UPROPERTY(EditAnywhere,Category="FSMDraw")
 	bool bDebugRange=false;
 	bool bStingdirCheck = false;
