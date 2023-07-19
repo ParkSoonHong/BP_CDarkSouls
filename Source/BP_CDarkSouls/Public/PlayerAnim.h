@@ -45,6 +45,12 @@ public:
 	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
 	class UAnimMontage* ShildMontage;
 
+	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
+	class UAnimMontage* DamageMontage;
+
+	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
+	class UAnimMontage* RifeTimeMontage;
+
 	UPROPERTY()
 	class APSH_CPlayer * Player;
 
@@ -66,6 +72,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	bool isBackStep = true;
 
+	
 	UFUNCTION()
 	void AnimNotify_AttackEnd();
 
@@ -83,16 +90,19 @@ public:
 
 	UFUNCTION()
 	void AnimNotify_endHardAttack();
+
+
+
 	void PlayRollAnimation();
 	void PlayBackStepAnimation();
-
-	
+	void PlayDamgedAnimation();
 	void PlayAttackAnimation();
 	void PlayAttackAnimation2();
 
 	void PlayHardAttackAnimation();
 	void PlayShildAnimation();
 	void PlayParryAnimation();
+	void PlayRifeTimeAnimation();
 
 	void PostInitializeComponents();
 

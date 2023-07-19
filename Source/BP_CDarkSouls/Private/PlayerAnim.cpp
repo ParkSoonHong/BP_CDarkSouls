@@ -18,7 +18,7 @@ UPlayerAnim::UPlayerAnim()
 		BackStepMontage = tempBackStep.Object;
 	}
 
-	ConstructorHelpers::FObjectFinder<UAnimMontage>tempAttack(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/Ani/MT_PSH_Attck.MT_PSH_Attck_C'"));
+	ConstructorHelpers::FObjectFinder<UAnimMontage>tempAttack(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/AttackAnim/MT_PSH_Attack1.MT_PSH_Attack1_C'"));
 	if (tempAttack.Succeeded())
 	{
 		AttackMontage = tempAttack.Object;
@@ -48,6 +48,18 @@ UPlayerAnim::UPlayerAnim()
 		parryMontage = tempParry.Object;
 	}
 
+	ConstructorHelpers::FObjectFinder<UAnimMontage>tempDamage(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/Ani/Hit/Hit.Hit_C'"));
+	if (tempDamage.Succeeded())
+	{
+		DamageMontage = tempDamage.Object;
+	}
+
+
+	ConstructorHelpers::FObjectFinder<UAnimMontage>tempLife(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/Ani/NewFolder/Mon_Drink.Mon_Drink_C'"));
+	if (tempLife.Succeeded())
+	{
+		RifeTimeMontage = tempLife.Object;
+	}
 
 }
 void UPlayerAnim::NativeUpdateAnimation(float DeltaSeconds)
@@ -78,27 +90,30 @@ void UPlayerAnim::NativeUpdateAnimation(float DeltaSeconds)
 
 }
 
-void UPlayerAnim::AnimNotify_AttackEnd()
+void UPlayerAnim::AnimNotify_AttackEnd() // 어택 끝났어
 {
-	AttackEnd = true;
-	
+	Player->PlayingAttack = true;
+	Player->iscombo = false;
+	Player->compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
+void UPlayerAnim::AnimNotify_StartAttack() // 공격 시작
+{
+	Player->PlayingAttack = false;
+}
+
+void UPlayerAnim::AnimNotify_ComboAttack() // 콤보 할거야?
+{
+	Player->PlayingAttack = true;
+	Player->iscombo = true;
+}
 
 void UPlayerAnim::AnimNotify_BackstetpTime()
 {
 	Player->isBackStep = false;
 }
 
-void UPlayerAnim::AnimNotify_StartAttack()
-{
-	startAttack = false;
-}
 
-void UPlayerAnim::AnimNotify_ComboAttack()
-{
-	comboAttack = true;
-}
 
 void UPlayerAnim::AnimNotify_RollEnd()
 {
@@ -107,7 +122,8 @@ void UPlayerAnim::AnimNotify_RollEnd()
 
 void UPlayerAnim::AnimNotify_endHardAttack()
 {
-	hardAttackEnd = true;
+	Player->isAttack = true;
+	Player->compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
 }
 
@@ -123,9 +139,15 @@ void UPlayerAnim::PlayBackStepAnimation()
 }
 
 
+void UPlayerAnim::PlayDamgedAnimation()
+{
+	Montage_Play(DamageMontage);
+}
+
 void UPlayerAnim::PlayAttackAnimation()
 {
 	Montage_Play(AttackMontage);
+	UE_LOG(LogTemp,Warning,TEXT("Attack1"));
 }
 
 void UPlayerAnim::PlayAttackAnimation2()
@@ -152,4 +174,8 @@ void UPlayerAnim::PlayParryAnimation()
 	Montage_Play(parryMontage);
 }
 
+void UPlayerAnim::PlayRifeTimeAnimation()
+{
+	Montage_Play(RifeTimeMontage);
+}
 

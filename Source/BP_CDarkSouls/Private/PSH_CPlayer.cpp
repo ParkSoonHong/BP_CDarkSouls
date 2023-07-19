@@ -101,7 +101,8 @@ APSH_CPlayer::APSH_CPlayer()
 	}
 	GetMesh()->SetCollisionProfileName("Player");
 	compSword->SetCollisionProfileName("PlayerWeapon");
-	PlayingAttack = false;
+	
+
 	compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	compShield->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	compShieldHendle->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -146,20 +147,6 @@ void APSH_CPlayer::Tick(float DeltaTime)
 		curTime += DeltaTime;
 	}
 
-	if (anim->hardAttackEnd)
-	{
-		compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		PlayingAttack = false;
-		anim->hardAttackEnd =false;
-	}
-
-
-	if (anim->comboAttack)
-	{
-		iscombo = false;
-		anim->startAttack = true;
-		UE_LOG(LogTemp, Warning, TEXT("Combo"));
-	}
 }
 
 // Called to bind functionality to input
@@ -184,6 +171,8 @@ void APSH_CPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &APSH_CPlayer::Attack);
 	PlayerInputComponent->BindAction("HardAttack", IE_Pressed, this, &APSH_CPlayer::HardAttack);
 	PlayerInputComponent->BindAction("Parry", IE_Pressed, this, &APSH_CPlayer::Parry);
+
+	PlayerInputComponent->BindAction("RifeTime", IE_Pressed, this, &APSH_CPlayer::RifeTime);
 }
 
 
@@ -326,34 +315,33 @@ void APSH_CPlayer::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedCompon
 
 void APSH_CPlayer::Attack()
 {
-	if(anim->startAttack)
+	if(PlayingAttack) // 공격 할수 있니?
 	{ 
-		anim->PlayAttackAnimation();
-		comboCount++;
-		compSword->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-
-		if (comboCount > 1)
+		
+			anim->PlayAttackAnimation();
+			compSword->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			comboCount++;
+		
+		if (comboCount > 1) // 콤보가 트루야?
 		{
-			anim->PlayAttackAnimation2();
-			UE_LOG(LogTemp, Warning, TEXT("sibal"));
-			comboCount = 0;
+				anim->PlayAttackAnimation2();
+				compSword->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);	
+				comboCount = 0;
 		}
+		
 	}
-
-	if (anim->comboAttack)
-	{
-	 anim->comboAttack = false;
-	}
-	// is콤보가 ture일때 클릭을 하면 콤보2를 발동
 
 }
 
 void APSH_CPlayer::HardAttack()
 {
+	if(isAttack)
+	{ 
 	anim->PlayHardAttackAnimation();
-	PlayingAttack = true;
 	compSword->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);	
+	isAttack = false;
 	//애니메이션 재생끝나면 노티파이로 compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision); PlayingAttack=false;
+	}
 }
 
 void APSH_CPlayer::Parry()
@@ -366,12 +354,19 @@ void APSH_CPlayer::Shild()
 	anim->PlayShildAnimation();
 }
 
+void APSH_CPlayer::RifeTime()
+{
+	
+	curHp += 5;
+}
+
 void APSH_CPlayer::Damaged(float value)
 {
 	if (curHp - value > 0)
 	{
 		curHp -= value;
-		UE_LOG(LogTemp, Warning, TEXT("%d"), curHp);
+		anim->PlayDamgedAnimation();
+		UE_LOG(LogTemp, Warning, TEXT("damage"));
 	}
 	else
 	{

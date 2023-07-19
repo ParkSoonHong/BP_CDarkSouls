@@ -123,14 +123,20 @@ public:
 	bool isPressedForwardMovekey = false;
 	bool isPressedRightMovekey = false;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere,Category = "Attack")
 	bool iscombo = false;
+
+	UPROPERTY(EditAnywhere)
+	bool isAttack = true;
 
 	UPROPERTY(EditAnywhere)
 	float iscombotime = 1.0;
 
 	UPROPERTY(EditAnywhere)
 	int32 comboCount = 0;
+
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	bool PlayingAttack = true;
 
 	
 public:
@@ -196,6 +202,8 @@ public:
 
 	void Shild();
 
+	void RifeTime();
+
 
 
 	/* Tick every frame */
@@ -206,8 +214,7 @@ public:
 
 public:
 	float PKMCurrentTime;
-		UPROPERTY(EditAnywhere)
-	bool PlayingAttack=false;
+
 	UPROPERTY(EditAnywhere,BlueprintReadOnly)
 	float maxHp = 10;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
