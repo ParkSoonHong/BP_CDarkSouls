@@ -117,6 +117,9 @@ public:
 	UPROPERTY(EditAnywhere,Category = "status")
 	bool isRoll = false;	// 스테미나 회복시간
 
+	UPROPERTY(EditAnywhere)
+	bool isBackStep = false;
+
 	bool isPressedForwardMovekey = false;
 	bool isPressedRightMovekey = false;
 

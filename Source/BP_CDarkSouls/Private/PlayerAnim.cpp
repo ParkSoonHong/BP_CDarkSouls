@@ -24,6 +24,12 @@ UPlayerAnim::UPlayerAnim()
 		AttackMontage = tempAttack.Object;
 	}
 
+	ConstructorHelpers::FObjectFinder<UAnimMontage>tempAttack2(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/Ani/MT_PSH_Attack2.MT_PSH_Attack2_C'"));
+	if (tempAttack.Succeeded())
+	{
+		AttackMontage2 = tempAttack2.Object;
+	}
+
 	ConstructorHelpers::FObjectFinder<UAnimMontage>tempShild(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/Ani/MT_PSH_Shild.MT_PSH_Shild_C'"));
 	if (tempShild.Succeeded())
 	{
@@ -78,6 +84,12 @@ void UPlayerAnim::AnimNotify_AttackEnd()
 	
 }
 
+
+void UPlayerAnim::AnimNotify_BackstetpTime()
+{
+	Player->isBackStep = false;
+}
+
 void UPlayerAnim::AnimNotify_StartAttack()
 {
 	startAttack = false;
@@ -90,7 +102,7 @@ void UPlayerAnim::AnimNotify_ComboAttack()
 
 void UPlayerAnim::AnimNotify_RollEnd()
 {
-	isRoll = false;
+	Player->isRoll = false;
 }
 
 void UPlayerAnim::AnimNotify_endHardAttack()
