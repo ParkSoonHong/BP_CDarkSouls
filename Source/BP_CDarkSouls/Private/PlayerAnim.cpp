@@ -88,6 +88,11 @@ void UPlayerAnim::AnimNotify_ComboAttack()
 	comboAttack = true;
 }
 
+void UPlayerAnim::AnimNotify_RollEnd()
+{
+	isRoll = false;
+}
+
 void UPlayerAnim::AnimNotify_endHardAttack()
 {
 	hardAttackEnd = true;

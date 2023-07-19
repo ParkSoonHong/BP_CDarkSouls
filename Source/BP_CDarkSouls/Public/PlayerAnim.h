@@ -60,6 +60,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	bool hardAttackEnd = false;
 
+	UPROPERTY(EditAnywhere)
+	bool isRoll = true;
+
 	UFUNCTION()
 	void AnimNotify_AttackEnd();
 
@@ -68,6 +71,9 @@ public:
 
 	UFUNCTION()
 	void AnimNotify_ComboAttack();
+
+	UFUNCTION()
+	void AnimNotify_RollEnd();
 
 	UFUNCTION()
 	void AnimNotify_endHardAttack();
