@@ -407,9 +407,10 @@ void APSH_CPlayer::ReleasedSpacebar()
 {
 	if (isPressedForwardMovekey || isPressedRightMovekey) // 입력이 있을때
 	{	
+		
 		if (curTime < runTime)
-		{
-			Roll();
+		{	
+				Roll();
 		}
 	}
 	curTime = 0;
