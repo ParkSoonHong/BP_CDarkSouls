@@ -147,54 +147,65 @@ void UPKM_OLDDSFSM::IdleState()
 void UPKM_OLDDSFSM::RunState()
 {
 	//direction = FVector(0, 0, 0);
-	bRunAnimCheck = true;
-	if (Target != nullptr)
-	{
-		direction = Target->GetActorLocation() - Me->GetActorLocation();
-		distance = direction.Size();
-	}
-	if (distance < BackRange) {
-		if (FVector::DotProduct(direction, Me->GetActorForwardVector()) >= 0) {
-			UE_LOG(LogTemp, Log, TEXT("Go BackStep"));
-			currentTime = 0;
-			BackStepSpeed = 0;
-			//방향 완전히 돌려라
-			GetOwner()->SetActorRotation(direction.Rotation());
-			//--------------------------------------------------------------------------------------------
-			mState = EEnemyState::BackStep;
-
-			UE_LOG(LogTemp, Log, TEXT("memset Time=%f"), currentTime);
+		bRunAnimCheck = true;
+		if (Target != nullptr)
+		{
+			direction = Target->GetActorLocation() - Me->GetActorLocation();
+			distance = direction.Size();
 		}
-		else {
+		if (distance < BackRange) {
+			if (FVector::DotProduct(direction, Me->GetActorForwardVector()) >= 0) {
+				UE_LOG(LogTemp, Log, TEXT("Go BackStep"));
+				currentTime = 0;
+				BackStepSpeed = 0;
+				//방향 완전히 돌려라
+				GetOwner()->SetActorRotation(direction.Rotation());
+				//--------------------------------------------------------------------------------------------
+				mState = EEnemyState::BackStep;
+
+				UE_LOG(LogTemp, Log, TEXT("memset Time=%f"), currentTime);
+			}
+			else {
 				FVector Forward = Me->GetActorForwardVector();
 				Forward = FMath::Lerp<FVector, float>(Forward, direction, 0.1 * GetWorld()->DeltaTimeSeconds);
 				GetOwner()->SetActorRotation(Forward.Rotation());
 				UE_LOG(LogTemp, Log, TEXT("Turn.."));
+			}
 		}
-	}
-	else if (distance < attackRange)
-	{
-		UE_LOG(LogTemp, Log, TEXT("switchAttack"));
-		currentTime = 0;
-		bRunAnimCheck = false;
-		mState = EEnemyState::Attack;
-	}
-	else if (distance < MoveRange)
-	{
-		UE_LOG(LogTemp, Log, TEXT("switchMove"));
-		bRunAnimCheck = false;
-		mState = EEnemyState::Move;
-	}
-	else if (distance < RunRange)
-	{
-		Moving(500, direction);
-	}
-	else {
-		UE_LOG(LogTemp, Log, TEXT("switchIdle"));
-		bRunAnimCheck = false;
-		mState = EEnemyState::Idle;
-	}
-
+		else if (distance < attackRange)
+		{
+			UE_LOG(LogTemp, Log, TEXT("switchAttack"));
+			currentTime = 0;
+			bRunAnimCheck = false;
+			mState = EEnemyState::Attack;
+		}
+		else if (distance < MoveRange)
+		{
+			int32 RandRushRun = FMath::RandRange(1, 2);
+			if (RandRushRun == 1)
+			{
+				bRunAnimCheck = false;
+				currentTime = 0;
+				bRushdirCheck = false;
+				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				mState = EEnemyState::RushAttack;
+			}
+			else
+			{
+				UE_LOG(LogTemp, Log, TEXT("switchMove"));
+				bRunAnimCheck = false;
+				mState = EEnemyState::Move;
+			}
+		}
+		else if (distance < RunRange)
+		{
+			Moving(200, direction);
+		}
+		else {
+			UE_LOG(LogTemp, Log, TEXT("switchIdle"));
+			bRunAnimCheck = false;
+			mState = EEnemyState::Idle;
+		}
 }
 
 void UPKM_OLDDSFSM::MoveState()
@@ -1038,86 +1049,10 @@ void UPKM_OLDDSFSM::RaiseAttackState()
 
 void UPKM_OLDDSFSM::TakeDownAttackState()
 {
-	currentTime += GetWorld()->DeltaTimeSeconds;
-	if (currentTime < 0.8)//들어올리기
-	{
-		bTakeDownAttackAnimCheck = true;
-		direction = Target->GetActorLocation() - Me->GetActorLocation();
-		direction.Z = 0;
-		Me->SetActorRotation(direction.Rotation()*(currentTime/0.4));
-		//Me->spearComp->SetRelativeRotation(FRotator(0, 150 * currentTime / 0.4f, -20 * currentTime / 0.4f));
-	}
-	else
-	{
-		if (ComboCount < 1)
-		{
-			int32 RandCombo = FMath::RandRange(1, 7);
-			if (RandCombo == 1)
-			{
-				ComboCount++;
-				bTakeDownAttackAnimCheck = false;
-				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-				//스윙으로가
-				currentTime = 0;
-				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-				mState = EEnemyState::SwingAttack;
-			}
-			else if (RandCombo == 2)
-			{
-				ComboCount++;
-				bTakeDownAttackAnimCheck = false;
-				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-				//스팅1으로가
-				currentTime = 0;
-				bStingdirCheck = false;
-				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-				mState = EEnemyState::StingAttack;
-			}
-			else if (RandCombo == 3)
-			{
-				ComboCount++;
-				bTakeDownAttackAnimCheck = false;
-				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-				//스팅2으로가
-				currentTime = 0;
-				bStingdirCheck = false;
-				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-				mState = EEnemyState::StingTwoAttack;
-			}
-			else if (RandCombo == 4)
-			{
-				ComboCount++;
-				bTakeDownAttackAnimCheck = false;
-				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-				//raise으로가
-				currentTime = 0;
-				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-				mState = EEnemyState::RaiseAttack;
-			
-			}
-			else if (RandCombo == 5)
-			{
-				ComboCount = 0;
-				bTakeDownAttackAnimCheck = false;
-				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-				mState = EEnemyState::Idle;
-			}
-			else
-			{
-				ComboCount = 0;
-				bTakeDownAttackAnimCheck = false;
-				Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-				mState = EEnemyState::Idle;
-			}
-		}
-		else
-		{
-			ComboCount = 0;
-			bTakeDownAttackAnimCheck = false;
-			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			mState = EEnemyState::Idle;
-		}
-	}
+	ComboCount = 0;
+	bTakeDownAttackAnimCheck = false;
+	Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	mState = EEnemyState::Idle;
 }
 
 void UPKM_OLDDSFSM::TestAttackState()
@@ -1187,10 +1122,21 @@ void UPKM_OLDDSFSM::ReciveDamage(float value)
 			bRaiseAttackAnimCheck = false;
 			bTakeDownAttackAnimCheck = false;
 			bTestAttackAnimCheck = false;
-
 			bDieAnimCheck = true;
 			DieEffect = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DieFactory, Me->GetActorLocation());
 			Me->HitComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			if (RangeAttackEffect!=nullptr)
+			{
+				RangeAttackEffect->DestroyComponent();
+			}
+			if (RangeBallEffect != nullptr)
+			{
+				RangeBallEffect->DestroyComponent();
+			}
+			if (RushAttackEffect != nullptr)
+			{
+				RushAttackEffect->DestroyComponent();
+			}
 			currentTime = 0;
 			UE_LOG(LogTemp, Log, TEXT("go die"));
 			mState = EEnemyState::Die;
