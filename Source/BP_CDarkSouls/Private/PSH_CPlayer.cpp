@@ -156,7 +156,14 @@ void APSH_CPlayer::Tick(float DeltaTime)
 		compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		PlayingAttack = false;
 		anim->hardAttackEnd =false;
-		
+	}
+
+
+	if (anim->comboAttack)
+	{
+		iscombo = false;
+		anim->startAttack = true;
+		UE_LOG(LogTemp, Warning, TEXT("Combo"));
 	}
 }
 
@@ -324,14 +331,26 @@ void APSH_CPlayer::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedCompon
 
 void APSH_CPlayer::Attack()
 {
-	if (PlayingAttack == false)
-	{
+	if(anim->startAttack)
+	{ 
 		anim->PlayAttackAnimation();
-		PlayingAttack = true;
+		comboCount++;
 		compSword->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+		if (comboCount > 1)
+		{
+			anim->PlayAttackAnimation2();
+			UE_LOG(LogTemp, Warning, TEXT("sibal"));
+			comboCount = 0;
+		}
 	}
 
-//	curTime += GetWorld()->del
+	if (anim->comboAttack)
+	{
+	 anim->comboAttack = false;
+	}
+	// is콤보가 ture일때 클릭을 하면 콤보2를 발동
+
 }
 
 void APSH_CPlayer::HardAttack()

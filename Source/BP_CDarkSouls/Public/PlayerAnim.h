@@ -34,6 +34,9 @@ public:
 	class UAnimMontage* AttackMontage;
 
 	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
+	class UAnimMontage* AttackMontage2;
+
+	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
 	class UAnimMontage* HardAttackMontage;
 
 	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
@@ -42,22 +45,44 @@ public:
 	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
 	class UAnimMontage* ShildMontage;
 
+	UPROPERTY()
+	class APSH_CPlayer * Player;
+
 	UPROPERTY(EditAnywhere)
-	bool Attack1 = false;
+	bool comboAttack = false;
+
+	UPROPERTY(EditAnywhere)
+	bool startAttack = true;
+
+	UPROPERTY(EditAnywhere)
+	bool AttackEnd = false;
+
 	UPROPERTY(EditAnywhere)
 	bool hardAttackEnd = false;
 
 	UFUNCTION()
-	void AnimNotify_Attack1();
+	void AnimNotify_AttackEnd();
+
+	UFUNCTION()
+	void AnimNotify_StartAttack();
+
+	UFUNCTION()
+	void AnimNotify_ComboAttack();
+
 	UFUNCTION()
 	void AnimNotify_endHardAttack();
-
 	void PlayRollAnimation();
 	void PlayBackStepAnimation();
+
+	
 	void PlayAttackAnimation();
+	void PlayAttackAnimation2();
+
 	void PlayHardAttackAnimation();
 	void PlayShildAnimation();
 	void PlayParryAnimation();
+
+	void PostInitializeComponents();
 
 public:
 	UPlayerAnim();

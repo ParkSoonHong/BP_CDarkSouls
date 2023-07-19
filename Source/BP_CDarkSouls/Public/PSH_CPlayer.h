@@ -120,6 +120,15 @@ public:
 	bool isPressedForwardMovekey = false;
 	bool isPressedRightMovekey = false;
 
+	UPROPERTY(EditAnywhere)
+	bool iscombo = false;
+
+	UPROPERTY(EditAnywhere)
+	float iscombotime = 1.0;
+
+	UPROPERTY(EditAnywhere)
+	int32 comboCount = 0;
+
 	
 public:
 	/** Returns CameraBoom subobject **/
@@ -149,6 +158,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UPlayerAnim * anim;
 
+	
 	/** Called for forwards/backward input */
 	void MoveForward(float Value);
 	/** Called for side to side input */
@@ -193,7 +203,7 @@ public:
 
 public:
 	float PKMCurrentTime;
-
+		UPROPERTY(EditAnywhere)
 	bool PlayingAttack=false;
 		UPROPERTY(EditAnywhere)
 	int32 maxHp = 10;

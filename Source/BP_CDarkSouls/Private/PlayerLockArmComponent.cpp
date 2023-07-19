@@ -96,7 +96,7 @@ void UPlayerLockArmComponent::ToggleCameraLock()
 	if (NewCameraTarget != nullptr)
 	{
 		print(TEXT("Testing"));
-		LockToTarget(NewCameraTarget);
+		//LockToTarget(NewCameraTarget);
 	}
 }
 

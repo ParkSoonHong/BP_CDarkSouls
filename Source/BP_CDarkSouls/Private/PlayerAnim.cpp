@@ -49,7 +49,7 @@ void UPlayerAnim::NativeUpdateAnimation(float DeltaSeconds)
 	Super::NativeUpdateAnimation(DeltaSeconds);
 	auto ownerPwan = TryGetPawnOwner();
 	// 2. TPSPlayer가 필요하다.
-	auto Player = Cast<APSH_CPlayer>(ownerPwan);
+	Player = Cast<APSH_CPlayer>(ownerPwan);
 
 	if (Player != nullptr)
 	{
@@ -72,10 +72,20 @@ void UPlayerAnim::NativeUpdateAnimation(float DeltaSeconds)
 
 }
 
-void UPlayerAnim::AnimNotify_Attack1()
+void UPlayerAnim::AnimNotify_AttackEnd()
 {
-	Attack1 = true;
-	UE_LOG(LogTemp, Warning, TEXT("LastAttack"));
+	AttackEnd = true;
+	
+}
+
+void UPlayerAnim::AnimNotify_StartAttack()
+{
+	startAttack = false;
+}
+
+void UPlayerAnim::AnimNotify_ComboAttack()
+{
+	comboAttack = true;
 }
 
 void UPlayerAnim::AnimNotify_endHardAttack()
@@ -87,6 +97,7 @@ void UPlayerAnim::AnimNotify_endHardAttack()
 void UPlayerAnim::PlayRollAnimation()
 {
 	Montage_Play(RollMontage);
+	
 }
 
 void UPlayerAnim::PlayBackStepAnimation()
@@ -94,10 +105,20 @@ void UPlayerAnim::PlayBackStepAnimation()
 	Montage_Play(BackStepMontage);
 }
 
+
 void UPlayerAnim::PlayAttackAnimation()
 {
-	Montage_Play(AttackMontage); // 변경필요
+	Montage_Play(AttackMontage);
 }
+
+void UPlayerAnim::PlayAttackAnimation2()
+{
+	Montage_Play(AttackMontage2);
+}
+// void UPlayerAnim::PlayAttackAnimation(FName sctionName)
+// {
+// 	Montage_JumpToSection(sctionName,AttackMontage);
+// }
 
 void UPlayerAnim::PlayHardAttackAnimation()
 {
