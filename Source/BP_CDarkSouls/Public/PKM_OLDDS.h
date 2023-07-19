@@ -30,7 +30,6 @@ public:
 	class USkeletalMeshComponent* springArmComp;
 	UPROPERTY(VisibleAnywhere)
 	class UCapsuleComponent* HitComp;
-
 	UPROPERTY(VisibleAnywhere)
 	class UStaticMeshComponent* spearComp;
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly)
