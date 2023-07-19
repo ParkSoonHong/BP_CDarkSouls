@@ -74,4 +74,4 @@ Plugins/*/Intermediate/*
 DerivedDataCache/*
 
 # Custom ignore
-Bazaar_Meshingun/*
+Content/Bazaar_Meshingun/*
