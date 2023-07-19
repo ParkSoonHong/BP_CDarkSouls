@@ -63,9 +63,15 @@ public:
 	UPROPERTY(EditAnywhere)
 	bool isRoll = true;
 
+	UPROPERTY(EditAnywhere)
+	bool isBackStep = true;
+
 	UFUNCTION()
 	void AnimNotify_AttackEnd();
 
+	UFUNCTION()
+	void AnimNotify_BackstetpTime();
+	
 	UFUNCTION()
 	void AnimNotify_StartAttack();
 

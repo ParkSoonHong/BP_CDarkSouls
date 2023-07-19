@@ -141,11 +141,6 @@ void APSH_CPlayer::Tick(float DeltaTime)
 		Run();
 	}
 
-	if (isRoll)
-	{
-		Roll();
-	}
-
 	if (isTimeOn)
 	{
 		curTime += DeltaTime;
@@ -398,7 +393,11 @@ void APSH_CPlayer::PressedSpacebar()
 	}
 	else
 	{
+		if (!isBackStep)
+		{
 		BackStep();
+		isBackStep = true;
+		}
 	}
 	
 }
@@ -410,7 +409,12 @@ void APSH_CPlayer::ReleasedSpacebar()
 		
 		if (curTime < runTime)
 		{	
+			if (!isRoll)
+			{
 				Roll();
+				isRoll = true;
+			}
+
 		}
 	}
 	curTime = 0;
