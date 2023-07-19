@@ -62,15 +62,16 @@ AOSY_Pursuer::AOSY_Pursuer()
 	HitComp->SetWorldScale3D(FVector(3, 3, 3));
 	HitComp->SetCollisionProfileName(TEXT("Pursuer"));
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HitComp->OnComponentBeginOverlap.AddDynamic(this, &AOSY_Pursuer::OnComponentBeginOverlap);
+
 }
 
 // Called when the game starts or when spawned
 void AOSY_Pursuer::BeginPlay()
 {
 	Super::BeginPlay();
-	HitComp->OnComponentBeginOverlap.AddDynamic(this, &AOSY_Pursuer::OnComponentBeginOverlap);
+	// 이거 키면 터짐
 
-	
 }
 
 // Called every frame
