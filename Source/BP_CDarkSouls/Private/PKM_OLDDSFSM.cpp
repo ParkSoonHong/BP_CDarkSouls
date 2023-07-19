@@ -363,7 +363,25 @@ void UPKM_OLDDSFSM::DamageState()
 
 void UPKM_OLDDSFSM::DieState()
 {
-	GetOwner()->Destroy();
+	currentTime += GetWorld()->DeltaRealTimeSeconds;
+	if (currentTime>1)
+	{
+		if (DieEndEffect==nullptr)
+		{
+			FVector DEELoc = Me->GetActorLocation();
+			DEELoc.Z -= 200;
+			DieEndEffect = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DieEndFactory,DEELoc);
+			DieEndEffect->SetWorldScale3D(FVector(2,2,2));
+		}
+	}
+	if (currentTime > 6)
+	{
+		DieEndStartEffect = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DieEndStartFactory, Me->GetActorLocation());
+		DieEndStartEffect->SetWorldScale3D(FVector(10,10,0.1));
+		//DieEndEffect->DestroyComponent();
+		//DieEndEffect->EndPlay(EEndPlayReason::Destroyed);
+		Me->Destroy();
+	}
 }
 
 void UPKM_OLDDSFSM::Moving(float speed, FVector dir)
@@ -1158,6 +1176,23 @@ void UPKM_OLDDSFSM::ReciveDamage(float value)
 		else
 		{
 			HP = 0;
+			bBackStepAnimCheck = false;
+			bRushAnimCheck = false;
+			bWalkAnimCheck = false;
+			bRunAnimCheck = false;
+			bRangeAttackAnimCheck = false;
+			bStingAttackAnimCheck = false;
+			bSwingAttackAnimCheck = false;
+			bStingTwoAttackAnimCheck = false;
+			bRaiseAttackAnimCheck = false;
+			bTakeDownAttackAnimCheck = false;
+			bTestAttackAnimCheck = false;
+
+			bDieAnimCheck = true;
+			DieEffect = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DieFactory, Me->GetActorLocation());
+			Me->HitComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			currentTime = 0;
+			UE_LOG(LogTemp, Log, TEXT("go die"));
 			mState = EEnemyState::Die;
 		}
 }

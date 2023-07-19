@@ -86,7 +86,7 @@ public:
 	float BackStepSpeed;
 	float StingSpeed;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
-	int32 HP=10;
+	int32 HP=2;
 	UPROPERTY(EditAnywhere,Category="FSMDraw")
 	bool bDebugRange=false;
 	bool bStingdirCheck = false;
@@ -112,10 +112,13 @@ public:
 	bool bRaiseAttackAnimCheck = false;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
 	bool bTakeDownAttackAnimCheck = false;
-		UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
 	bool bTestAttackAnimCheck = false;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "FSM")
 	bool bTestAttackAnimPlayingEnd = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "FSM")
+	bool bDieAnimCheck=false;
+	
 
 	float MovingSpeed=0;
 	int32 ComboCount = 0;
@@ -141,5 +144,25 @@ public:
    
    UPROPERTY(EditDefaultsOnly,Category="Effect")
    class UParticleSystemComponent *RangeAttackEffect;
+
+   	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystem *DieFactory;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystemComponent *DieEffect;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystem *DieEndStartFactory;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystemComponent *DieEndStartEffect;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystem *DieEndFactory;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystemComponent *DieEndEffect;
+
+
 
 };
