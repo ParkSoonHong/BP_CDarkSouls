@@ -179,10 +179,12 @@ void UOSY_PursuerFSM::AttackState()
 		else
 		{
 			int percent= FMath::RandRange(1,3);
+			percent = 3;
 			if (percent > 2)
 			{
 				// attack1로가
 				anim->bAttack1_1Play= true;
+				me->compSword->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 				mState= EEnmeyState::Attack1_1;
 				anim->animState = mState;
 			}
@@ -190,6 +192,7 @@ void UOSY_PursuerFSM::AttackState()
 			{
 				// attack2로가
 				anim->bAttack2Play=true;
+				me->compSword->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 				mState= EEnmeyState::Attack2;
 				anim->animState = mState;
 			}
@@ -238,6 +241,7 @@ void UOSY_PursuerFSM::RushState()
 	}
 	if (distance < RushAttackDistance&& currentTIme>RushDelayTime)
 	{
+		me->compSword->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		mState = EEnmeyState::RushAttack;
 		anim->bRushAttackPlay = true;
 		anim->animState = mState;
@@ -261,7 +265,7 @@ void UOSY_PursuerFSM::RushAttackState()
 	if (anim->bRushAttackPlay == false)
 	{
 	UE_LOG(LogTemp, Error, TEXT("Succes"))
-		
+		me->compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		mState = EEnmeyState::Idle;
 		anim->animState = mState;
 	
@@ -283,8 +287,10 @@ void UOSY_PursuerFSM::Attack1_1State()
 	if (anim->bAttack1_1Play == false)
 	{
 		int Attack1_2Random=FMath::RandRange(1,2);
+		Attack1_2Random = 1;
 		if (Attack1_2Random > 1)
 		{
+			me->compSword->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 			UE_LOG(LogTemp, Error, TEXT("?????"))
 			anim->bAttack1_2Play= true;
 			mState=EEnmeyState::Attack1_2;
@@ -292,8 +298,10 @@ void UOSY_PursuerFSM::Attack1_1State()
 		}
 		else
 		{
-			anim->animState= mState;
+			// 끝날때;
+			me->compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			mState=EEnmeyState::Idle;
+			anim->animState = mState;
 			
 		}
 	}
@@ -315,12 +323,14 @@ void UOSY_PursuerFSM::Attack1_2State()
 	{
 		if (Attack1_3Random > 1)
 		{
+			me->compSword->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 			anim->bAttack1_3Play = true;
 			mState = EEnmeyState::Attack1_3;
 			anim->animState = mState;
 		}
 		else
 		{
+			me->compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			mState = EEnmeyState::Idle;
 			anim->animState = mState;
 			anim->bAttack1_1Play=true;
@@ -340,6 +350,7 @@ void UOSY_PursuerFSM::Attack1_3State()
 
 	if (anim->bAttack1_3Play == false)
 	{
+		me->compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		mState = EEnmeyState::Idle;
 		anim->animState = mState;
 	}
@@ -354,7 +365,7 @@ void UOSY_PursuerFSM::Attack2State()
 
 	if (anim->bAttack2Play == false)
 	{
-
+		me->compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		mState = EEnmeyState::Idle;
 		anim->animState = mState;
 	}
