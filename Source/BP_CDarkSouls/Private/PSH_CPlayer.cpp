@@ -137,6 +137,13 @@ void APSH_CPlayer::Tick(float DeltaTime)
 		restTime();
 	}
 
+	if (curTime > runTime)
+	{
+		curStamina -= 0.1;
+		retunSpeed = runSpeed;  // 달리기로 바꾸기
+		isRun = true;
+	}
+
 	if (isRun) // 달리는 상태면
 	{
 		Run();
@@ -353,7 +360,11 @@ void APSH_CPlayer::Shild()
 
 void APSH_CPlayer::RifeTime()
 {
-
+	isRun = true;
+	isAttack = true;
+	PlayingAttack = true;
+	isRoll = false;
+	isBackStep = false;
 	curHp += 5;
 	anim->PlayRifeTimeAnimation();
 }
@@ -380,17 +391,20 @@ void APSH_CPlayer::PressedSpacebar()
 	isTimeOn = true;
 	if (isPressedForwardMovekey || isPressedRightMovekey) //입력이 있을때
 	{
-		if (curTime >= runTime) 
-		{
-			retunSpeed = runSpeed;  // 달리기로 바꾸기
-			isRun = true;
-		}
+// 		if (curTime > runTime) 
+// 		{
+// 			UE_LOG(LogTemp,Warning,TEXT("RUN"));
+// 			curStamina -= 25 * curTime;
+// 			retunSpeed = runSpeed;  // 달리기로 바꾸기
+// 			isRun = true;
+// 		}
 		
 	}
 	else
 	{
 		if (!isBackStep)
 		{
+			curStamina -= 20;
 		BackStep();
 		isBackStep = true;
 		}
@@ -407,6 +421,7 @@ void APSH_CPlayer::ReleasedSpacebar()
 		{	
 			if (!isRoll)
 			{
+				curStamina -= 30;
 				Roll();
 				isRoll = true;
 			}
@@ -442,17 +457,14 @@ void APSH_CPlayer::restTime()
 void APSH_CPlayer::Run()
 {
 	isRest = false;
-	curStamina -= 25 * GetWorld()->DeltaTimeSeconds;
 }
 
 void APSH_CPlayer::Roll()
 {	
 	anim->PlayRollAnimation();
-	curStamina -= 30;
 }
 
 void APSH_CPlayer::BackStep()
 {
 	anim->PlayBackStepAnimation();
-	curStamina -= 20;
 }

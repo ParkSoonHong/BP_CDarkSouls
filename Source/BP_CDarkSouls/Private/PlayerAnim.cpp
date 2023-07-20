@@ -131,8 +131,8 @@ void UPlayerAnim::AnimNotify_endHardAttack()
 void UPlayerAnim::AnimNotify_HitEnd()
 {
 	Player->isAttack = true;
-	Player->isRoll = true;
-	Player->isBackStep = true;
+	Player->isRoll = false;
+	Player->isBackStep = false;
 	Player->PlayingAttack = true;
 }
 

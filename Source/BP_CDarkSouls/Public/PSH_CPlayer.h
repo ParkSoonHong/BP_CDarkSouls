@@ -82,14 +82,14 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Setings")
-	float walkSpeed = 600;
+	float walkSpeed = 500;
 	// ¶Ù±â ¼Óµµ
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Setings")
 	float runSpeed = 800;
 
 	// ´Ù½Ã ¹Ù²ð ¼Óµµ
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Setings")
-	float retunSpeed=600;
+	float retunSpeed=	500;
 
 	UPROPERTY(EditAnywhere,Category = "Setings")
 	bool isRun=false;
