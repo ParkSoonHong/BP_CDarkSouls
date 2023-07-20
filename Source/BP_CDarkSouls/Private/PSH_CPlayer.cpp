@@ -17,6 +17,8 @@
 #include "PKM_OLDDS.h"
 #include "OSY_Pursuer.h"
 #include "Components/CapsuleComponent.h"
+#include "Blueprint/UserWidget.h"
+
 
 // Sets default values
 APSH_CPlayer::APSH_CPlayer()
@@ -102,6 +104,17 @@ APSH_CPlayer::APSH_CPlayer()
 	GetMesh()->SetCollisionProfileName("Player");
 	compSword->SetCollisionProfileName("PlayerWeapon");
 	
+	ConstructorHelpers::FClassFinder<UUserWidget>tempDieWidget(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/ParkSoonHong/WB_PSH_Die.WB_PSH_Die_C'"));
+	if (tempDieWidget.Succeeded())
+	{
+		compDieWidget = tempDieWidget.Class;
+	}
+
+	ConstructorHelpers::FObjectFinder<USoundBase> tempDieSound(TEXT("/Script/Engine.SoundWave'/Game/ParkSoonHong/sound/dark-souls-you-died-sound-effect.dark-souls-you-died-sound-effect'"));
+		if (tempDieWidget.Succeeded())
+		{
+			dieSound = tempDieSound.Object;
+		}
 
 	compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	compShield->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -152,6 +165,14 @@ void APSH_CPlayer::Tick(float DeltaTime)
 	if (isTimeOn)
 	{
 		curTime += DeltaTime;
+	}
+
+	if (isDie)
+	{
+		if (curTime >= 5)
+		{
+			UGameplayStatics::OpenLevel(this,FName("Start"));
+		}
 	}
 
 }
@@ -369,6 +390,7 @@ void APSH_CPlayer::RifeTime()
 	anim->PlayRifeTimeAnimation();
 }
 
+
 void APSH_CPlayer::Damaged(float value)
 {
 	if (curHp - value > 0)
@@ -382,10 +404,22 @@ void APSH_CPlayer::Damaged(float value)
 	}
 	else
 	{
-		curHp = 0;
-		Destroy();
+		Die();
+		isTimeOn = true;
+		isDie = true;
 	}
+
 }
+
+void APSH_CPlayer::Die()
+{
+	CreateWidget(GetWorld(),compDieWidget)->AddToViewport();
+	UGameplayStatics::PlaySound2D(GetWorld(),dieSound);
+	anim->PlayDeadAnimation();
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+}
+
 void APSH_CPlayer::PressedSpacebar()
 {
 	isTimeOn = true;
@@ -405,8 +439,8 @@ void APSH_CPlayer::PressedSpacebar()
 		if (!isBackStep)
 		{
 			curStamina -= 20;
-		BackStep();
-		isBackStep = true;
+			BackStep();
+			isBackStep = true;
 		}
 	}
 	
@@ -467,4 +501,5 @@ void APSH_CPlayer::Roll()
 void APSH_CPlayer::BackStep()
 {
 	anim->PlayBackStepAnimation();
+
 }

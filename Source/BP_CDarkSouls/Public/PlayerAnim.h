@@ -51,6 +51,9 @@ public:
 	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
 	class UAnimMontage* RifeTimeMontage;
 
+	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
+	class UAnimMontage* deadMontage;
+
 	UPROPERTY()
 	class APSH_CPlayer * Player;
 
@@ -106,6 +109,7 @@ public:
 	void PlayShildAnimation();
 	void PlayParryAnimation();
 	void PlayRifeTimeAnimation();
+	void PlayDeadAnimation();
 
 	void PostInitializeComponents();
 
