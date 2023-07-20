@@ -10,7 +10,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
-#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Green, text)
+//#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Green, text)
 
 
 
@@ -58,21 +58,21 @@ void UPlayerLockArmComponent::TickComponent(float DeltaTime, enum ELevelTick Tic
 	}
 	
 	// Draw debug
-	if (bDrawDebug)
-	{
-		for (UDSTargetComponent* Target : GetTargetComponents())
-		{
-			DrawDebugLine(GetWorld(), GetOwner()->GetActorLocation(), Target->GetComponentLocation(), FColor::Green);
-		}
-
-		// Draw target inclusion sphere
-		DrawDebugSphere(GetWorld(), GetOwner()->GetActorLocation(),MaxTagetLockDistance, 32, FColor::Cyan);
-
-		UKismetSystemLibrary::DrawDebugString(this, FVector::ZeroVector, bUseSoftLock ? "Soft-lock Enabled" : "Soft-lock Disabled", GetOwner(), FLinearColor::Green);
-
-		if (bSoftlockRequireReset)
-			UKismetSystemLibrary::DrawDebugString(this, FVector(0.f, 0.f, -10.f), "Soft-lock Requires Reset", GetOwner(), FLinearColor::Green);
-	}
+// 	if (bDrawDebug)
+// 	{
+// 		for (UDSTargetComponent* Target : GetTargetComponents())
+// 		{
+// 			DrawDebugLine(GetWorld(), GetOwner()->GetActorLocation(), Target->GetComponentLocation(), FColor::Green);
+// 		}
+// 
+// 		// Draw target inclusion sphere
+// 		DrawDebugSphere(GetWorld(), GetOwner()->GetActorLocation(),MaxTagetLockDistance, 32, FColor::Cyan);
+// 
+// 		UKismetSystemLibrary::DrawDebugString(this, FVector::ZeroVector, bUseSoftLock ? "Soft-lock Enabled" : "Soft-lock Disabled", GetOwner(), FLinearColor::Green);
+// 
+// 		if (bSoftlockRequireReset)
+// 			UKismetSystemLibrary::DrawDebugString(this, FVector(0.f, 0.f, -10.f), "Soft-lock Requires Reset", GetOwner(), FLinearColor::Green);
+// 	}
 
 }
 
@@ -95,7 +95,7 @@ void UPlayerLockArmComponent::ToggleCameraLock()
 
 	if (NewCameraTarget != nullptr)
 	{
-		print(TEXT("Testing"));
+		//print(TEXT("Testing"));
 		//LockToTarget(NewCameraTarget);
 	}
 }
@@ -106,7 +106,7 @@ void UPlayerLockArmComponent::ToggleSoftLock()
 
 	if (bUseSoftLock)
 	{
-		print(TEXT("Soft-lock enabled"));
+		//print(TEXT("Soft-lock enabled"));
 		
 		bSoftlockRequireReset = false;
 		
@@ -116,7 +116,7 @@ void UPlayerLockArmComponent::ToggleSoftLock()
 	{
 		
 		BreakTargetLock();
-		print(TEXT("Soft-lock disabled"));
+		//print(TEXT("Soft-lock disabled"));
 	
 	}
 }
