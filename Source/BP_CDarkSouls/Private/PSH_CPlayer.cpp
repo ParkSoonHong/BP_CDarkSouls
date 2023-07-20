@@ -17,6 +17,8 @@
 #include "PKM_OLDDS.h"
 #include "OSY_Pursuer.h"
 #include "Components/CapsuleComponent.h"
+#include "Blueprint/UserWidget.h"
+
 
 // Sets default values
 APSH_CPlayer::APSH_CPlayer()
@@ -102,6 +104,17 @@ APSH_CPlayer::APSH_CPlayer()
 	GetMesh()->SetCollisionProfileName("Player");
 	compSword->SetCollisionProfileName("PlayerWeapon");
 	
+	ConstructorHelpers::FClassFinder<UUserWidget>tempDieWidget(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/ParkSoonHong/WB_PSH_Die.WB_PSH_Die_C'"));
+	if (tempDieWidget.Succeeded())
+	{
+		compDieWidget = tempDieWidget.Class;
+	}
+
+	ConstructorHelpers::FObjectFinder<USoundBase> tempDieSound(TEXT("/Script/Engine.SoundWave'/Game/ParkSoonHong/sound/dark-souls-you-died-sound-effect.dark-souls-you-died-sound-effect'"));
+		if (tempDieWidget.Succeeded())
+		{
+			dieSound = tempDieSound.Object;
+		}
 
 	compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	compShield->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -137,6 +150,13 @@ void APSH_CPlayer::Tick(float DeltaTime)
 		restTime();
 	}
 
+	if (curTime > runTime)
+	{
+		curStamina -= 0.1;
+		retunSpeed = runSpeed;  // 달리기로 바꾸기
+		isRun = true;
+	}
+
 	if (isRun) // 달리는 상태면
 	{
 		Run();
@@ -145,6 +165,14 @@ void APSH_CPlayer::Tick(float DeltaTime)
 	if (isTimeOn)
 	{
 		curTime += DeltaTime;
+	}
+
+	if (isDie)
+	{
+		if (curTime >= 5)
+		{
+			UGameplayStatics::OpenLevel(this,FName("Start"));
+		}
 	}
 
 }
@@ -353,10 +381,15 @@ void APSH_CPlayer::Shild()
 
 void APSH_CPlayer::RifeTime()
 {
-
+	isRun = true;
+	isAttack = true;
+	PlayingAttack = true;
+	isRoll = false;
+	isBackStep = false;
 	curHp += 5;
 	anim->PlayRifeTimeAnimation();
 }
+
 
 void APSH_CPlayer::Damaged(float value)
 {
@@ -371,28 +404,43 @@ void APSH_CPlayer::Damaged(float value)
 	}
 	else
 	{
-		curHp = 0;
-		Destroy();
+		Die();
+		isTimeOn = true;
+		isDie = true;
 	}
+
 }
+
+void APSH_CPlayer::Die()
+{
+	CreateWidget(GetWorld(),compDieWidget)->AddToViewport();
+	UGameplayStatics::PlaySound2D(GetWorld(),dieSound);
+	anim->PlayDeadAnimation();
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+}
+
 void APSH_CPlayer::PressedSpacebar()
 {
 	isTimeOn = true;
 	if (isPressedForwardMovekey || isPressedRightMovekey) //입력이 있을때
 	{
-		if (curTime >= runTime) 
-		{
-			retunSpeed = runSpeed;  // 달리기로 바꾸기
-			isRun = true;
-		}
+// 		if (curTime > runTime) 
+// 		{
+// 			UE_LOG(LogTemp,Warning,TEXT("RUN"));
+// 			curStamina -= 25 * curTime;
+// 			retunSpeed = runSpeed;  // 달리기로 바꾸기
+// 			isRun = true;
+// 		}
 		
 	}
 	else
 	{
 		if (!isBackStep)
 		{
-		BackStep();
-		isBackStep = true;
+			curStamina -= 20;
+			BackStep();
+			isBackStep = true;
 		}
 	}
 	
@@ -407,6 +455,7 @@ void APSH_CPlayer::ReleasedSpacebar()
 		{	
 			if (!isRoll)
 			{
+				curStamina -= 30;
 				Roll();
 				isRoll = true;
 			}
@@ -442,17 +491,15 @@ void APSH_CPlayer::restTime()
 void APSH_CPlayer::Run()
 {
 	isRest = false;
-	curStamina -= 25 * GetWorld()->DeltaTimeSeconds;
 }
 
 void APSH_CPlayer::Roll()
 {	
 	anim->PlayRollAnimation();
-	curStamina -= 30;
 }
 
 void APSH_CPlayer::BackStep()
 {
 	anim->PlayBackStepAnimation();
-	curStamina -= 20;
+
 }

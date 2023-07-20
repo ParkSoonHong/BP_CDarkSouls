@@ -61,6 +61,11 @@ UPlayerAnim::UPlayerAnim()
 		RifeTimeMontage = tempLife.Object;
 	}
 
+	ConstructorHelpers::FObjectFinder<UAnimMontage>tempDead(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/Ani/MT_Dead.MT_Dead'"));
+	if (tempDead.Succeeded())
+	{
+		deadMontage = tempDead.Object;
+	}
 }
 void UPlayerAnim::NativeUpdateAnimation(float DeltaSeconds)
 {
@@ -94,13 +99,18 @@ void UPlayerAnim::AnimNotify_AttackEnd() // 어택 끝났어
 {
 	Player->PlayingAttack = true;
 	Player->iscombo = false;
+	Player->comboCount = 0;
 	Player->compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Player->isRoll = false;
+	Player->isBackStep = false;
 }
 
 void UPlayerAnim::AnimNotify_StartAttack() // 공격 시작
 {
 	Player->compSword->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	/*Player->PlayingAttack = false;*/
+	Player->PlayingAttack = false;
+	Player->isRoll=false;
+	Player->isBackStep=true;
 }
 
 void UPlayerAnim::AnimNotify_ComboAttack() // 콤보 할거야?
@@ -111,6 +121,10 @@ void UPlayerAnim::AnimNotify_ComboAttack() // 콤보 할거야?
 
 void UPlayerAnim::AnimNotify_BackstetpTime()
 {
+	
+	Player->isAttack = true;
+	Player->PlayingAttack = true;
+	Player->isRoll = false;
 	Player->isBackStep = false;
 }
 
@@ -119,6 +133,10 @@ void UPlayerAnim::AnimNotify_BackstetpTime()
 void UPlayerAnim::AnimNotify_RollEnd()
 {
 	Player->isRoll = false;
+	Player->isAttack = true;
+	Player->PlayingAttack = true;
+	
+	Player->isBackStep = false;
 }
 
 void UPlayerAnim::AnimNotify_endHardAttack()
@@ -131,26 +149,34 @@ void UPlayerAnim::AnimNotify_endHardAttack()
 void UPlayerAnim::AnimNotify_HitEnd()
 {
 	Player->isAttack = true;
-	Player->isRoll = true;
-	Player->isBackStep = true;
+	Player->isRoll = false;
+	Player->isBackStep = false;
 	Player->PlayingAttack = true;
 }
 
 void UPlayerAnim::PlayRollAnimation()
 {
 	Montage_Play(RollMontage);
-	
+	Player->isAttack = false;
+	Player->PlayingAttack = false;
+	Player->isBackStep = true;
 }
 
 void UPlayerAnim::PlayBackStepAnimation()
 {
 	Montage_Play(BackStepMontage);
+	Player->isAttack = false;
+	Player->PlayingAttack = false;
+	Player->isBackStep = true;
 }
 
 
 void UPlayerAnim::PlayDamgedAnimation()
 {
 	Montage_Play(DamageMontage);
+	Player->isAttack = false;
+	Player->PlayingAttack = false;
+	Player->isBackStep = true;
 }
 
 void UPlayerAnim::PlayAttackAnimation()
@@ -186,5 +212,10 @@ void UPlayerAnim::PlayParryAnimation()
 void UPlayerAnim::PlayRifeTimeAnimation()
 {
 	Montage_Play(RifeTimeMontage);
+}
+
+void UPlayerAnim::PlayDeadAnimation()
+{
+	Montage_Play(deadMontage);
 }
 
