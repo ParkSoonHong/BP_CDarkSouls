@@ -181,7 +181,7 @@ void UOSY_PursuerFSM::AttackState()
 		else
 		{
 			int percent= FMath::RandRange(1,3);
-			percent = 3;
+			
 			if (percent > 2)
 			{
 				// attack1·Î°¡
@@ -289,7 +289,7 @@ void UOSY_PursuerFSM::Attack1_1State()
 	if (anim->bAttack1_1Play == false)
 	{
 		int Attack1_2Random=FMath::RandRange(1,2);
-		Attack1_2Random = 1;
+		
 		if (Attack1_2Random > 1)
 		{
 			me->compSword->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
