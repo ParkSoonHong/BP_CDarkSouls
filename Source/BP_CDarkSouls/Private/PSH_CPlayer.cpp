@@ -316,16 +316,13 @@ void APSH_CPlayer::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedCompon
 void APSH_CPlayer::Attack()
 {
 	if(PlayingAttack) // 공격 할수 있니?
-	{ 
-		
+	{ 	
 			anim->PlayAttackAnimation();
-			compSword->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 			comboCount++;
 		
 		if (comboCount > 1) // 콤보가 트루야?
 		{
 				anim->PlayAttackAnimation2();
-				compSword->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);	
 				comboCount = 0;
 		}
 		
@@ -356,8 +353,9 @@ void APSH_CPlayer::Shild()
 
 void APSH_CPlayer::RifeTime()
 {
-	
+
 	curHp += 5;
+	anim->PlayRifeTimeAnimation();
 }
 
 void APSH_CPlayer::Damaged(float value)
@@ -365,8 +363,11 @@ void APSH_CPlayer::Damaged(float value)
 	if (curHp - value > 0)
 	{
 		curHp -= value;
+		isRoll = false;
+		isAttack = false;
+		PlayingAttack = false;
 		anim->PlayDamgedAnimation();
-		UE_LOG(LogTemp, Warning, TEXT("damage"));
+		UE_LOG(LogTemp, Warning, TEXT("damage&d"),curHp);
 	}
 	else
 	{

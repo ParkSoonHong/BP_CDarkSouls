@@ -99,7 +99,8 @@ void UPlayerAnim::AnimNotify_AttackEnd() // 어택 끝났어
 
 void UPlayerAnim::AnimNotify_StartAttack() // 공격 시작
 {
-	Player->PlayingAttack = false;
+	Player->compSword->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	/*Player->PlayingAttack = false;*/
 }
 
 void UPlayerAnim::AnimNotify_ComboAttack() // 콤보 할거야?
@@ -125,6 +126,14 @@ void UPlayerAnim::AnimNotify_endHardAttack()
 	Player->isAttack = true;
 	Player->compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
+}
+
+void UPlayerAnim::AnimNotify_HitEnd()
+{
+	Player->isAttack = true;
+	Player->isRoll = true;
+	Player->isBackStep = true;
+	Player->PlayingAttack = true;
 }
 
 void UPlayerAnim::PlayRollAnimation()

@@ -91,6 +91,9 @@ public:
 	UFUNCTION()
 	void AnimNotify_endHardAttack();
 
+	UFUNCTION()
+	void AnimNotify_HitEnd();
+
 
 
 	void PlayRollAnimation();
