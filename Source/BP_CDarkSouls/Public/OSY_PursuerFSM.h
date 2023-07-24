@@ -88,8 +88,18 @@ public: //Idle 加己
 	float RushDistance = 5000;
 	float AttackStartDistance = 2000;
 	float BackstepStartDistance = 200;
-	float RushStartDistance = 1000;
+	float RushStartDistance = 600;
 	float RushAttackDistance = 500;
+
+
+	float rushstartDistance= 1000;
+	float attackstartDistance = 300;
+	float backstepstartDiatacne = 100;
+
+	float MoveRange =1000;
+	float AttackRange = 250;
+	float BackstepRange = 150;
+
 
 public: // Attack 加己
 

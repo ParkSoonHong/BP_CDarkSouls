@@ -14,7 +14,7 @@ AOSY_Pursuer::AOSY_Pursuer()
 
 
 	// Ω∫ƒÃ∑π≈ª-----------------------------------------------------------
-	ConstructorHelpers::FObjectFinder<USkeletalMesh> TempMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/OhSeYoung/Asset/The_Pursuer/PC_Computer_-_Dark_Souls_II_-_The_Pursuer/The_Pursuer/untitled_R1.untitled_R1'"));
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> TempMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/OhSeYoung/Beta/Asset/Model/With_Bone_Pursure.With_Bone_Pursure'"));
 
 	if (TempMesh.Succeeded())
 	{
@@ -31,8 +31,8 @@ AOSY_Pursuer::AOSY_Pursuer()
 	if (TempSwordMesh.Succeeded())
 	{
 		compSword->SetStaticMesh(TempSwordMesh.Object);
-		compSword->SetRelativeLocation(FVector(-26.13f,-3.71f,4.42f));
-		compSword->SetRelativeRotation(FRotator(9.41f,87.2f,-91.55f));
+		compSword->SetRelativeLocation(FVector(-10.18f,12.00f,-33.64f));
+		compSword->SetRelativeRotation(FRotator(2.22f,-14.53f,-8.93f));
 		compSword->SetRelativeScale3D(FVector(1));
 	}
 	// Ω«µÂ----------------------------------------------------------
@@ -43,8 +43,8 @@ AOSY_Pursuer::AOSY_Pursuer()
 	if (TempShieldMesh.Succeeded())
 	{
 		compShield->SetStaticMesh(TempShieldMesh.Object);
-		compShield->SetRelativeLocation(FVector(70.99f, -9.63f, 11.37f));
-		compShield->SetRelativeRotation(FRotator(-11.42f, 77.09f, 101.18f));
+		compShield->SetRelativeLocation(FVector(-4.99f, -0.47f, -77.90f));
+		compShield->SetRelativeRotation(FRotator(3.09f, -22.38f, 2.58f));
 		compShield->SetRelativeScale3D(FVector(1));
 	}
 	// FSM----------------------------------------------------------
@@ -70,7 +70,7 @@ AOSY_Pursuer::AOSY_Pursuer()
 void AOSY_Pursuer::BeginPlay()
 {
 	Super::BeginPlay();
-	// ¿Ã∞≈ ≈∞∏È ≈Õ¡¸
+
 
 }
 
