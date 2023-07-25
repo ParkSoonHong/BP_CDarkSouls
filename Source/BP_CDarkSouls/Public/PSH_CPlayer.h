@@ -115,10 +115,10 @@ public:
 	bool isTimeOn = false;
 
 	UPROPERTY(EditAnywhere,Category = "status")
-	bool isRoll = false;	// 스테미나 회복시간
+	bool isRoll = true;	
 
 	UPROPERTY(EditAnywhere)
-	bool isBackStep = false;
+	bool isBackStep = true;
 
 	bool isPressedForwardMovekey = false;
 	bool isPressedRightMovekey = false;
@@ -139,11 +139,23 @@ public:
 	int32 comboCount = 0;
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
-	bool PlayingAttack = true;
+		bool PlayingAttack = false; 
+
+	UPROPERTY(EditAnywhere, Category = "Attack")
+		bool isAttackTime = true;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UUserWidget> compDieWidget;
 	
+	UPROPERTY(EditAnywhere)
+	bool isMoving = true;
+
+	UPROPERTY(EditAnywhere)
+	bool isHearing = true;
+
+	UPROPERTY(EditAnywhere)
+	class UCapsuleComponent * SworldCollision;
+
 public:
 	/** Returns CameraBoom subobject **/
 	UFUNCTION(BlueprintCallable, Category = "Lock On Camera")
@@ -209,7 +221,7 @@ public:
 
 	void Shild();
 
-	void RifeTime();
+	void healing();
 
 	void Die();
 
@@ -228,5 +240,5 @@ public:
 	float maxHp = 5;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float  curHp = 5;
-	void Damaged(float value);
+	void Damaged(int value);
 };
