@@ -156,26 +156,31 @@ void UOSY_PursuerFSM::WalkState()
 	// Enemy forward 벡터가 direction 방향으로 일치시키고 싶다.
 	me->SetActorRotation(forward.Rotation());
 
-	if (distance > AttackRange)
+
+	currentTIme += me->GetWorld()->DeltaTimeSeconds;
+	if (currentTIme > DelayTime)
 	{
-		// 어택스테이트로 가
-		currentTIme = 0;
-		mState = EEnmeyState::Rush;
-		anim->animState = mState;
-	}
-	else if (distance > BackstepRange)
-	{
-		currentTIme = 0;
-		mState = EEnmeyState::Attack;
-		anim->animState = mState;
-	}
-	// 200보다 작다면
-	else
-	{
-		// 백스텝 스테이트로 가 
-		currentTIme = 0;
-		mState = EEnmeyState::Backstep;
-		anim->animState = mState;
+		if (distance > AttackRange)
+		{
+			// 어택스테이트로 가
+			currentTIme = 0;
+			mState = EEnmeyState::Rush;
+			anim->animState = mState;
+		}
+		else if (distance > BackstepRange)
+		{
+			currentTIme = 0;
+			mState = EEnmeyState::Attack;
+			anim->animState = mState;
+		}
+		// 200보다 작다면
+		else
+		{
+			// 백스텝 스테이트로 가 
+			currentTIme = 0;
+			mState = EEnmeyState::Backstep;
+			anim->animState = mState;
+		}
 	}
 
 	
@@ -410,36 +415,39 @@ void UOSY_PursuerFSM::BackstepState()
 	// Enemy forward 벡터가 direction 방향으로 일치시키고 싶다.
 	me->SetActorRotation(forward.Rotation());
 
-
-
-	anim->animState = mState;
-	
 	currentTIme +=GetWorld()->DeltaRealTimeSeconds;
-	float FastTime = 0.1f;
-	float SlowTime = 0.8f;
-	float EndTime = 1;
-	// 만약 현재시간이 패스트타임보다 작거나같으면,
-	if (currentTIme <= FastTime)
-	{
-		Backspeed = 500* sqrt(currentTIme/FastTime);
-		FVector P = me->GetActorLocation()+Direction*-1* Backspeed *GetWorld()->DeltaRealTimeSeconds;
-		me->SetActorLocation(P);
-	}
-	else if (currentTIme < SlowTime)
-	{
-		Backspeed = 500;
-		FVector P = me->GetActorLocation() + Direction * -1 * Backspeed * GetWorld()->DeltaRealTimeSeconds;
-		me->SetActorLocation(P);
-	}
-	else if (currentTIme < EndTime)
-	{
-		Backspeed = 500*(1-FMath::Pow(((currentTIme-SlowTime)/EndTime-SlowTime),2));
-	}
-	else
-	{
-		mState = EEnmeyState::Idle;
-		anim->animState = mState;
-	}
+	anim->animState = mState;
+	int backstep=FMath::RandRange(1,10);
+
+			float FastTime = 0.1f;
+			float SlowTime = 0.8f;
+			float EndTime = 1;
+			// 만약 현재시간이 패스트타임보다 작거나같으면,
+			if (currentTIme <= FastTime)
+			{
+				Backspeed = 500* sqrt(currentTIme/FastTime);
+				FVector P = me->GetActorLocation()+Direction*-1* Backspeed *GetWorld()->DeltaRealTimeSeconds;
+				me->SetActorLocation(P);
+			}
+			else if (currentTIme < SlowTime)
+			{
+				Backspeed = 500;
+				FVector P = me->GetActorLocation() + Direction * -1 * Backspeed * GetWorld()->DeltaRealTimeSeconds;
+				me->SetActorLocation(P);
+			}
+			else if (currentTIme < EndTime)
+			{
+				Backspeed = 500*(1-FMath::Pow(((currentTIme-SlowTime)/EndTime-SlowTime),2));
+			}
+			else
+			{
+			currentTIme=0;
+				mState = EEnmeyState::Idle;
+				anim->animState = mState;
+			}
+	
+	
+
 }
 
 void UOSY_PursuerFSM::DamageState()
