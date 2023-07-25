@@ -116,6 +116,13 @@ APSH_CPlayer::APSH_CPlayer()
 			dieSound = tempDieSound.Object;
 		}
 
+	SworldCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("SwordCollsion"));
+
+	SworldCollision->SetupAttachment(compSword);
+	SworldCollision->SetRelativeLocation(FVector(0,0,-50));
+	SworldCollision->SetCapsuleSize(10,80);
+
+	SworldCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	compShield->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	compShieldHendle->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -171,6 +178,7 @@ void APSH_CPlayer::Tick(float DeltaTime)
 	{
 		if (curTime >= 5)
 		{
+			curTime = 0;
 			UGameplayStatics::OpenLevel(this,FName("Start"));
 		}
 	}
@@ -200,21 +208,24 @@ void APSH_CPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction("HardAttack", IE_Pressed, this, &APSH_CPlayer::HardAttack);
 	PlayerInputComponent->BindAction("Parry", IE_Pressed, this, &APSH_CPlayer::Parry);
 
-	PlayerInputComponent->BindAction("RifeTime", IE_Pressed, this, &APSH_CPlayer::RifeTime);
+	PlayerInputComponent->BindAction("RifeTime", IE_Pressed, this, &APSH_CPlayer::healing);
 }
 
 
 void APSH_CPlayer::MoveForward(float Val)
 {
-	if ((Controller != NULL) && (Val != 0.0f))
+	if (isMoving)
 	{
-		// find out which way is forward
-		const FRotator Rotation = CameraLockArm->CameraTarget == nullptr ? Controller->GetControlRotation() : (CameraLockArm->CameraTarget->GetOwner()->GetActorLocation() - GetActorLocation()).GetSafeNormal().Rotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
+		if ((Controller != NULL) && (Val != 0.0f))
+		{
+			// find out which way is forward
+			const FRotator Rotation = CameraLockArm->CameraTarget == nullptr ? Controller->GetControlRotation() : (CameraLockArm->CameraTarget->GetOwner()->GetActorLocation() - GetActorLocation()).GetSafeNormal().Rotation();
+			const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-		// get forward vector
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		AddMovementInput(Direction, Val);
+			// get forward vector
+			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+			AddMovementInput(Direction, Val);
+		}
 	}
 
 	if (Val != 0) // 움직이고 있다.
@@ -229,15 +240,18 @@ void APSH_CPlayer::MoveForward(float Val)
 
 void APSH_CPlayer::MoveRight(float Val)
 {
-	if ((Controller != NULL) && (Val != 0.0f))
-	{
-		// find out which way is right
-		const FRotator Rotation = CameraLockArm->CameraTarget == nullptr ? Controller->GetControlRotation() : (CameraLockArm->CameraTarget->GetOwner()->GetActorLocation() - GetActorLocation()).GetSafeNormal().Rotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
+	if(isMoving)
+	{ 
+		if ((Controller != NULL) && (Val != 0.0f))
+		{
+			// find out which way is right
+			const FRotator Rotation = CameraLockArm->CameraTarget == nullptr ? Controller->GetControlRotation() : (CameraLockArm->CameraTarget->GetOwner()->GetActorLocation() - GetActorLocation()).GetSafeNormal().Rotation();
+			const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-		// get right vector 
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-		AddMovementInput(Direction, Val);
+			// get right vector 
+			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+			AddMovementInput(Direction, Val);
+		}
 	}
 
 	if (Val != 0) // 움직이고 있다.
@@ -322,15 +336,17 @@ void APSH_CPlayer::TickActor(float DeltaTime, enum ELevelTick TickType, FActorTi
 void APSH_CPlayer::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	OverlapOldDs = Cast<APKM_OLDDS>(UGameplayStatics::GetActorOfClass(GetWorld(), APKM_OLDDS::StaticClass()));
+
 	if (OverlapOldDs != nullptr)
 	{
 		OverlapOldDs->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		UE_LOG(LogTemp, Warning, TEXT("Overlap"));
 		Damaged(1);
 		UE_LOG(LogTemp, Warning, TEXT("%d"), curHp);
-
 	}
+
 	tagetPursuer = Cast<AOSY_Pursuer>(UGameplayStatics::GetActorOfClass(GetWorld(), AOSY_Pursuer::StaticClass()));
+
 	if (tagetPursuer != nullptr)
 	{
 		tagetPursuer->compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -343,7 +359,7 @@ void APSH_CPlayer::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedCompon
 
 void APSH_CPlayer::Attack()
 {
-	if(PlayingAttack) // 공격 할수 있니?
+	if(isAttackTime) // 공격 할수 있니?
 	{ 	
 			anim->PlayAttackAnimation();
 			comboCount++;
@@ -363,9 +379,6 @@ void APSH_CPlayer::HardAttack()
 	if(isAttack)
 	{ 
 	anim->PlayHardAttackAnimation();
-	compSword->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);	
-	isAttack = false;
-	//애니메이션 재생끝나면 노티파이로 compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision); PlayingAttack=false;
 	}
 }
 
@@ -379,30 +392,46 @@ void APSH_CPlayer::Shild()
 	anim->PlayShildAnimation();
 }
 
-void APSH_CPlayer::RifeTime()
+void APSH_CPlayer::healing()
 {
-	isRun = true;
-	isAttack = true;
-	PlayingAttack = true;
-	isRoll = false;
-	isBackStep = false;
+	if (isHearing)
+	{
 	curHp += 5;
-	anim->PlayRifeTimeAnimation();
+	anim->PlayHealingAnimation();
+	}
 }
 
 
-void APSH_CPlayer::Damaged(float value)
+void APSH_CPlayer::Damaged(int value)
 {
-	if (curHp - value > 0)
+// 	if (curHp - value > 0)
+// 	{
+// 		curHp -= value;
+// 		anim->PlayDamgedAnimation();
+// 		UE_LOG(LogTemp, Warning, TEXT("damage&d"),curHp);
+// 	}
+// 	else
+	switch (value)
 	{
-		curHp -= value;
-		isRoll = false;
-		isAttack = false;
-		PlayingAttack = false;
+	case 1:
 		anim->PlayDamgedAnimation();
-		UE_LOG(LogTemp, Warning, TEXT("damage&d"),curHp);
+		curHp -= value;
+		UE_LOG(LogTemp, Warning, TEXT("hit1"));
+	break;
+	case 2:
+		anim->PlayDamgedAnimation2();
+		curHp -= value;
+		UE_LOG(LogTemp, Warning, TEXT("hit2"));
+	break;
+	case 3:
+		anim->PlayDamgedAnimation3();
+		curHp -= value;
+		UE_LOG(LogTemp, Warning, TEXT("hit3"));
+	default:
+		break;
 	}
-	else
+	
+	if(curHp<=0)
 	{
 		Die();
 		isTimeOn = true;
@@ -425,22 +454,15 @@ void APSH_CPlayer::PressedSpacebar()
 	isTimeOn = true;
 	if (isPressedForwardMovekey || isPressedRightMovekey) //입력이 있을때
 	{
-// 		if (curTime > runTime) 
-// 		{
-// 			UE_LOG(LogTemp,Warning,TEXT("RUN"));
-// 			curStamina -= 25 * curTime;
-// 			retunSpeed = runSpeed;  // 달리기로 바꾸기
-// 			isRun = true;
-// 		}
-		
+
 	}
-	else
+	else // 방향키 입력이 없을때
 	{
-		if (!isBackStep)
+		if (isBackStep) // is backstep이 true이면 백스텝을 해라.
 		{
 			curStamina -= 20;
 			BackStep();
-			isBackStep = true;
+			isBackStep = false;
 		}
 	}
 	
@@ -453,11 +475,11 @@ void APSH_CPlayer::ReleasedSpacebar()
 		
 		if (curTime < runTime)
 		{	
-			if (!isRoll)
+			if (isRoll)
 			{
 				curStamina -= 30;
 				Roll();
-				isRoll = true;
+				isRoll = false;
 			}
 
 		}
