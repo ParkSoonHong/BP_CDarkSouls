@@ -121,7 +121,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "FSM")
 	bool bDieAnimCheck=false;
 	
-
+	int32 TESTRand = 1;
 	float MovingSpeed=0;
 	int32 ComboCount = 0;
 	//연속공격 변수
@@ -165,6 +165,7 @@ public:
 	UPROPERTY(EditDefaultsOnly,Category="Effect")
 	class UParticleSystemComponent *DieEndEffect;
 
-
-
+	int32 High = 0;
+	FVector RangingLoc;
+	FVector RangeStartLoc;
 };

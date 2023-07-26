@@ -310,6 +310,7 @@ void UPKM_OLDDSFSM::AttackState()
 		7 래인지어택
 		*/
 		int32 RandAttack = FMath::RandRange(1, 7);
+		RandAttack = 7;
 		if (RandAttack == 1)
 		{
 			currentTime = 0;
@@ -901,6 +902,7 @@ void UPKM_OLDDSFSM::RangeAttackState()
 				RangeAttackEffect=UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), RangeAttackFactory,StormLoc);
 				RangeBallEffect = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), RangeAttackBallFactory,BallLoc);
 				bRangeAttackEffect = true;
+				RangingLoc = RangeStartLoc;
 			}
 			RangeAttackEffect->SetWorldScale3D(FVector(0.3*currentTime, 0.3*currentTime, 1));
 			RangeBallEffect->SetWorldScale3D(FVector(2*currentTime, 2*currentTime, 1));
@@ -908,11 +910,14 @@ void UPKM_OLDDSFSM::RangeAttackState()
 		else if (currentTime < 2)//벌리기
 		{
 			bRangeAttackAnimCheck = true;
+			Me->HitComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			RangeAttackEffect->SetWorldScale3D(FVector(4* ((currentTime - 1) / 1), 4* ((currentTime - 1) / 1), 1));
 			FVector BallP0 = RangeBallEffect->GetComponentLocation();
 			FVector Balldis = Me->GetActorForwardVector();
 			FVector Ballvt=180*Balldis*GetWorld()->DeltaRealTimeSeconds;
 			FVector BallP=BallP0+Ballvt;
+			RangingLoc.Z = RangeStartLoc.Z+500*(currentTime - 2);
+			Me->SetActorLocation(RangingLoc);
 			RangeBallEffect->SetWorldLocation(BallP);
 			if (!bRangeAttackHit)
 			{
@@ -926,6 +931,8 @@ void UPKM_OLDDSFSM::RangeAttackState()
 		else if (currentTime < 3)//좁히기
 		{
 			RangeAttackEffect->SetWorldScale3D(FVector(4-4 * ((currentTime - 2) / 1), 4-4 * ((currentTime - 2) / 1), 1));
+			RangingLoc.Z = RangeStartLoc.Z + 500-500 * (currentTime - 3);
+			Me->SetActorLocation(RangingLoc);
 			if (!bRangeAttackHit)
 			{
 				if (RangeDistance.Size() < 800 - 800 * ((currentTime - 2) / 1))
@@ -948,6 +955,7 @@ void UPKM_OLDDSFSM::RangeAttackState()
 			//RangeAttackEffect->FinishDestroy();
 			bRangeAttackAnimCheck = false;
 			UE_LOG(LogTemp, Log, TEXT("RangeEnd"));
+			Me->HitComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 			mState = EEnemyState::Idle;
 		}
 	}
