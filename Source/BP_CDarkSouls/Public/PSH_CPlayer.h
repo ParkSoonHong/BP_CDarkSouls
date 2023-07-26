@@ -82,14 +82,14 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Setings")
-	float walkSpeed = 600;
+	float walkSpeed = 500;
 	// 뛰기 속도
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Setings")
 	float runSpeed = 800;
 
 	// 다시 바뀔 속도
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Setings")
-	float retunSpeed=600;
+	float retunSpeed=	500;
 
 	UPROPERTY(EditAnywhere,Category = "Setings")
 	bool isRun=false;
@@ -115,10 +115,10 @@ public:
 	bool isTimeOn = false;
 
 	UPROPERTY(EditAnywhere,Category = "status")
-	bool isRoll = false;	// 스테미나 회복시간
+	bool isRoll = true;	
 
 	UPROPERTY(EditAnywhere)
-	bool isBackStep = false;
+	bool isBackStep = true;
 
 	bool isPressedForwardMovekey = false;
 	bool isPressedRightMovekey = false;
@@ -129,6 +129,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	bool isAttack = true;
 
+	UPROPERTY(EditAnywhere,BlueprintReadOnly)
+	bool isDie = false;
+
 	UPROPERTY(EditAnywhere)
 	float iscombotime = 1.0;
 
@@ -136,9 +139,23 @@ public:
 	int32 comboCount = 0;
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
-	bool PlayingAttack = true;
+		bool PlayingAttack = false; 
 
+	UPROPERTY(EditAnywhere, Category = "Attack")
+		bool isAttackTime = true;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UUserWidget> compDieWidget;
 	
+	UPROPERTY(EditAnywhere)
+	bool isMoving = true;
+
+	UPROPERTY(EditAnywhere)
+	bool isHearing = true;
+
+	UPROPERTY(EditAnywhere)
+	class UCapsuleComponent * SworldCollision;
+
 public:
 	/** Returns CameraBoom subobject **/
 	UFUNCTION(BlueprintCallable, Category = "Lock On Camera")
@@ -166,6 +183,8 @@ public:
 	class UStaticMeshComponent* PlayerWeaponComp;
 	UPROPERTY(EditAnywhere)
 	class UPlayerAnim * anim;
+	UPROPERTY(EditAnywhere)
+	class USoundBase * dieSound;
 
 	
 	/** Called for forwards/backward input */
@@ -202,7 +221,9 @@ public:
 
 	void Shild();
 
-	void RifeTime();
+	void healing();
+
+	void Die();
 
 
 
@@ -216,8 +237,8 @@ public:
 	float PKMCurrentTime;
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly)
-	float maxHp = 10;
+	float maxHp = 5;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float  curHp = 10;
-	void Damaged(float value);
+	float  curHp = 5;
+	void Damaged(int value);
 };

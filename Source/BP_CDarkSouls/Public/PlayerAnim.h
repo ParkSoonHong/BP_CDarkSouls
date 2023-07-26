@@ -49,7 +49,16 @@ public:
 	class UAnimMontage* DamageMontage;
 
 	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
-	class UAnimMontage* RifeTimeMontage;
+	class UAnimMontage* DamageMontage2;
+
+	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
+	class UAnimMontage* DamageMontage3;
+
+	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
+	class UAnimMontage* healingMontage;
+
+	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
+	class UAnimMontage* deadMontage;
 
 	UPROPERTY()
 	class APSH_CPlayer * Player;
@@ -94,20 +103,28 @@ public:
 	UFUNCTION()
 	void AnimNotify_HitEnd();
 
+	UFUNCTION()
+	void AnimNotify_endHeling();
+	
+	UFUNCTION()
+	void AnimNotify_movingOn();
+
 
 
 	void PlayRollAnimation();
 	void PlayBackStepAnimation();
 	void PlayDamgedAnimation();
+	void PlayDamgedAnimation2();
+	void PlayDamgedAnimation3();
 	void PlayAttackAnimation();
 	void PlayAttackAnimation2();
 
 	void PlayHardAttackAnimation();
 	void PlayShildAnimation();
 	void PlayParryAnimation();
-	void PlayRifeTimeAnimation();
+	void PlayHealingAnimation();
+	void PlayDeadAnimation();
 
-	void PostInitializeComponents();
 
 public:
 	UPlayerAnim();
