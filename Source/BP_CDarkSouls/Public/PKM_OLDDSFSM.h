@@ -209,4 +209,13 @@ public:
 	UPROPERTY(EditDefaultsOnly,Category="Sound")
 	class USoundBase* Sting2Sound;
 	bool bSting2Sound = false;
+
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* MapSound;
+
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class UAudioComponent* MapAudio;
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* DieBloodSound;
+
 };

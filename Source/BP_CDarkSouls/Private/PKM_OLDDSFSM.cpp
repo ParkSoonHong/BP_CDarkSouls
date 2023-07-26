@@ -7,6 +7,7 @@
 #include "PKM_OLDDS.h"
 #include "Components/CapsuleComponent.h"
 #include <Particles/ParticleSystemComponent.h>
+#include <Components/AudioComponent.h>
 // Sets default values for this component's properties
 UPKM_OLDDSFSM::UPKM_OLDDSFSM()
 {
@@ -70,6 +71,18 @@ UPKM_OLDDSFSM::UPKM_OLDDSFSM()
 	{
 		Sting2Sound = TempSting2Sound.Object;
 	}
+
+	ConstructorHelpers::FObjectFinder<USoundBase>TempMapSound(TEXT("/Script/Engine.SoundWave'/Game/ParkKyoungMin/Sound/OLDDSMAPSound.OLDDSMAPSound'"));
+	if (TempMapSound.Succeeded())
+	{
+		MapSound = TempMapSound.Object;
+	}
+
+	ConstructorHelpers::FObjectFinder<USoundBase>TempDieBloodSound(TEXT("/Script/Engine.SoundWave'/Game/ParkKyoungMin/Sound/blood.blood'"));
+	if (TempDieBloodSound.Succeeded())
+	{
+		DieBloodSound = TempDieBloodSound.Object;
+	}
 }
 
 
@@ -82,6 +95,8 @@ void UPKM_OLDDSFSM::BeginPlay()
 	Target = Cast<APSH_CPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), APSH_CPlayer::StaticClass()));
 	Me = Cast<APKM_OLDDS>(GetOwner());
 	Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	MapAudio=UGameplayStatics::CreateSound2D(GetWorld(), MapSound);
+	MapAudio->Play();
 }
 
 
@@ -360,11 +375,11 @@ void UPKM_OLDDSFSM::AttackState()
 		2 스팅
 		3 투핸드스팅
 		4 레이즈업
-		5 테이크다운 -- 삭제
-		6 러쉬
-		7 래인지어택
+		//5 테이크다운 -- 삭제
+		5 러쉬
+		6 래인지어택
 		*/
-		int32 RandAttack = FMath::RandRange(1, 7);
+		int32 RandAttack = FMath::RandRange(1, 6);
 		if (RandAttack == 1)
 		{
 			currentTime = 0;
@@ -391,7 +406,7 @@ void UPKM_OLDDSFSM::AttackState()
 			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 			mState = EEnemyState::RaiseAttack;
 		}
-		else if (RandAttack == 6)
+		else if (RandAttack == 5)
 		{
 			currentTime = 0;
 			bRushdirCheck = false;
@@ -399,7 +414,7 @@ void UPKM_OLDDSFSM::AttackState()
 			mState = EEnemyState::RushAttack;
 
 		}
-		else if (RandAttack == 7)
+		else if (RandAttack == 6)
 		{
 			currentTime = 0;
 			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -424,8 +439,14 @@ void UPKM_OLDDSFSM::DamageState()
 void UPKM_OLDDSFSM::DieState()
 {
 	currentTime += GetWorld()->DeltaRealTimeSeconds;
+	if (currentTime<2)
+	{
+		MapAudio->SetVolumeMultiplier(1 - (currentTime / 2));
+	}
+
 	if (currentTime>1)
 	{
+
 		if (DieEndEffect==nullptr)
 		{
 			FVector DEELoc = Me->GetActorLocation();
@@ -437,6 +458,7 @@ void UPKM_OLDDSFSM::DieState()
 		{
 			if (!bDownKneeSound)
 			{
+				MapAudio->Stop();
 				UGameplayStatics::PlaySoundAtLocation(GetWorld(), DownKneeSound, Me->GetActorLocation());
 				bDownKneeSound = true;
 			}
@@ -452,10 +474,13 @@ void UPKM_OLDDSFSM::DieState()
 	}
 	if (currentTime > 8)
 	{
+		DieEffect->Complete();
+		DieEndEffect->Complete();
 		DieEndStartEffect = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DieEndStartFactory, Me->GetActorLocation());
 		DieEndStartEffect->SetWorldScale3D(FVector(10,10,0.1));
 		//DieEndEffect->DestroyComponent();
 		//DieEndEffect->EndPlay(EEndPlayReason::Destroyed);
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), DieBloodSound, Me->GetActorLocation());
 		Me->Destroy();
 	}
 }
