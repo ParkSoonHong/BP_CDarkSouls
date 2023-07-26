@@ -360,12 +360,11 @@ void UPKM_OLDDSFSM::AttackState()
 		2 스팅
 		3 투핸드스팅
 		4 레이즈업
-		5 테이크다운
+		5 테이크다운 -- 삭제
 		6 러쉬
 		7 래인지어택
 		*/
 		int32 RandAttack = FMath::RandRange(1, 7);
-		RandAttack = 4;
 		if (RandAttack == 1)
 		{
 			currentTime = 0;
@@ -391,12 +390,6 @@ void UPKM_OLDDSFSM::AttackState()
 			currentTime = 0;
 			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 			mState = EEnemyState::RaiseAttack;
-		}
-		else if (RandAttack == 5)
-		{
-			currentTime = 0;
-			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-			mState = EEnemyState::TakeDownAttack;
 		}
 		else if (RandAttack == 6)
 		{
@@ -675,7 +668,7 @@ void UPKM_OLDDSFSM::StingAttackState()
 	{	
 		if (ComboCount < 1)
 		{
-			int32 RandCombo = FMath::RandRange(1, 7);
+			int32 RandCombo = FMath::RandRange(1, 6);
 	
 			if (RandCombo == 1)
 			{
@@ -796,7 +789,7 @@ void UPKM_OLDDSFSM::StingTwoAttackState()
 		bSting2Sound = false;
 		if (ComboCount<1)
 		{
-			int32 RandCombo = FMath::RandRange(1,7);
+			int32 RandCombo = FMath::RandRange(1,6);
 			if (RandCombo==1)
 			{
 				ComboCount++;
@@ -914,7 +907,7 @@ void UPKM_OLDDSFSM::SwingAttackState()
 
 		if (ComboCount < 1)
 		{
-			int32 RandCombo = FMath::RandRange(1, 7);
+			int32 RandCombo = FMath::RandRange(1, 6);
 			if (RandCombo == 1)
 			{
 				ComboCount = 0;
@@ -1115,7 +1108,7 @@ void UPKM_OLDDSFSM::RaiseAttackState()
 		bSwingSound = false;
 		if (ComboCount < 1)
 		{
-			int32 RandCombo = FMath::RandRange(1, 7);
+			int32 RandCombo = FMath::RandRange(1, 6);
 			if (RandCombo == 1)
 			{
 				ComboCount++;
