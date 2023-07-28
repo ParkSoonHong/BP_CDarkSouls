@@ -144,9 +144,18 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Attack")
 		bool isAttackTime = true;
 
+	UPROPERTY(EditAnywhere, Category = "Attack")
+		bool isDamaged = false;
+
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UUserWidget> compDieWidget;
-	
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UUserWidget> playMainWidget;
+
+	UPROPERTY(EditAnywhere)
+	class UPSH_Shield* shield;
+
 	UPROPERTY(EditAnywhere)
 	bool isMoving = true;
 
@@ -156,6 +165,16 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UCapsuleComponent * SworldCollision;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool isDefense = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool isDefenseTime = false;
+
+	UPROPERTY(EditAnywhere)
+	float MovePower = 100.0f;
+
+
 public:
 	/** Returns CameraBoom subobject **/
 	UFUNCTION(BlueprintCallable, Category = "Lock On Camera")
@@ -163,12 +182,6 @@ public:
 	/** Returns FollowCamera subobject **/
 	UFUNCTION(BlueprintCallable, Category = "Lock On Camera")
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-
-	UPROPERTY(EditAnywhere)
-	class UStaticMeshComponent* compShield;
-
-	UPROPERTY(EditAnywhere)
-	class UStaticMeshComponent* compShieldHendle;
 
 	UPROPERTY(EditAnywhere)
 	class UStaticMeshComponent* compSword;
@@ -185,7 +198,8 @@ public:
 	class UPlayerAnim * anim;
 	UPROPERTY(EditAnywhere)
 	class USoundBase * dieSound;
-
+	UPROPERTY(EditAnywhere)
+	class UParticleSystem* blood;
 	
 	/** Called for forwards/backward input */
 	void MoveForward(float Value);
@@ -219,11 +233,14 @@ public:
 
 	void Parry();
 
-	void Shild();
+	void DefenseOn();
+	void DefenseOff();
 
 	void healing();
 
 	void Die();
+
+	void changeWeapon();
 
 
 
@@ -240,5 +257,7 @@ public:
 	float maxHp = 5;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float  curHp = 5;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float  curHped = 5;
 	void Damaged(int value);
 };

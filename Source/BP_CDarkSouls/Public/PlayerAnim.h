@@ -22,6 +22,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly,Category="Settings")
 	float diretion = 0;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite,Category="Settings")
+	bool isChange = true;
+
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
@@ -43,7 +46,7 @@ public:
 	class UAnimMontage* parryMontage;
 
 	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
-	class UAnimMontage* ShildMontage;
+	class UAnimMontage* DefenseOnMontage;
 
 	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
 	class UAnimMontage* DamageMontage;
@@ -59,6 +62,12 @@ public:
 
 	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
 	class UAnimMontage* deadMontage;
+
+	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
+	class UAnimMontage* equipMontage;
+
+	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
+	class UAnimMontage* unequipMontage;
 
 	UPROPERTY()
 	class APSH_CPlayer * Player;
@@ -108,6 +117,15 @@ public:
 	
 	UFUNCTION()
 	void AnimNotify_movingOn();
+	
+	UFUNCTION()
+	void AnimNotify_Equip();
+	
+	UFUNCTION()
+	void AnimNotify_UnEquip();
+	
+	UFUNCTION()
+	void AnimNotify_endEquip();
 
 
 
@@ -120,10 +138,13 @@ public:
 	void PlayAttackAnimation2();
 
 	void PlayHardAttackAnimation();
-	void PlayShildAnimation();
+	void PlayDefenseOnAnimation();
+	
 	void PlayParryAnimation();
 	void PlayHealingAnimation();
 	void PlayDeadAnimation();
+	void PlayEquipAnimation();
+	void PlayUnEquipAnimation();
 
 
 public:

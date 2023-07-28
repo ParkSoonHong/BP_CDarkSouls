@@ -18,6 +18,8 @@
 #include "OSY_Pursuer.h"
 #include "Components/CapsuleComponent.h"
 #include "Blueprint/UserWidget.h"
+#include "PSH_Shield.h"
+#include "Particles/ParticleSystem.h"
 
 
 // Sets default values
@@ -26,28 +28,15 @@ APSH_CPlayer::APSH_CPlayer()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	compShield = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Shield"));
-	compShieldHendle = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ShieldHendle"));
 	compSword = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Sword"));
-	compShield->SetupAttachment(GetMesh(),TEXT("S_Shield"));
-	compShieldHendle->SetupAttachment(compShield);
+	shield = CreateDefaultSubobject<UPSH_Shield>(TEXT("ShieldComponent"));
+	
+	shield->SetupAttachment(GetMesh(),TEXT("S_Shield"));
 	compSword->SetupAttachment(GetMesh(),TEXT("S_Sword"));
 
-	ConstructorHelpers::FObjectFinder<UStaticMesh> tempShield(TEXT("/Script/Engine.StaticMesh'/Game/ParkSoonHong/Asset/Shield/shild_mesh0.shild_mesh0'"));
-	if (tempShield.Succeeded())
-	{
-		compShield->SetStaticMesh(tempShield.Object);
-	}
-
-	ConstructorHelpers::FObjectFinder<UStaticMesh> tempShieldHendle(TEXT("/Script/Engine.StaticMesh'/Game/ParkSoonHong/Asset/Shield/shild_mesh1.shild_mesh1'"));
-
-	if (tempShieldHendle.Succeeded())
-	{
-		compShieldHendle->SetStaticMesh(tempShieldHendle.Object);
-	}
 	
 	ConstructorHelpers::FObjectFinder<UStaticMesh> tempSword(TEXT("/Script/Engine.StaticMesh'/Game/ParkSoonHong/Asset/Sword/sowrd.sowrd'"));
-	if (tempShield.Succeeded())
+	if (tempSword.Succeeded())
 	{
 		compSword->SetStaticMesh(tempSword.Object);
 	}
@@ -110,11 +99,23 @@ APSH_CPlayer::APSH_CPlayer()
 		compDieWidget = tempDieWidget.Class;
 	}
 
+	ConstructorHelpers::FClassFinder<UUserWidget>tmepPlayMainWidget(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/BP_GamPlayMain.BP_GamPlayMain_C'"));
+	if (tmepPlayMainWidget.Succeeded())
+	{
+		playMainWidget = tmepPlayMainWidget.Class;
+	}
+
 	ConstructorHelpers::FObjectFinder<USoundBase> tempDieSound(TEXT("/Script/Engine.SoundWave'/Game/ParkSoonHong/sound/dark-souls-you-died-sound-effect.dark-souls-you-died-sound-effect'"));
-		if (tempDieWidget.Succeeded())
-		{
+	if (tempDieWidget.Succeeded())
+	{
 			dieSound = tempDieSound.Object;
-		}
+	}
+
+	ConstructorHelpers::FObjectFinder<UParticleSystem> tmepblood(TEXT("/Script/Engine.ParticleSystem'/Game/Realistic_Starter_VFX_Pack_Vol2/Particles/Blood/P_Blood_Splat_Cone.P_Blood_Splat_Cone'"));
+	if (tmepblood.Succeeded())
+	{
+		blood = tmepblood.Object;
+	}
 
 	SworldCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("SwordCollsion"));
 
@@ -124,8 +125,7 @@ APSH_CPlayer::APSH_CPlayer()
 
 	SworldCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	compShield->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	compShieldHendle->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	shield->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 // Called when the game starts or when spawned
@@ -138,6 +138,12 @@ void APSH_CPlayer::BeginPlay()
 	curStamina = maxStamina;
 	anim = Cast<UPlayerAnim>(GetMesh()->GetAnimInstance());
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &APSH_CPlayer::OnComponentBeginOverlap);
+
+	compSword->SetVisibility(false);
+	shield->SetVisibility(false);
+	
+	CreateWidget(GetWorld(), playMainWidget)->AddToViewport();
+	
 }
 
 // Called every frame
@@ -182,7 +188,21 @@ void APSH_CPlayer::Tick(float DeltaTime)
 			UGameplayStatics::OpenLevel(this,FName("Start"));
 		}
 	}
+	GetCharacterMovement()->MaxWalkSpeed = FMath::Lerp(GetCharacterMovement()->MaxWalkSpeed, retunSpeed, 2 * DeltaTime);
 
+	if(!isDefense)
+	{
+	anim->Montage_JumpToSection(FName("defenceEnd"), anim->DefenseOnMontage);
+	}
+
+	if (isDamaged)
+	{
+		curHped -= 0.025;
+		if (curHped <= curHp)
+		{
+			isDamaged = false;
+		}
+	}
 }
 
 // Called to bind functionality to input
@@ -206,9 +226,15 @@ void APSH_CPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &APSH_CPlayer::Attack);
 	PlayerInputComponent->BindAction("HardAttack", IE_Pressed, this, &APSH_CPlayer::HardAttack);
+
 	PlayerInputComponent->BindAction("Parry", IE_Pressed, this, &APSH_CPlayer::Parry);
 
+	PlayerInputComponent->BindAction("Defense", IE_Pressed, this, &APSH_CPlayer::DefenseOn);
+	PlayerInputComponent->BindAction("Defense", IE_Released, this, &APSH_CPlayer::DefenseOff);
+
 	PlayerInputComponent->BindAction("RifeTime", IE_Pressed, this, &APSH_CPlayer::healing);
+
+	PlayerInputComponent->BindAction("WeaponChange",IE_Pressed, this,&APSH_CPlayer::changeWeapon);
 }
 
 
@@ -329,30 +355,40 @@ void APSH_CPlayer::TickActor(float DeltaTime, enum ELevelTick TickType, FActorTi
 		// Update control rotation to face target
 		GetController()->SetControlRotation(NewRot);
 	}
-	GetCharacterMovement()->MaxWalkSpeed = FMath::Lerp(GetCharacterMovement()->MaxWalkSpeed, retunSpeed, 2 * DeltaTime);
-
+	
 }
 
 void APSH_CPlayer::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	OverlapOldDs = Cast<APKM_OLDDS>(UGameplayStatics::GetActorOfClass(GetWorld(), APKM_OLDDS::StaticClass()));
-
-	if (OverlapOldDs != nullptr)
-	{
-		OverlapOldDs->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		UE_LOG(LogTemp, Warning, TEXT("Overlap"));
-		Damaged(1);
-		UE_LOG(LogTemp, Warning, TEXT("%d"), curHp);
-	}
-
 	tagetPursuer = Cast<AOSY_Pursuer>(UGameplayStatics::GetActorOfClass(GetWorld(), AOSY_Pursuer::StaticClass()));
 
-	if (tagetPursuer != nullptr)
+	if (!isDefenseTime)
 	{
-		tagetPursuer->compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		UE_LOG(LogTemp, Warning, TEXT("Overlap"));
-		Damaged(1);
+		if (OverlapOldDs != nullptr)
+		{
+			OverlapOldDs->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			UE_LOG(LogTemp, Warning, TEXT("Overlap"));
+			Damaged(1);
+			UE_LOG(LogTemp, Warning, TEXT("%d"), curHp);
+		}
+
+		if (tagetPursuer != nullptr)
+		{
+			tagetPursuer->compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			UE_LOG(LogTemp, Warning, TEXT("Overlap"));
+			Damaged(1);
+		}
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(),blood,GetActorLocation(),FRotator::ZeroRotator);
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("DefenseHit"));
+		FVector NewPosition = GetActorLocation() - GetActorForwardVector() * MovePower;
+		FVector dir = FMath::Lerp(GetActorLocation(),GetActorForwardVector()*MovePower,0.05f*GetWorld()->DeltaTimeSeconds);
+		SetActorLocation(dir);
+	}
+
 }
 
 //PKMWrite
@@ -384,20 +420,45 @@ void APSH_CPlayer::HardAttack()
 
 void APSH_CPlayer::Parry()
 {
+	if(isDefense)
+	{ 
 	anim->PlayParryAnimation();
+	UE_LOG(LogTemp, Warning, TEXT("Parry"));
+	}
 }
 
-void APSH_CPlayer::Shild()
+void APSH_CPlayer::DefenseOn() // 다른 행동이 실행 되면 이전 몽타주 
 {
-	anim->PlayShildAnimation();
+	UE_LOG(LogTemp,Warning,TEXT("Defense"));
+	if(isDefense)
+	{ 
+		anim->PlayDefenseOnAnimation();
+		isDefenseTime = true;
+	}
+}
+
+void APSH_CPlayer::DefenseOff()
+{
+	if (isDefense)
+	{
+		anim->Montage_JumpToSection(FName("defenceEnd"), anim->DefenseOnMontage);
+		isDefenseTime = false;
+	}
 }
 
 void APSH_CPlayer::healing()
 {
 	if (isHearing)
 	{
-	curHp += 5;
-	anim->PlayHealingAnimation();
+		anim->PlayHealingAnimation();
+		if (curHp >= 10)
+		{
+			curHp = 10;
+		}
+		else
+		{
+			curHp += 5;
+		}
 	}
 }
 
@@ -411,21 +472,24 @@ void APSH_CPlayer::Damaged(int value)
 // 		UE_LOG(LogTemp, Warning, TEXT("damage&d"),curHp);
 // 	}
 // 	else
-	switch (value)
+	switch (value) // value 가 데미지. 데미지만큼 깍아야하는데....
 	{
 	case 1:
 		anim->PlayDamgedAnimation();
 		curHp -= value;
+		isDamaged = true;
 		UE_LOG(LogTemp, Warning, TEXT("hit1"));
 	break;
 	case 2:
 		anim->PlayDamgedAnimation2();
 		curHp -= value;
+		isDamaged = true;
 		UE_LOG(LogTemp, Warning, TEXT("hit2"));
 	break;
 	case 3:
 		anim->PlayDamgedAnimation3();
 		curHp -= value;
+		isDamaged = true;
 		UE_LOG(LogTemp, Warning, TEXT("hit3"));
 	default:
 		break;
@@ -447,6 +511,21 @@ void APSH_CPlayer::Die()
 	anim->PlayDeadAnimation();
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
+}
+
+void APSH_CPlayer::changeWeapon()
+{
+	// 트루이면 무기 들고 아니면 무기 안듬.
+	if(anim->isChange) // 만약 바꿀게 가 들어오면
+	{ 
+		anim->PlayEquipAnimation();
+		anim->isChange = false;
+	}
+	else
+	{
+		anim->PlayUnEquipAnimation();
+		anim->isChange = true;
+	}
 }
 
 void APSH_CPlayer::PressedSpacebar()
