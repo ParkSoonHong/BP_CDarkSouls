@@ -127,6 +127,9 @@ public:
 	UFUNCTION()
 	void AnimNotify_endEquip();
 
+	UFUNCTION()
+	void AnimNotify_ParryEnd();
+
 
 
 	void PlayRollAnimation();

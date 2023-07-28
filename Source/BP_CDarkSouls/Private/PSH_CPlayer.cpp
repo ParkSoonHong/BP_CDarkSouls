@@ -423,6 +423,7 @@ void APSH_CPlayer::Parry()
 	if(isDefense)
 	{ 
 	anim->PlayParryAnimation();
+	isParry = true;
 	UE_LOG(LogTemp, Warning, TEXT("Parry"));
 	}
 }

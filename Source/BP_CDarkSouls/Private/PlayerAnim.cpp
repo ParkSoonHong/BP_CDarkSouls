@@ -235,6 +235,11 @@ void UPlayerAnim::AnimNotify_endEquip()
 	Player->isDefense = true;
 }
 
+void UPlayerAnim::AnimNotify_ParryEnd()
+{
+	Player->isParry = false;
+}
+
 void UPlayerAnim::PlayRollAnimation()
 {
 	Montage_Play(RollMontage);

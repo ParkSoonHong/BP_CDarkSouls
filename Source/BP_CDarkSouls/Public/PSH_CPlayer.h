@@ -174,6 +174,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	float MovePower = 100.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool isParry = false;
 
 public:
 	/** Returns CameraBoom subobject **/
