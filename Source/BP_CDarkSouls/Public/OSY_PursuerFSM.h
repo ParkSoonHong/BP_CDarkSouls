@@ -136,7 +136,24 @@ public:	//애니관련
 
 	UPROPERTY(EditDefaultsOnly,Category="Effect")
 	class UParticleSystemComponent *DieEndEffect;
-	
 
+	UPROPERTY(EditDefaultsOnly,Category="Sounds")
+	class USoundBase *RushSound;
+	bool bRushSound=false;
+
+	UPROPERTY(EditDefaultsOnly,Category="Sounds")
+	class USoundBase *RushAttackSound;
+	bool bRushAttackSound=false;
+
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* MapSound;
 	
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* ReactSound;
+
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class UAudioComponent* MapAudio;
+
+	FVector JumpStartloc;
+	bool bcheckrushattackloc = false;
 };

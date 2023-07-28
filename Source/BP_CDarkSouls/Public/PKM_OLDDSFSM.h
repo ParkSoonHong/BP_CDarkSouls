@@ -121,7 +121,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "FSM")
 	bool bDieAnimCheck=false;
 	
-
+	int32 TESTRand = 1;
 	float MovingSpeed=0;
 	int32 ComboCount = 0;
 	//연속공격 변수
@@ -165,6 +165,57 @@ public:
 	UPROPERTY(EditDefaultsOnly,Category="Effect")
 	class UParticleSystemComponent *DieEndEffect;
 
+	int32 High = 0;
+	FVector RangingLoc;
+	FVector RangeStartLoc;
 
+
+
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* RushChargeSound;
+	
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* RushSound;
+	bool bRushSound = false;
+
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* RangeChargeSound;
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* RangeSound;
+	bool bRangeSound = false;
+
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* SwingSound;
+	bool bSwingSound = false;
+
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* BackStepSound;
+	bool bBackStepSound = false;
+
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* DamageSound;
+
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* DownKneeSound;
+	bool bDownKneeSound = false;
+
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* DeadSound;
+	bool bDeadSound = false;
+
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* StingSound;
+	bool bStingSound = false;
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* Sting2Sound;
+	bool bSting2Sound = false;
+
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* MapSound;
+
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class UAudioComponent* MapAudio;
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* DieBloodSound;
 
 };

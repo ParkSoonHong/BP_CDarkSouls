@@ -7,6 +7,7 @@
 #include "PKM_OLDDS.h"
 #include "Components/CapsuleComponent.h"
 #include <Particles/ParticleSystemComponent.h>
+#include <Components/AudioComponent.h>
 // Sets default values for this component's properties
 UPKM_OLDDSFSM::UPKM_OLDDSFSM()
 {
@@ -15,6 +16,73 @@ UPKM_OLDDSFSM::UPKM_OLDDSFSM()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	// ...
+	ConstructorHelpers::FObjectFinder<USoundBase>TempRushChargeSound(TEXT("/Script/Engine.SoundWave'/Game/ParkKyoungMin/Sound/RushCharge.RushCharge'"));
+	if (TempRushChargeSound.Succeeded())
+	{
+		RushChargeSound = TempRushChargeSound.Object;
+	}
+	ConstructorHelpers::FObjectFinder<USoundBase>TempRushSound(TEXT("/Script/Engine.SoundWave'/Game/ParkKyoungMin/Sound/Rush.Rush'"));
+	if (TempRushSound.Succeeded())
+	{
+		RushSound = TempRushSound.Object;
+	}
+	ConstructorHelpers::FObjectFinder<USoundBase>TempRangeChargeSound(TEXT("/Script/Engine.SoundWave'/Game/ParkKyoungMin/Sound/RangeAttackCharge.RangeAttackCharge'"));
+	if (TempRangeChargeSound.Succeeded())
+	{
+		RangeChargeSound = TempRangeChargeSound.Object;
+	}
+	ConstructorHelpers::FObjectFinder<USoundBase>TempRangeSound(TEXT("/Script/Engine.SoundWave'/Game/ParkKyoungMin/Sound/RangeShock.RangeShock'"));
+	if (TempRangeSound.Succeeded())
+	{
+		RangeSound = TempRangeSound.Object;
+	}
+	ConstructorHelpers::FObjectFinder<USoundBase>TempSwingSound(TEXT("/Script/Engine.SoundWave'/Game/ParkKyoungMin/Sound/swing.swing'"));
+	if (TempSwingSound.Succeeded())
+	{
+		SwingSound = TempSwingSound.Object;
+	}
+	ConstructorHelpers::FObjectFinder<USoundBase>TempBackStepSound(TEXT("/Script/Engine.SoundWave'/Game/ParkKyoungMin/Sound/BackStep.BackStep'"));
+	if (TempBackStepSound.Succeeded())
+	{
+		BackStepSound = TempBackStepSound.Object;
+	}
+	ConstructorHelpers::FObjectFinder<USoundBase>TempDamageSound(TEXT("/Script/Engine.SoundWave'/Game/ParkKyoungMin/Sound/damaged.damaged'"));
+	if (TempDamageSound.Succeeded())
+	{
+		DamageSound = TempDamageSound.Object;
+	}
+	ConstructorHelpers::FObjectFinder<USoundBase>TempDownKneeSound(TEXT("/Script/Engine.SoundWave'/Game/ParkKyoungMin/Sound/downs-knee.downs-knee'"));
+	if (TempDownKneeSound.Succeeded())
+	{
+		DownKneeSound = TempDownKneeSound.Object;
+	}
+	ConstructorHelpers::FObjectFinder<USoundBase>TempDeadSound(TEXT("/Script/Engine.SoundWave'/Game/ParkKyoungMin/Sound/dead.dead'"));
+	if (TempDeadSound.Succeeded())
+	{
+		DeadSound = TempDeadSound.Object;
+	}
+	ConstructorHelpers::FObjectFinder<USoundBase>TempStingSound(TEXT("/Script/Engine.SoundWave'/Game/ParkKyoungMin/Sound/sting.sting'"));
+	if (TempStingSound.Succeeded())
+	{
+		StingSound = TempStingSound.Object;
+	}
+	ConstructorHelpers::FObjectFinder<USoundBase>TempSting2Sound(TEXT("/Script/Engine.SoundWave'/Game/ParkKyoungMin/Sound/sting2.sting2'"));
+	if (TempSting2Sound.Succeeded())
+	{
+		Sting2Sound = TempSting2Sound.Object;
+	}
+
+	ConstructorHelpers::FObjectFinder<USoundBase>TempMapSound(TEXT("/Script/Engine.SoundWave'/Game/ParkKyoungMin/Sound/OLDDSMAPSound.OLDDSMAPSound'"));
+	if (TempMapSound.Succeeded())
+	{
+		MapSound = TempMapSound.Object;
+	}
+
+	ConstructorHelpers::FObjectFinder<USoundBase>TempDieBloodSound(TEXT("/Script/Engine.SoundWave'/Game/ParkKyoungMin/Sound/blood.blood'"));
+	if (TempDieBloodSound.Succeeded())
+	{
+		DieBloodSound = TempDieBloodSound.Object;
+	}
 }
 
 
@@ -27,6 +95,8 @@ void UPKM_OLDDSFSM::BeginPlay()
 	Target = Cast<APSH_CPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), APSH_CPlayer::StaticClass()));
 	Me = Cast<APKM_OLDDS>(GetOwner());
 	Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	MapAudio=UGameplayStatics::CreateSound2D(GetWorld(), MapSound);
+	MapAudio->Play();
 }
 
 
@@ -199,7 +269,7 @@ void UPKM_OLDDSFSM::RunState()
 		}
 		else if (distance < RunRange)
 		{
-			Moving(200, direction);
+			Moving(500, direction);
 		}
 		else {
 			UE_LOG(LogTemp, Log, TEXT("switchIdle"));
@@ -250,11 +320,11 @@ void UPKM_OLDDSFSM::MoveState()
 	}
 	else if (distance < MoveRange)
 	{
-		if (MovingSpeed > 200)
+		if (MovingSpeed > 300)
 		{
-			MovingSpeed = 200;
+			MovingSpeed = 300;
 		}
-		Moving(200, direction);
+		Moving(300, direction);
 	}
 	else if (distance < RunRange)
 	{
@@ -305,11 +375,11 @@ void UPKM_OLDDSFSM::AttackState()
 		2 스팅
 		3 투핸드스팅
 		4 레이즈업
-		5 테이크다운
-		6 러쉬
-		7 래인지어택
+		//5 테이크다운 -- 삭제
+		5 러쉬
+		6 래인지어택
 		*/
-		int32 RandAttack = FMath::RandRange(1, 7);
+		int32 RandAttack = FMath::RandRange(1, 6);
 		if (RandAttack == 1)
 		{
 			currentTime = 0;
@@ -339,18 +409,12 @@ void UPKM_OLDDSFSM::AttackState()
 		else if (RandAttack == 5)
 		{
 			currentTime = 0;
-			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-			mState = EEnemyState::TakeDownAttack;
-		}
-		else if (RandAttack == 6)
-		{
-			currentTime = 0;
 			bRushdirCheck = false;
 			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 			mState = EEnemyState::RushAttack;
 
 		}
-		else if (RandAttack == 7)
+		else if (RandAttack == 6)
 		{
 			currentTime = 0;
 			Me->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -375,8 +439,14 @@ void UPKM_OLDDSFSM::DamageState()
 void UPKM_OLDDSFSM::DieState()
 {
 	currentTime += GetWorld()->DeltaRealTimeSeconds;
+	if (currentTime<2)
+	{
+		MapAudio->SetVolumeMultiplier(1 - (currentTime / 2));
+	}
+
 	if (currentTime>1)
 	{
+
 		if (DieEndEffect==nullptr)
 		{
 			FVector DEELoc = Me->GetActorLocation();
@@ -384,13 +454,33 @@ void UPKM_OLDDSFSM::DieState()
 			DieEndEffect = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DieEndFactory,DEELoc);
 			DieEndEffect->SetWorldScale3D(FVector(2,2,2));
 		}
+		if (currentTime >2.5)
+		{
+			if (!bDownKneeSound)
+			{
+				MapAudio->Stop();
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), DownKneeSound, Me->GetActorLocation());
+				bDownKneeSound = true;
+			}
+		}
+		if (currentTime>3)
+		{
+			if (!bDeadSound)
+			{
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeadSound, Me->GetActorLocation());
+				bDeadSound = true;
+			}
+		}
 	}
-	if (currentTime > 6)
+	if (currentTime > 8)
 	{
+		DieEffect->Complete();
+		DieEndEffect->Complete();
 		DieEndStartEffect = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DieEndStartFactory, Me->GetActorLocation());
 		DieEndStartEffect->SetWorldScale3D(FVector(10,10,0.1));
 		//DieEndEffect->DestroyComponent();
 		//DieEndEffect->EndPlay(EEndPlayReason::Destroyed);
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), DieBloodSound, Me->GetActorLocation());
 		Me->Destroy();
 	}
 }
@@ -446,6 +536,11 @@ void UPKM_OLDDSFSM::BackStepState()
 	if (currentTime <= FastTime)// 0~0.1
 	{
 		bBackStepAnimCheck = true;
+		if (!bBackStepSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), BackStepSound, Me->GetActorLocation());
+			bBackStepSound = true;
+		}
 		BackStepSpeed = 1000 * sqrt(currentTime / FastTime);
 		//UE_LOG(LogTemp, Log, TEXT("Time=%f BSS1%f"),currentTime,BackStepSpeed);
 		FVector vt = direction * -1 * BackStepSpeed * GetWorld()->DeltaTimeSeconds;
@@ -469,6 +564,7 @@ void UPKM_OLDDSFSM::BackStepState()
 	}
 	else
 	{
+		bBackStepSound = false;
 		UE_LOG(LogTemp, Log, TEXT("BackSEnd"));
 		bBackStepAnimCheck = false;
 		mState = EEnemyState::Idle;
@@ -477,10 +573,10 @@ void UPKM_OLDDSFSM::BackStepState()
 void UPKM_OLDDSFSM::RushAttackState()
 {
 	currentTime += GetWorld()->DeltaTimeSeconds;
-	float RushDelay = 0.3;
-	float FastTime = 0.5;
-	float SlowTime = 0.7;
-	float EndTime = 0.8;
+	float RushDelay = 1;
+	float FastTime = 1.2;
+	float SlowTime = 1.4;
+	float EndTime = 1.5;
 	FVector P0 = Me->GetActorLocation();
 	if (!bRushdirCheck) {
 		direction = Target->GetActorLocation() - P0;
@@ -493,17 +589,32 @@ void UPKM_OLDDSFSM::RushAttackState()
 		RushELoc.Z = RushELoc.Z + 60;
 		RushAttackEffect = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), RushAttackFactory, RushELoc);
 		RushAttackEffect->SetWorldScale3D(FVector(0,0,0));
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), RushChargeSound, MyLoc);
 	}
 	//FVector Forward = Me->GetActorForwardVector();
 	//Forward = FMath::Lerp<FVector, float>(Forward, direction, 5 * GetWorld()->DeltaTimeSeconds);
 	//GetOwner()->SetActorRotation(Forward.Rotation());
 	if (currentTime<=RushDelay)
 	{
-		bRushAnimCheck = true;
-		RushAttackEffect->SetWorldScale3D(FVector(3*(currentTime/0.3),3* (currentTime / 0.3),3* (currentTime / 0.3)));
+		if (currentTime<0.3)
+		{
+			RushAttackEffect->SetWorldScale3D(FVector(3 * (currentTime / 0.3), 3 * (currentTime / 0.3), 3 * (currentTime / 0.3)));
+		}
+		else if (currentTime<0.7)
+		{
+		}
+		else
+		{
+			bRushAnimCheck = true;
+		}
 	}
 	else if (currentTime <= FastTime)// 0~0.1
 	{
+		if (!bRushSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), RushSound, Me->GetActorLocation());
+			bRushSound = true;
+		}
 		BackStepSpeed = 2000 * sqrt(currentTime / FastTime);
 		//UE_LOG(LogTemp, Log, TEXT("Time=%f BSS1%f"),currentTime,BackStepSpeed);
 		FVector vt = direction * BackStepSpeed * GetWorld()->DeltaTimeSeconds;
@@ -530,6 +641,7 @@ void UPKM_OLDDSFSM::RushAttackState()
 	}
 	else if (currentTime < 3) {
 		bRushAnimCheck = false;
+		bRushSound = false;
 		Me->HitComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		RushAttackEffect->SetWorldScale3D(FVector(3-3*(currentTime-0.8)/2.2,3-3*(currentTime - 0.8) / 2.2,3-3* (currentTime - 0.8) / 2.2));
 	}
@@ -554,6 +666,7 @@ void UPKM_OLDDSFSM::StingAttackState()
 		direction.Normalize();
 		bStingdirCheck = true;
 		Me->SetActorRotation(direction.Rotation()*(currentTime/0.1));
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), StingSound, P0);
 	}
 	else if (currentTime < 0.1)
 	{
@@ -580,7 +693,7 @@ void UPKM_OLDDSFSM::StingAttackState()
 	{	
 		if (ComboCount < 1)
 		{
-			int32 RandCombo = FMath::RandRange(1, 7);
+			int32 RandCombo = FMath::RandRange(1, 6);
 	
 			if (RandCombo == 1)
 			{
@@ -683,6 +796,11 @@ void UPKM_OLDDSFSM::StingTwoAttackState()
 	}
 	else if (currentTime < 0.5)
 	{
+		if (!bSting2Sound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), Sting2Sound, P0);
+			bSting2Sound = true;
+		}
 		//UE_LOG(LogTemp, Log, TEXT("Time=%f BSS1%f"),currentTime,BackStepSpeed);
 		FVector vt = direction * StingSpeed * GetWorld()->DeltaTimeSeconds;
 		FVector P = P0 + vt;
@@ -690,13 +808,13 @@ void UPKM_OLDDSFSM::StingTwoAttackState()
 	}
 	else if (currentTime < 1.4)//후딜레이 0.5초
 	{
-
 	}
 	else
 	{
+		bSting2Sound = false;
 		if (ComboCount<1)
 		{
-			int32 RandCombo = FMath::RandRange(1,7);
+			int32 RandCombo = FMath::RandRange(1,6);
 			if (RandCombo==1)
 			{
 				ComboCount++;
@@ -781,6 +899,14 @@ void UPKM_OLDDSFSM::SwingAttackState()
 		direction.Z = 0;
 		Me->SetActorRotation(direction.Rotation() * (currentTime / 0.4));
 		//Me->spearComp->SetRelativeRotation(FRotator(0, 150 * currentTime / 0.4f, -20 * currentTime / 0.4f));
+		if (currentTime>0.2)
+		{
+			if (!bSwingSound)
+			{
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), SwingSound, Me->GetActorLocation());
+				bSwingSound = true;
+			}
+		}
 	}
 	else if (currentTime < 0.5)//휘두르기
 	{
@@ -788,10 +914,10 @@ void UPKM_OLDDSFSM::SwingAttackState()
 	}
 	else if (currentTime < 0.7)//후딜레이 0.2초
 	{
-
 	}
 	else if (currentTime < 1.1)
 	{
+		bSwingSound = false;
 		//Me->spearComp->SetRelativeRotation(FRotator(0, -150, 30-(50*(currentTime-0.7)/0.2f)));
 	}
 	else if (currentTime < 1.2)
@@ -806,7 +932,7 @@ void UPKM_OLDDSFSM::SwingAttackState()
 
 		if (ComboCount < 1)
 		{
-			int32 RandCombo = FMath::RandRange(1, 7);
+			int32 RandCombo = FMath::RandRange(1, 6);
 			if (RandCombo == 1)
 			{
 				ComboCount = 0;
@@ -900,19 +1026,39 @@ void UPKM_OLDDSFSM::RangeAttackState()
 				BallLoc.Z = BallLoc.Z + 50;
 				RangeAttackEffect=UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), RangeAttackFactory,StormLoc);
 				RangeBallEffect = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), RangeAttackBallFactory,BallLoc);
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), RangeChargeSound, MyLoc);
 				bRangeAttackEffect = true;
+				RangeStartLoc = MyLoc;
+				RangingLoc = RangeStartLoc;
 			}
 			RangeAttackEffect->SetWorldScale3D(FVector(0.3*currentTime, 0.3*currentTime, 1));
 			RangeBallEffect->SetWorldScale3D(FVector(2*currentTime, 2*currentTime, 1));
 		}
 		else if (currentTime < 2)//벌리기
 		{
+
 			bRangeAttackAnimCheck = true;
+			if (!bRangeSound)
+			{
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), RangeSound, Me->GetActorLocation());
+				bRangeSound = true;
+			}
+			Me->HitComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			RangeAttackEffect->SetWorldScale3D(FVector(4* ((currentTime - 1) / 1), 4* ((currentTime - 1) / 1), 1));
 			FVector BallP0 = RangeBallEffect->GetComponentLocation();
 			FVector Balldis = Me->GetActorForwardVector();
 			FVector Ballvt=180*Balldis*GetWorld()->DeltaRealTimeSeconds;
 			FVector BallP=BallP0+Ballvt;
+			if (currentTime<1.7)
+			{
+				RangingLoc.Z = RangeStartLoc.Z + 300 * ((currentTime - 1)/0.7);
+				Me->SetActorLocation(RangingLoc);
+			}
+			else
+			{
+				RangingLoc.Z = RangeStartLoc.Z + 300 - 300 * ((currentTime - 1.7)/0.3);
+				Me->SetActorLocation(RangingLoc);
+			}
 			RangeBallEffect->SetWorldLocation(BallP);
 			if (!bRangeAttackHit)
 			{
@@ -944,10 +1090,12 @@ void UPKM_OLDDSFSM::RangeAttackState()
 		else
 		{
 			RangeBallEffect->DestroyComponent();
+			bRangeSound = false;
 			bRangeAttackEffect = false;
 			//RangeAttackEffect->FinishDestroy();
 			bRangeAttackAnimCheck = false;
 			UE_LOG(LogTemp, Log, TEXT("RangeEnd"));
+			Me->HitComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 			mState = EEnemyState::Idle;
 		}
 	}
@@ -959,6 +1107,11 @@ void UPKM_OLDDSFSM::RaiseAttackState()
 	if (currentTime < 0.4)//들어올리기
 	{
 		bRaiseAttackAnimCheck = true;
+		if (!bSwingSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), SwingSound, Me->GetActorLocation());
+			bSwingSound = true;
+		}
 		direction = Target->GetActorLocation() - Me->GetActorLocation();
 		Me->SetActorRotation(direction.Rotation()*(currentTime/0.4));
 		//Me->spearComp->SetRelativeRotation(FRotator(0, 150 * currentTime / 0.4f, -20 * currentTime / 0.4f));
@@ -977,9 +1130,10 @@ void UPKM_OLDDSFSM::RaiseAttackState()
 	}
 	else
 	{
+		bSwingSound = false;
 		if (ComboCount < 1)
 		{
-			int32 RandCombo = FMath::RandRange(1, 7);
+			int32 RandCombo = FMath::RandRange(1, 6);
 			if (RandCombo == 1)
 			{
 				ComboCount++;
@@ -1107,9 +1261,11 @@ void UPKM_OLDDSFSM::ReciveDamage(float value)
 		{
 			OLDDSHP -= value;
 			UE_LOG(LogTemp, Log, TEXT("OLDDS OLDDSHP=%d"),OLDDSHP);
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), DamageSound, Me->GetActorLocation());
 		}
 		else
 		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), DamageSound, Me->GetActorLocation());
 			OLDDSHP = 0;
 			bBackStepAnimCheck = false;
 			bRushAnimCheck = false;

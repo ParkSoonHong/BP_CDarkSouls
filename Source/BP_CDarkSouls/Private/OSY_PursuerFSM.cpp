@@ -11,6 +11,7 @@
 #include "OSY_AnimInstance.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Components/CapsuleComponent.h"
+#include <Components/AudioComponent.h>
 
 
 // Sets default values for this component's properties
@@ -20,6 +21,24 @@ UOSY_PursuerFSM::UOSY_PursuerFSM()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
+	//-----------러시-------------------
+	ConstructorHelpers::FObjectFinder<USoundBase>tempRushSound(TEXT("/Script/Engine.SoundWave'/Game/OhSeYoung/Beta/Asset/Sound/RUSH.RUSH'"));
+	if (tempRushSound.Succeeded())
+	{
+		RushSound=tempRushSound.Object;
+	}
+	//-----------맞는소리-------------------
+	ConstructorHelpers::FObjectFinder<USoundBase>tempReactSound(TEXT("/Script/Engine.SoundWave'/Game/OhSeYoung/Beta/Asset/Sound/React__mp3cut_net_.React__mp3cut_net_'"));
+	if (tempReactSound.Succeeded())
+	{
+		ReactSound = tempReactSound.Object;
+	}
+	//-----------배경음-------------------
+	ConstructorHelpers::FObjectFinder<USoundBase>tempMapSound(TEXT("/Script/Engine.SoundWave'/Game/OhSeYoung/Beta/Asset/Sound/Map__mp3cut_net_.Map__mp3cut_net_'"));
+	if (tempRushSound.Succeeded())
+	{
+		MapSound = tempMapSound.Object;
+	}
 	// ...
 }
 
@@ -36,6 +55,9 @@ void UOSY_PursuerFSM::BeginPlay()
 
 	//UOSY_AnimInstance* 할당
 	anim = Cast<UOSY_AnimInstance>(me->GetMesh()->GetAnimInstance());
+
+	MapAudio = UGameplayStatics::CreateSound2D(GetWorld(), MapSound);
+	MapAudio->Play();
 	
 	
 }
@@ -130,9 +152,20 @@ void UOSY_PursuerFSM::IdleState()
 		}
 		else
 		{
+			int Random=FMath::RandRange(1,10);
+			if (Random > 3)
+			{
 			currentTIme = 0;
 			mState = EEnmeyState::Backstep;
 			anim->animState = mState;
+			}
+			else
+			{
+				currentTIme = 0;
+				anim->bAttack2Play = true;
+				mState = EEnmeyState::Attack2;
+				anim->animState = mState;
+			}
 		}
 
 	}
@@ -155,28 +188,42 @@ void UOSY_PursuerFSM::WalkState()
 	forward = FMath::Lerp(forward, Direction, 5 * GetWorld()->DeltaTimeSeconds);
 	// Enemy forward 벡터가 direction 방향으로 일치시키고 싶다.
 	me->SetActorRotation(forward.Rotation());
+	
 
-	if (distance > AttackRange)
-	{
-		// 어택스테이트로 가
-		currentTIme = 0;
-		mState = EEnmeyState::Rush;
-		anim->animState = mState;
-	}
-	else if (distance > BackstepRange)
-	{
-		currentTIme = 0;
-		mState = EEnmeyState::Attack;
-		anim->animState = mState;
-	}
-	// 200보다 작다면
-	else
-	{
-		// 백스텝 스테이트로 가 
-		currentTIme = 0;
-		mState = EEnmeyState::Backstep;
-		anim->animState = mState;
-	}
+	currentTIme += me->GetWorld()->DeltaTimeSeconds;
+
+		if (distance > AttackRange)
+		{
+			// 어택스테이트로 가
+			currentTIme = 0;
+			mState = EEnmeyState::Rush;
+			anim->animState = mState;
+		}
+		else if (distance > BackstepRange)
+		{
+			currentTIme = 0;
+			mState = EEnmeyState::Attack;
+			anim->animState = mState;
+		}
+		// 200보다 작다면
+		else
+		{
+			int Random = FMath::RandRange(1, 10);
+			if (Random > 3)
+			{
+				currentTIme = 0;
+				mState = EEnmeyState::Backstep;
+				anim->animState = mState;
+			}
+			else
+			{
+				currentTIme = 0;
+				anim->bAttack2Play = true;
+				mState = EEnmeyState::Attack2;
+				anim->animState = mState;
+			}
+		}
+
 
 	
 }
@@ -197,35 +244,48 @@ void UOSY_PursuerFSM::RushState()
 	// Enemy forward 벡터가 direction 방향으로 일치시키고 싶다.
 	me->SetActorRotation(forward.Rotation());
 
+
+	
 	currentTIme += GetWorld()->DeltaTimeSeconds;
 	float FastTime = 0.1;
 	float SlowTime = 0.8;
 	float EndTime = 2;
 	// 만약 현재시간이 페스트타임보다 작거나 같다면
-	if (currentTIme <= FastTime)
+	if (distance>AttackRange)
 	{
-		// 러시스피드를 살짝 느리게 한다
-		Rushspeed = 2500 * sqrt(currentTIme / FastTime);
-		FVector P = me->GetActorLocation() + Direction * Rushspeed * GetWorld()->DeltaRealTimeSeconds;
-		me->SetActorLocation(P);
+		if (currentTIme <= FastTime)
+		{
+			// 러시스피드를 살짝 느리게 한다
+			Rushspeed = 2500 * sqrt(currentTIme / FastTime);
+			FVector P = me->GetActorLocation() + Direction * Rushspeed * GetWorld()->DeltaRealTimeSeconds;
+			me->SetActorLocation(P);
+		}
+		// 그렇지 않으면서 현재 시간이 슬로우타임보다 작다면 정속도로 움직인다.
+		else if (currentTIme < SlowTime)
+		{
+			if (!bRushSound)
+			{
+				//재생
+				bRushSound=true;
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), RushSound, me->GetActorLocation());
+			}
+			Rushspeed = 2500;
+			FVector P = me->GetActorLocation() + Direction * Rushspeed * GetWorld()->DeltaRealTimeSeconds;
+			me->SetActorLocation(P);
+		}
+		// 그것도 아니고 엔드타임보다 작다면 다시 느리게 움직인다.
+		else
+		{
+			Rushspeed = 2500 * (1 - FMath::Pow(((currentTIme / SlowTime) - (currentTIme / SlowTime)), 2));
+			FVector P = me->GetActorLocation() + Direction * Rushspeed * GetWorld()->DeltaRealTimeSeconds;
+			me->SetActorLocation(P);
+		}
 	}
-	// 그렇지 않으면서 현재 시간이 슬로우타임보다 작다면 정속도로 움직인다.
-	else if (currentTIme < SlowTime)
-	{
-		Rushspeed = 2500;
-		FVector P = me->GetActorLocation() + Direction * Rushspeed * GetWorld()->DeltaRealTimeSeconds;
-		me->SetActorLocation(P);
-	}
-	// 그것도 아니고 엔드타임보다 작다면 다시 느리게 움직인다.
 	else
 	{
-		Rushspeed = 2500 * (1 - FMath::Pow(((currentTIme / SlowTime) - (currentTIme / SlowTime)), 2));
-		FVector P = me->GetActorLocation() + Direction * Rushspeed * GetWorld()->DeltaRealTimeSeconds;
-		me->SetActorLocation(P);
-	}
-	if (distance < AttackRange && currentTIme>RushDelayTime)
-	{
+		bRushSound=false;
 		me->compSword->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		currentTIme=0;
 		mState = EEnmeyState::RushAttack;
 		anim->bRushAttackPlay = true;
 		anim->animState = mState;
@@ -237,25 +297,51 @@ void UOSY_PursuerFSM::RushState()
 void UOSY_PursuerFSM::RushAttackState()
 {
 	UE_LOG(LogTemp, Error, TEXT("RushAttack"))
-		FVector Direction = Target->GetActorLocation() - me->GetActorLocation();
+	FVector Direction = Target->GetActorLocation() - me->GetActorLocation();
 	float distance = Direction.Length();
 	Direction.Normalize();
-
-	UE_LOG(LogTemp, Error, TEXT("NowRUSHATTACK"))
+	
+	currentTIme += GetWorld()->DeltaTimeSeconds;
+	if (!bcheckrushattackloc)
+	{
+		JumpStartloc = me->GetActorLocation();
+		//me->HitComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		bcheckrushattackloc = true;
+	}
+	if (currentTIme < 0.7)
+	{
+		//암것도 안함
+	}
+	else if (currentTIme < 1.2)
+	{
+		FVector JumpLoc = JumpStartloc;
+		JumpLoc.Z += 100 * sqrt((currentTIme - 0.7) / 0.5);
+		me->SetActorLocation(JumpLoc);
+	}
+	else if (currentTIme < 1.5)
+	{
+		FVector JumpLoc = JumpStartloc;
+		JumpLoc.Z += 100 - 100 * ((currentTIme - 1.2) / 0.3) * ((currentTIme - 1.2) / 0.3);
+		me->SetActorLocation(JumpLoc);
+	}
+		UE_LOG(LogTemp, Error, TEXT("NowRUSHATTACK"))
 		// 러시어택을 플레이한다.
 
 		// 러시어택이 끝나면 대기로 돌아간다.
 		// 노티파이가 찍히면 스테이트를 바꿔라
+
+
+
 		if (anim->bRushAttackPlay == false)
 		{
 			UE_LOG(LogTemp, Error, TEXT("Succes"))
 				me->compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			mState = EEnmeyState::Idle;
 			anim->animState = mState;
-
+			bcheckrushattackloc=false;
 		}
-
-
+	
+	
 }
 
 
@@ -410,36 +496,39 @@ void UOSY_PursuerFSM::BackstepState()
 	// Enemy forward 벡터가 direction 방향으로 일치시키고 싶다.
 	me->SetActorRotation(forward.Rotation());
 
-
-
-	anim->animState = mState;
-	
 	currentTIme +=GetWorld()->DeltaRealTimeSeconds;
-	float FastTime = 0.1f;
-	float SlowTime = 0.8f;
-	float EndTime = 1;
-	// 만약 현재시간이 패스트타임보다 작거나같으면,
-	if (currentTIme <= FastTime)
-	{
-		Backspeed = 500* sqrt(currentTIme/FastTime);
-		FVector P = me->GetActorLocation()+Direction*-1* Backspeed *GetWorld()->DeltaRealTimeSeconds;
-		me->SetActorLocation(P);
-	}
-	else if (currentTIme < SlowTime)
-	{
-		Backspeed = 500;
-		FVector P = me->GetActorLocation() + Direction * -1 * Backspeed * GetWorld()->DeltaRealTimeSeconds;
-		me->SetActorLocation(P);
-	}
-	else if (currentTIme < EndTime)
-	{
-		Backspeed = 500*(1-FMath::Pow(((currentTIme-SlowTime)/EndTime-SlowTime),2));
-	}
-	else
-	{
-		mState = EEnmeyState::Idle;
-		anim->animState = mState;
-	}
+	anim->animState = mState;
+	int backstep=FMath::RandRange(1,10);
+
+			float FastTime = 0.1f;
+			float SlowTime = 0.8f;
+			float EndTime = 1;
+			// 만약 현재시간이 패스트타임보다 작거나같으면,
+			if (currentTIme <= FastTime)
+			{
+				Backspeed = 500* sqrt(currentTIme/FastTime);
+				FVector P = me->GetActorLocation()+Direction*-1* Backspeed *GetWorld()->DeltaRealTimeSeconds;
+				me->SetActorLocation(P);
+			}
+			else if (currentTIme < SlowTime)
+			{
+				Backspeed = 500;
+				FVector P = me->GetActorLocation() + Direction * -1 * Backspeed * GetWorld()->DeltaRealTimeSeconds;
+				me->SetActorLocation(P);
+			}
+			else if (currentTIme < EndTime)
+			{
+				Backspeed = 500*(1-FMath::Pow(((currentTIme-SlowTime)/EndTime-SlowTime),2));
+			}
+			else
+			{
+			currentTIme=0;
+				mState = EEnmeyState::Idle;
+				anim->animState = mState;
+			}
+	
+	
+
 }
 
 void UOSY_PursuerFSM::DamageState()
@@ -449,15 +538,36 @@ void UOSY_PursuerFSM::DamageState()
 
 void UOSY_PursuerFSM::DieState()
 {
+	if (anim->animState != mState)
+	{
+		UE_LOG(LogTemp,Log,TEXT("NODie"));
+	}
 	currentTIme += GetWorld()->DeltaRealTimeSeconds;
+	if (!bcheckrushattackloc)
+	{
+		JumpStartloc = me->GetActorLocation();
+		//me->HitComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		bcheckrushattackloc = true;
+	}
+	if (currentTIme < 2)
+	{
+		MapAudio->SetVolumeMultiplier(1 - (currentTIme / 2));
+	}
 	if (currentTIme > 1)
 	{
 		if (DieEndEffect == nullptr)
 		{
+			MapAudio->Stop();
 			FVector DEELoc = me->GetActorLocation();
 			DEELoc.Z -= 200;
 			DieEndEffect = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DieEndFactory, DEELoc);
 			DieEndEffect->SetWorldScale3D(FVector(2, 2, 2));
+		}
+		if (currentTIme<6)
+		{
+			FVector JumpLoc=JumpStartloc;
+			JumpLoc.Z+=100*((currentTIme-1)/5);
+			me->SetActorLocation(JumpLoc);
 		}
 	}
 	if (currentTIme > 6)
@@ -488,11 +598,13 @@ void UOSY_PursuerFSM::ReciveDamage(float value)
 
 	if (PURSUERHP - value > 0)
 	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ReactSound, me->GetActorLocation());
 		PURSUERHP -= value;
 		UE_LOG(LogTemp, Log, TEXT("PURSUER PURSUERHP=%d"), PURSUERHP);
 	}
 	else
 	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ReactSound, me->GetActorLocation());
 		PURSUERHP = 0;
 		anim->bAttack1_1Play = false;
 		anim->bAttack1_2Play = false;
@@ -506,6 +618,7 @@ void UOSY_PursuerFSM::ReciveDamage(float value)
 		currentTIme = 0;
 		UE_LOG(LogTemp, Log, TEXT("go die"));
 		mState = EEnmeyState::Die;
+		anim->animState = mState;
 	}
 }
 

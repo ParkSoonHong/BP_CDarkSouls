@@ -61,6 +61,7 @@ AOSY_Pursuer::AOSY_Pursuer()
 	HitComp->SetupAttachment(RootComponent);
 	HitComp->SetWorldScale3D(FVector(3, 3, 3));
 	HitComp->SetCollisionProfileName(TEXT("Pursuer"));
+	GetMesh()->SetCollisionProfileName(TEXT("Pursuer"));
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	HitComp->OnComponentBeginOverlap.AddDynamic(this, &AOSY_Pursuer::OnComponentBeginOverlap);
 
