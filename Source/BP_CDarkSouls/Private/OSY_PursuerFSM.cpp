@@ -130,9 +130,20 @@ void UOSY_PursuerFSM::IdleState()
 		}
 		else
 		{
+			int Random=FMath::RandRange(1,10);
+			if (Random > 3)
+			{
 			currentTIme = 0;
 			mState = EEnmeyState::Backstep;
 			anim->animState = mState;
+			}
+			else
+			{
+				currentTIme = 0;
+				anim->bAttack2Play = true;
+				mState = EEnmeyState::Attack2;
+				anim->animState = mState;
+			}
 		}
 
 	}
@@ -155,11 +166,10 @@ void UOSY_PursuerFSM::WalkState()
 	forward = FMath::Lerp(forward, Direction, 5 * GetWorld()->DeltaTimeSeconds);
 	// Enemy forward 벡터가 direction 방향으로 일치시키고 싶다.
 	me->SetActorRotation(forward.Rotation());
-
+	
 
 	currentTIme += me->GetWorld()->DeltaTimeSeconds;
-	if (currentTIme > DelayTime)
-	{
+
 		if (distance > AttackRange)
 		{
 			// 어택스테이트로 가
@@ -176,12 +186,22 @@ void UOSY_PursuerFSM::WalkState()
 		// 200보다 작다면
 		else
 		{
-			// 백스텝 스테이트로 가 
-			currentTIme = 0;
-			mState = EEnmeyState::Backstep;
-			anim->animState = mState;
+			int Random = FMath::RandRange(1, 10);
+			if (Random > 3)
+			{
+				currentTIme = 0;
+				mState = EEnmeyState::Backstep;
+				anim->animState = mState;
+			}
+			else
+			{
+				currentTIme = 0;
+				anim->bAttack2Play = true;
+				mState = EEnmeyState::Attack2;
+				anim->animState = mState;
+			}
 		}
-	}
+
 
 	
 }
@@ -242,11 +262,13 @@ void UOSY_PursuerFSM::RushState()
 void UOSY_PursuerFSM::RushAttackState()
 {
 	UE_LOG(LogTemp, Error, TEXT("RushAttack"))
-		FVector Direction = Target->GetActorLocation() - me->GetActorLocation();
+	FVector Direction = Target->GetActorLocation() - me->GetActorLocation();
 	float distance = Direction.Length();
 	Direction.Normalize();
-
-	UE_LOG(LogTemp, Error, TEXT("NowRUSHATTACK"))
+	
+	currentTIme += GetWorld()->DeltaTimeSeconds;
+	
+		UE_LOG(LogTemp, Error, TEXT("NowRUSHATTACK"))
 		// 러시어택을 플레이한다.
 
 		// 러시어택이 끝나면 대기로 돌아간다.
@@ -257,10 +279,9 @@ void UOSY_PursuerFSM::RushAttackState()
 				me->compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			mState = EEnmeyState::Idle;
 			anim->animState = mState;
-
 		}
-
-
+	
+	
 }
 
 
