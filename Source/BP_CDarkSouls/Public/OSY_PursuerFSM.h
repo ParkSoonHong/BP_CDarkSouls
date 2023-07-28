@@ -136,6 +136,14 @@ public:	//애니관련
 
 	UPROPERTY(EditDefaultsOnly,Category="Effect")
 	class UParticleSystemComponent *DieEndEffect;
+
+	UPROPERTY(EditDefaultsOnly,Category="Sounds")
+	class USoundBase *RushSound;
+	bool bRushSound=false;
+
+	UPROPERTY(EditDefaultsOnly,Category="Sounds")
+	class USoundBase *RushAttackSound;
+	bool bRushAttackSound=false;
 	
 
 	

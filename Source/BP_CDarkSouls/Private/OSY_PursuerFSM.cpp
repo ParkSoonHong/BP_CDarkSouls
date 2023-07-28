@@ -20,6 +20,14 @@ UOSY_PursuerFSM::UOSY_PursuerFSM()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
+	//-----------러시-------------------
+	ConstructorHelpers::FObjectFinder<USoundBase>tempRushSound(TEXT("/Script/Engine.SoundWave'/Game/OhSeYoung/Beta/Asset/Sound/RUSHSOUND.RUSHSOUND'"));
+	if (tempRushSound.Succeeded())
+	{
+		RushSound=tempRushSound.Object;
+	}
+	//-----------러시어택-------------------
+
 	// ...
 }
 
@@ -222,34 +230,46 @@ void UOSY_PursuerFSM::RushState()
 	// Enemy forward 벡터가 direction 방향으로 일치시키고 싶다.
 	me->SetActorRotation(forward.Rotation());
 
+
+	
 	currentTIme += GetWorld()->DeltaTimeSeconds;
 	float FastTime = 0.1;
 	float SlowTime = 0.8;
 	float EndTime = 2;
 	// 만약 현재시간이 페스트타임보다 작거나 같다면
-	if (currentTIme <= FastTime)
+	if (distance>AttackRange)
 	{
-		// 러시스피드를 살짝 느리게 한다
-		Rushspeed = 2500 * sqrt(currentTIme / FastTime);
-		FVector P = me->GetActorLocation() + Direction * Rushspeed * GetWorld()->DeltaRealTimeSeconds;
-		me->SetActorLocation(P);
+		if (currentTIme <= FastTime)
+		{
+			if (!bRushSound)
+			{
+				//재생
+				bRushSound=true;
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), RushSound, me->GetActorLocation());
+			}
+			// 러시스피드를 살짝 느리게 한다
+			Rushspeed = 2500 * sqrt(currentTIme / FastTime);
+			FVector P = me->GetActorLocation() + Direction * Rushspeed * GetWorld()->DeltaRealTimeSeconds;
+			me->SetActorLocation(P);
+		}
+		// 그렇지 않으면서 현재 시간이 슬로우타임보다 작다면 정속도로 움직인다.
+		else if (currentTIme < SlowTime)
+		{
+			Rushspeed = 2500;
+			FVector P = me->GetActorLocation() + Direction * Rushspeed * GetWorld()->DeltaRealTimeSeconds;
+			me->SetActorLocation(P);
+		}
+		// 그것도 아니고 엔드타임보다 작다면 다시 느리게 움직인다.
+		else
+		{
+			Rushspeed = 2500 * (1 - FMath::Pow(((currentTIme / SlowTime) - (currentTIme / SlowTime)), 2));
+			FVector P = me->GetActorLocation() + Direction * Rushspeed * GetWorld()->DeltaRealTimeSeconds;
+			me->SetActorLocation(P);
+		}
 	}
-	// 그렇지 않으면서 현재 시간이 슬로우타임보다 작다면 정속도로 움직인다.
-	else if (currentTIme < SlowTime)
-	{
-		Rushspeed = 2500;
-		FVector P = me->GetActorLocation() + Direction * Rushspeed * GetWorld()->DeltaRealTimeSeconds;
-		me->SetActorLocation(P);
-	}
-	// 그것도 아니고 엔드타임보다 작다면 다시 느리게 움직인다.
 	else
 	{
-		Rushspeed = 2500 * (1 - FMath::Pow(((currentTIme / SlowTime) - (currentTIme / SlowTime)), 2));
-		FVector P = me->GetActorLocation() + Direction * Rushspeed * GetWorld()->DeltaRealTimeSeconds;
-		me->SetActorLocation(P);
-	}
-	if (distance < AttackRange && currentTIme>RushDelayTime)
-	{
+		bRushSound=false;
 		me->compSword->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		mState = EEnmeyState::RushAttack;
 		anim->bRushAttackPlay = true;
@@ -273,6 +293,7 @@ void UOSY_PursuerFSM::RushAttackState()
 
 		// 러시어택이 끝나면 대기로 돌아간다.
 		// 노티파이가 찍히면 스테이트를 바꿔라
+
 		if (anim->bRushAttackPlay == false)
 		{
 			UE_LOG(LogTemp, Error, TEXT("Succes"))
