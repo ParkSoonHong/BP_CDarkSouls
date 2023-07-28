@@ -11,6 +11,7 @@
 #include "OSY_AnimInstance.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Components/CapsuleComponent.h"
+#include <Components/AudioComponent.h>
 
 
 // Sets default values for this component's properties
@@ -21,13 +22,23 @@ UOSY_PursuerFSM::UOSY_PursuerFSM()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	//-----------러시-------------------
-	ConstructorHelpers::FObjectFinder<USoundBase>tempRushSound(TEXT("/Script/Engine.SoundWave'/Game/OhSeYoung/Beta/Asset/Sound/RUSHSOUND.RUSHSOUND'"));
+	ConstructorHelpers::FObjectFinder<USoundBase>tempRushSound(TEXT("/Script/Engine.SoundWave'/Game/OhSeYoung/Beta/Asset/Sound/RUSH.RUSH'"));
 	if (tempRushSound.Succeeded())
 	{
 		RushSound=tempRushSound.Object;
 	}
-	//-----------러시어택-------------------
-
+	//-----------맞는소리-------------------
+	ConstructorHelpers::FObjectFinder<USoundBase>tempReactSound(TEXT("/Script/Engine.SoundWave'/Game/OhSeYoung/Beta/Asset/Sound/React__mp3cut_net_.React__mp3cut_net_'"));
+	if (tempReactSound.Succeeded())
+	{
+		ReactSound = tempReactSound.Object;
+	}
+	//-----------배경음-------------------
+	ConstructorHelpers::FObjectFinder<USoundBase>tempMapSound(TEXT("/Script/Engine.SoundWave'/Game/OhSeYoung/Beta/Asset/Sound/Map__mp3cut_net_.Map__mp3cut_net_'"));
+	if (tempRushSound.Succeeded())
+	{
+		MapSound = tempMapSound.Object;
+	}
 	// ...
 }
 
@@ -44,6 +55,9 @@ void UOSY_PursuerFSM::BeginPlay()
 
 	//UOSY_AnimInstance* 할당
 	anim = Cast<UOSY_AnimInstance>(me->GetMesh()->GetAnimInstance());
+
+	MapAudio = UGameplayStatics::CreateSound2D(GetWorld(), MapSound);
+	MapAudio->Play();
 	
 	
 }
@@ -241,12 +255,6 @@ void UOSY_PursuerFSM::RushState()
 	{
 		if (currentTIme <= FastTime)
 		{
-			if (!bRushSound)
-			{
-				//재생
-				bRushSound=true;
-				UGameplayStatics::PlaySoundAtLocation(GetWorld(), RushSound, me->GetActorLocation());
-			}
 			// 러시스피드를 살짝 느리게 한다
 			Rushspeed = 2500 * sqrt(currentTIme / FastTime);
 			FVector P = me->GetActorLocation() + Direction * Rushspeed * GetWorld()->DeltaRealTimeSeconds;
@@ -255,6 +263,12 @@ void UOSY_PursuerFSM::RushState()
 		// 그렇지 않으면서 현재 시간이 슬로우타임보다 작다면 정속도로 움직인다.
 		else if (currentTIme < SlowTime)
 		{
+			if (!bRushSound)
+			{
+				//재생
+				bRushSound=true;
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), RushSound, me->GetActorLocation());
+			}
 			Rushspeed = 2500;
 			FVector P = me->GetActorLocation() + Direction * Rushspeed * GetWorld()->DeltaRealTimeSeconds;
 			me->SetActorLocation(P);
@@ -271,6 +285,7 @@ void UOSY_PursuerFSM::RushState()
 	{
 		bRushSound=false;
 		me->compSword->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		currentTIme=0;
 		mState = EEnmeyState::RushAttack;
 		anim->bRushAttackPlay = true;
 		anim->animState = mState;
@@ -287,12 +302,35 @@ void UOSY_PursuerFSM::RushAttackState()
 	Direction.Normalize();
 	
 	currentTIme += GetWorld()->DeltaTimeSeconds;
-	
+	if (!bcheckrushattackloc)
+	{
+		JumpStartloc = me->GetActorLocation();
+		//me->HitComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		bcheckrushattackloc = true;
+	}
+	if (currentTIme < 0.7)
+	{
+		//암것도 안함
+	}
+	else if (currentTIme < 1.2)
+	{
+		FVector JumpLoc = JumpStartloc;
+		JumpLoc.Z += 100 * sqrt((currentTIme - 0.7) / 0.5);
+		me->SetActorLocation(JumpLoc);
+	}
+	else if (currentTIme < 1.5)
+	{
+		FVector JumpLoc = JumpStartloc;
+		JumpLoc.Z += 100 - 100 * ((currentTIme - 1.2) / 0.3) * ((currentTIme - 1.2) / 0.3);
+		me->SetActorLocation(JumpLoc);
+	}
 		UE_LOG(LogTemp, Error, TEXT("NowRUSHATTACK"))
 		// 러시어택을 플레이한다.
 
 		// 러시어택이 끝나면 대기로 돌아간다.
 		// 노티파이가 찍히면 스테이트를 바꿔라
+
+
 
 		if (anim->bRushAttackPlay == false)
 		{
@@ -300,6 +338,7 @@ void UOSY_PursuerFSM::RushAttackState()
 				me->compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			mState = EEnmeyState::Idle;
 			anim->animState = mState;
+			bcheckrushattackloc=false;
 		}
 	
 	
@@ -499,15 +538,36 @@ void UOSY_PursuerFSM::DamageState()
 
 void UOSY_PursuerFSM::DieState()
 {
+	if (anim->animState != mState)
+	{
+		UE_LOG(LogTemp,Log,TEXT("NODie"));
+	}
 	currentTIme += GetWorld()->DeltaRealTimeSeconds;
+	if (!bcheckrushattackloc)
+	{
+		JumpStartloc = me->GetActorLocation();
+		//me->HitComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		bcheckrushattackloc = true;
+	}
+	if (currentTIme < 2)
+	{
+		MapAudio->SetVolumeMultiplier(1 - (currentTIme / 2));
+	}
 	if (currentTIme > 1)
 	{
 		if (DieEndEffect == nullptr)
 		{
+			MapAudio->Stop();
 			FVector DEELoc = me->GetActorLocation();
 			DEELoc.Z -= 200;
 			DieEndEffect = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DieEndFactory, DEELoc);
 			DieEndEffect->SetWorldScale3D(FVector(2, 2, 2));
+		}
+		if (currentTIme<6)
+		{
+			FVector JumpLoc=JumpStartloc;
+			JumpLoc.Z+=100*((currentTIme-1)/5);
+			me->SetActorLocation(JumpLoc);
 		}
 	}
 	if (currentTIme > 6)
@@ -538,11 +598,13 @@ void UOSY_PursuerFSM::ReciveDamage(float value)
 
 	if (PURSUERHP - value > 0)
 	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ReactSound, me->GetActorLocation());
 		PURSUERHP -= value;
 		UE_LOG(LogTemp, Log, TEXT("PURSUER PURSUERHP=%d"), PURSUERHP);
 	}
 	else
 	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ReactSound, me->GetActorLocation());
 		PURSUERHP = 0;
 		anim->bAttack1_1Play = false;
 		anim->bAttack1_2Play = false;
@@ -556,6 +618,7 @@ void UOSY_PursuerFSM::ReciveDamage(float value)
 		currentTIme = 0;
 		UE_LOG(LogTemp, Log, TEXT("go die"));
 		mState = EEnmeyState::Die;
+		anim->animState = mState;
 	}
 }
 
