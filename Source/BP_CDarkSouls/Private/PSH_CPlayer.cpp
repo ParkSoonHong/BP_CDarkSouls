@@ -149,7 +149,8 @@ void APSH_CPlayer::BeginPlay()
 	compSword->SetVisibility(false);
 	shield->SetVisibility(false);
 	
-	CreateWidget(GetWorld(), playMainWidget)->AddToViewport();
+	/*CreateWidget(GetWorld(), playMainWidget)->AddToViewport();*/
+	
 	
 }
 
