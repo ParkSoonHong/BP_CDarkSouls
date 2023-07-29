@@ -78,7 +78,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
 	float MoveRange = 1000.0f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
-	float BackRange = 200.0f;
+	float BackRange = 300.0f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
 	float attackRange = 400.0f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
@@ -220,4 +220,6 @@ public:
 
 	int32 TestRandNum=1;
 	bool bFirstDash = false;
+	int32 BackRand;
+	bool bBackStepRand=false;
 };
