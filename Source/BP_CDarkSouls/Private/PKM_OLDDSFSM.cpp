@@ -251,7 +251,12 @@ void UPKM_OLDDSFSM::RunState()
 		}
 		else if (distance < MoveRange)
 		{
-			int32 RandRushRun = FMath::RandRange(1, 2);
+			int32 RandRushRun = FMath::RandRange(1, 3);
+			if (!bFirstDash)
+			{
+				RandRushRun = 1;
+				bFirstDash = true;
+			}
 			if (RandRushRun == 1)
 			{
 				bRunAnimCheck = false;
@@ -380,6 +385,11 @@ void UPKM_OLDDSFSM::AttackState()
 		6 래인지어택
 		*/
 		int32 RandAttack = FMath::RandRange(1, 6);
+		if (TestRandNum<7)
+		{
+			RandAttack = TestRandNum;
+			TestRandNum++;
+		}
 		if (RandAttack == 1)
 		{
 			currentTime = 0;
@@ -521,7 +531,6 @@ void UPKM_OLDDSFSM::Moving(float speed, FVector dir)
 
 void UPKM_OLDDSFSM::BackStepState()
 {
-
 	currentTime += GetWorld()->DeltaTimeSeconds;
 	float FastTime = 0.1;
 	float SlowTime = 0.8;

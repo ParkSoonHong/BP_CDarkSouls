@@ -218,4 +218,6 @@ public:
 	UPROPERTY(EditDefaultsOnly,Category="Sound")
 	class USoundBase* DieBloodSound;
 
+	int32 TestRandNum=1;
+	bool bFirstDash = false;
 };
