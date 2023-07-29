@@ -85,6 +85,18 @@ UPlayerAnim::UPlayerAnim()
 	{
 		parryMontage = tempParry.Object;
 	}
+
+	ConstructorHelpers::FObjectFinder<UAnimMontage>tempDie(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/Ani/MT_Dead.MT_Dead'"));
+	if (tempDie.Succeeded())
+	{
+		deadMontage = tempDie.Object;
+	}
+
+	ConstructorHelpers::FObjectFinder<UAnimMontage>tempStun(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/Ani/MT_PSH_Stun.MT_PSH_Stun'"));
+	if (tempStun.Succeeded())
+	{
+		StunMontage = tempStun.Object;
+	}
 }
 void UPlayerAnim::NativeUpdateAnimation(float DeltaSeconds)
 {
@@ -125,6 +137,7 @@ void UPlayerAnim::AnimNotify_AttackEnd() // 어택 끝났어
 	Player->isAttack = true;
 	Player->isHearing = true;
 	Player->isDefense = true;
+	Player->isRest = true;
 	Player->SworldCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
@@ -138,6 +151,7 @@ void UPlayerAnim::AnimNotify_StartAttack() // 공격 시작
 	Player->isBackStep=false;
 	Player->isHearing = false;
 	Player->isDefense = false;
+	Player->isRest = false;
 }
 
 void UPlayerAnim::AnimNotify_ComboAttack() // 콤보 할거야?
@@ -156,6 +170,8 @@ void UPlayerAnim::AnimNotify_BackstetpTime()
 	Player->isRoll = true;
 	Player->isHearing = true;
 	Player->isDefense = true;
+	Player->isRest = true;
+	Montage_Stop(0.5f,BackStepMontage);
 }
 
 
@@ -168,6 +184,7 @@ void UPlayerAnim::AnimNotify_RollEnd()
 	Player->isBackStep = true;
 	Player->isHearing = true;
 	Player->isDefense = true;
+	Player->isRest = true;
 }
 
 void UPlayerAnim::AnimNotify_endHardAttack()
@@ -180,6 +197,7 @@ void UPlayerAnim::AnimNotify_endHardAttack()
 	Player->isBackStep = true;
 	Player->isHearing = true;
 	Player->isDefense = true;
+	Player->isRest = true;
 	Player->compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
 }
@@ -238,6 +256,7 @@ void UPlayerAnim::AnimNotify_endEquip()
 void UPlayerAnim::AnimNotify_ParryEnd()
 {
 	Player->isParry = false;
+	Player->shield->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void UPlayerAnim::PlayRollAnimation()
@@ -249,6 +268,7 @@ void UPlayerAnim::PlayRollAnimation()
 	Player->PlayingAttack = false;
 	Player->isHearing = false;
 	Player->isDefense = false;
+	Player->isRest = false;
 }
 
 void UPlayerAnim::PlayBackStepAnimation() // 백스텝 실행 
@@ -260,6 +280,7 @@ void UPlayerAnim::PlayBackStepAnimation() // 백스텝 실행
 	Player->isRoll = false;
 	Player->isHearing = false;
 	Player->isDefense = false;
+	Player->isRest = false;
 
 }
 
@@ -322,11 +343,13 @@ void UPlayerAnim::PlayHardAttackAnimation()
 	Player->isBackStep = false;
 	Player->isHearing = false;
 	Player->isDefense = false;
+	Player->isRest = false;
 }
 
 void UPlayerAnim::PlayDefenseOnAnimation()
 {
 	Montage_Play(DefenseOnMontage);
+	Player->isRest = false;
 }
 
 void UPlayerAnim::PlayParryAnimation()
@@ -374,5 +397,18 @@ void UPlayerAnim::PlayUnEquipAnimation()
 	Player->isHearing = false;
 	Player->isDefense = false;
 	
+}
+
+void UPlayerAnim::PlayStunAnimation()
+{
+	Montage_Play(StunMontage);
+	Player->isAttack = false;
+	Player->isAttackTime = false;
+	Player->isBackStep = false;
+	Player->isRoll = false;
+	Player->isMoving = false;
+	Player->isHearing = false;
+	Player->isDefense = false;
+	Player->isDefenseTime = false;
 }
 

@@ -20,8 +20,6 @@ public:
 		UPROPERTY()
 		class APSH_CPlayer* me;
 	
-		UPROPERTY()
-		class UParticleSystem* DefenseParticle;
 
 public:
 	UFUNCTION()

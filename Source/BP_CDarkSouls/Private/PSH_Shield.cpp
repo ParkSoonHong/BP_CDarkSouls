@@ -14,20 +14,29 @@ UPSH_Shield::UPSH_Shield()
 		SetStaticMesh(tempShield.Object);
 	}
 
-	ConstructorHelpers::FObjectFinder<UParticleSystem> tempDefenseParticle(TEXT("/Script/Engine.ParticleSystem'/Game/Realistic_Starter_VFX_Pack_Vol2/Particles/Destruction/P_Destruction_Building_A.P_Destruction_Building_A'"));
-	if (tempDefenseParticle.Succeeded())
-	{
-		DefenseParticle = tempDefenseParticle.Object;
-	}
-	/*me->SetupAttachment(me->GetMesh(), TEXT("S_Shield"));*/
-
 
 	OnComponentBeginOverlap.AddDynamic(this, &UPSH_Shield::OnComponentOverlap);
+
 	
+	// 뒤로 밀려나기
+	me = Cast<APSH_CPlayer>(GetOwner());
 }
 
 
 void UPSH_Shield::OnComponentOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DefenseParticle, OtherActor->GetActorLocation(), FRotator::ZeroRotator);
+	auto player = Cast<APSH_CPlayer>(OtherActor);
+	if (player)
+	{
+		return;
+	}
+	else
+	{
+		if (me != nullptr)
+		{
+		me->NukBack();
+		}
+	}
+	UE_LOG(LogTemp,Warning,TEXT("%s"),*OtherActor->GetName());
+	/*me->NukBack();*/
 }

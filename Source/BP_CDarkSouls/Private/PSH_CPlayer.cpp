@@ -117,15 +117,22 @@ APSH_CPlayer::APSH_CPlayer()
 		blood = tmepblood.Object;
 	}
 
+	ConstructorHelpers::FObjectFinder<UParticleSystem> tempDefenseParticle(TEXT("/Script/Engine.ParticleSystem'/Game/Realistic_Starter_VFX_Pack_Vol2/Particles/Hit/P_Default.P_Default'"));
+	if (tempDefenseParticle.Succeeded())
+	{
+		DefenseParticle = tempDefenseParticle.Object;
+	}
+
 	SworldCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("SwordCollsion"));
 
 	SworldCollision->SetupAttachment(compSword);
-	SworldCollision->SetRelativeLocation(FVector(0,0,-50));
-	SworldCollision->SetCapsuleSize(10,80);
+	SworldCollision->SetRelativeLocation(FVector(0, 0, -50));
+	SworldCollision->SetCapsuleSize(10, 80);
 
 	SworldCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	shield->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	shield->SetCollisionProfileName("PlayerShelid");
 }
 
 // Called when the game starts or when spawned
@@ -154,8 +161,8 @@ void APSH_CPlayer::Tick(float DeltaTime)
 
 	if (curStamina <= 0) // 스테미나가 0일때
 	{	
-		curStamina = 0;
 		steminaOring();
+		curStamina = 0;
 	}
 
 	if (isRest)
@@ -174,6 +181,7 @@ void APSH_CPlayer::Tick(float DeltaTime)
 	{
 		Run();
 	}
+	
 
 	if (isTimeOn)
 	{
@@ -240,8 +248,8 @@ void APSH_CPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 void APSH_CPlayer::MoveForward(float Val)
 {
-	if (isMoving)
-	{
+	if (isMoving)	
+	{ 
 		if ((Controller != NULL) && (Val != 0.0f))
 		{
 			// find out which way is forward
@@ -383,10 +391,22 @@ void APSH_CPlayer::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedCompon
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("DefenseHit"));
-		FVector NewPosition = GetActorLocation() - GetActorForwardVector() * MovePower;
-		FVector dir = FMath::Lerp(GetActorLocation(),GetActorForwardVector()*MovePower,0.05f*GetWorld()->DeltaTimeSeconds);
-		SetActorLocation(dir);
+		if (OverlapOldDs != nullptr)
+		{
+			OverlapOldDs->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+
+		if (tagetPursuer != nullptr)
+		{
+			tagetPursuer->compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DefenseParticle, shield->GetComponentLocation(), FRotator::ZeroRotator);
+		NukBack();
+		if (curStamina<=10)
+		{
+			anim->PlayStunAnimation();
+		}
+
 	}
 
 }
@@ -424,6 +444,7 @@ void APSH_CPlayer::Parry()
 	{ 
 	anim->PlayParryAnimation();
 	isParry = true;
+	shield->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	UE_LOG(LogTemp, Warning, TEXT("Parry"));
 	}
 }
@@ -434,6 +455,7 @@ void APSH_CPlayer::DefenseOn() // 다른 행동이 실행 되면 이전 몽타주
 	if(isDefense)
 	{ 
 		anim->PlayDefenseOnAnimation();
+		shield->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		isDefenseTime = true;
 	}
 }
@@ -443,6 +465,7 @@ void APSH_CPlayer::DefenseOff()
 	if (isDefense)
 	{
 		anim->Montage_JumpToSection(FName("defenceEnd"), anim->DefenseOnMontage);
+		shield->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		isDefenseTime = false;
 	}
 }
@@ -452,9 +475,9 @@ void APSH_CPlayer::healing()
 	if (isHearing)
 	{
 		anim->PlayHealingAnimation();
-		if (curHp >= 10)
+		if (curHp >= 5)
 		{
-			curHp = 10;
+			curHp = 5;
 		}
 		else
 		{
@@ -529,6 +552,16 @@ void APSH_CPlayer::changeWeapon()
 	}
 }
 
+void APSH_CPlayer::NukBack()
+{
+	UE_LOG(LogTemp, Warning, TEXT("nukBack"));
+	isDefenseDamage = true;
+	curStamina -= 60;
+	FVector NewPosition = GetActorLocation() - GetActorForwardVector() * MovePower;
+	FVector dir = FMath::Lerp(GetActorLocation(), NewPosition, 0.5f);
+	SetActorLocation(dir);
+}
+
 void APSH_CPlayer::PressedSpacebar()
 {
 	isTimeOn = true;
@@ -574,20 +607,45 @@ void APSH_CPlayer::ReleasedSpacebar()
 void APSH_CPlayer::steminaOring()
 {
 	//스테미나가 0인 상태 걷기, 방어를 제외한 모든 활동을 정지한다
+	UE_LOG(LogTemp,Warning,TEXT("NoRun"));
 	retunSpeed = walkSpeed;
 	isRun = false;
 	isRest = true;
 	isTimeOn = false;
+	isRoll = false;
+	isAttack = false;
+	isDefense = false;
+	PlayingAttack = false;
+	curTime = 0;
 }
 
 void APSH_CPlayer::restTime()
 {
-	curStamina += 30 * GetWorld()->DeltaTimeSeconds;
+	curStamina += steminaPower;
 	if (curStamina >= maxStamina)
 	{
 		curStamina = 100;
 		isRest = false;
 	}
+	if (curStamina <= 10)
+	{
+		isRoll = false;
+		isAttack = false;
+		isDefense = false;
+		PlayingAttack = false;
+		isSteminaOn = true;
+		steminaPower = 0.2f;
+	}
+	if (isSteminaOn&&curStamina >= 15)
+	{
+		isRoll = true;
+		isAttack = true;
+		isDefense = true;
+		PlayingAttack = true;
+		isSteminaOn = false;
+		steminaPower = 0.3f;
+	}
+	
 }
 
 void APSH_CPlayer::Run()
@@ -603,5 +661,4 @@ void APSH_CPlayer::Roll()
 void APSH_CPlayer::BackStep()
 {
 	anim->PlayBackStepAnimation();
-
 }

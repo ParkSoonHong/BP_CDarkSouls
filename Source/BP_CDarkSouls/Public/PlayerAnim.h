@@ -69,6 +69,9 @@ public:
 	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
 	class UAnimMontage* unequipMontage;
 
+	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
+	class UAnimMontage* StunMontage;
+
 	UPROPERTY()
 	class APSH_CPlayer * Player;
 
@@ -130,6 +133,9 @@ public:
 	UFUNCTION()
 	void AnimNotify_ParryEnd();
 
+// 	UFUNCTION()
+// 	void AnimNotify_ParryEnd();
+
 
 
 	void PlayRollAnimation();
@@ -148,6 +154,7 @@ public:
 	void PlayDeadAnimation();
 	void PlayEquipAnimation();
 	void PlayUnEquipAnimation();
+	void PlayStunAnimation();
 
 
 public:

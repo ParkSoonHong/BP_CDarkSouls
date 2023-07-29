@@ -81,7 +81,7 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Setings")
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Setings")
 	float walkSpeed = 500;
 	// ¶Ù±â ¼Óµµ
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Setings")
@@ -170,9 +170,20 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool isDefenseTime = false;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool isDefenseDamage = false;
+
 
 	UPROPERTY(EditAnywhere)
 	float MovePower = 100.0f;
+
+	UPROPERTY(EditAnywhere)
+	float steminaPower = 0.1f;
+
+	UPROPERTY(EditAnywhere)
+	bool isSteminaOn = false;
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool isParry = false;
@@ -202,6 +213,8 @@ public:
 	class USoundBase * dieSound;
 	UPROPERTY(EditAnywhere)
 	class UParticleSystem* blood;
+	UPROPERTY(EditAnywhere)
+	class UParticleSystem* DefenseParticle;
 	
 	/** Called for forwards/backward input */
 	void MoveForward(float Value);
@@ -243,6 +256,10 @@ public:
 	void Die();
 
 	void changeWeapon();
+
+public:
+	UFUNCTION()
+	void NukBack();
 
 
 
