@@ -16,7 +16,7 @@
 
 UPlayerLockArmComponent::UPlayerLockArmComponent()
 {
-	MaxTagetLockDistance = 2000.f;
+	MaxTagetLockDistance = 1000.f;
 	bDrawDebug = true;
 
 	TargetArmLength = 300.0f;
@@ -25,9 +25,9 @@ UPlayerLockArmComponent::UPlayerLockArmComponent()
 	bEnableCameraRotationLag = false;
 	CameraLagSpeed = 3.f;
 	CameraRotationLagSpeed= 2.f;
-	CameraLagMaxDistance = 100.0f;
+	CameraLagMaxDistance = 300.0f;
 
-	player = Cast<APSH_CPlayer>(GetOwner());
+	/*player = Cast<APSH_CPlayer>(GetOwner());*/
 
 }
 
@@ -53,6 +53,21 @@ void UPlayerLockArmComponent::TickComponent(float DeltaTime, enum ELevelTick Tic
 			else
 			{
 				BreakTargetLock();
+			}
+		}
+	}
+	else
+	{
+		if (bUseSoftLock) // Attempt to auto target nearby enemy
+		{
+			if (UDSTargetComponent* NewCameraTarget = GetLockTarget())
+			{
+				if (!bSoftlockRequireReset) // Soft-lock is reset?
+					LockToTarget(NewCameraTarget);
+			}
+			else // If player forcibly broke soft-lock, reset it when no target is within range
+			{
+				bSoftlockRequireReset = false;
 			}
 		}
 	}
@@ -96,7 +111,7 @@ void UPlayerLockArmComponent::ToggleCameraLock()
 	if (NewCameraTarget != nullptr)
 	{
 		//print(TEXT("Testing"));
-		//LockToTarget(NewCameraTarget);
+		LockToTarget(NewCameraTarget);
 	}
 }
 
@@ -125,7 +140,7 @@ void UPlayerLockArmComponent::LockToTarget(UDSTargetComponent* NewTargetComponen
 {
 	CameraTarget = NewTargetComponent;
 	bEnableCameraRotationLag = true;
-	player->GetCharacterMovement()->bOrientRotationToMovement = false;
+/*	player->GetCharacterMovement()->bOrientRotationToMovement = false;*/
 	
 }
 
@@ -136,7 +151,7 @@ void UPlayerLockArmComponent::BreakTargetLock()
 		CameraTarget = nullptr;
 		//player->GetController()->SetControlRotation(FollowCamera->GetForwardVector().Rotation());
 		bEnableCameraRotationLag = false;
-		player->GetCharacterMovement()->bOrientRotationToMovement = true;
+		/*player->GetCharacterMovement()->bOrientRotationToMovement = true;*/
 	}
 }
 

@@ -81,7 +81,7 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Setings")
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Setings")
 	float walkSpeed = 500;
 	// ¶Ù±â ¼Óµµ
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Setings")
@@ -144,9 +144,18 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Attack")
 		bool isAttackTime = true;
 
+	UPROPERTY(EditAnywhere, Category = "Attack")
+		bool isDamaged = false;
+
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UUserWidget> compDieWidget;
-	
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UUserWidget> playMainWidget;
+
+	UPROPERTY(EditAnywhere)
+	class UPSH_Shield* shield;
+
 	UPROPERTY(EditAnywhere)
 	bool isMoving = true;
 
@@ -156,6 +165,29 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UCapsuleComponent * SworldCollision;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool isDefense = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool isDefenseTime = false;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool isDefenseDamage = false;
+
+
+	UPROPERTY(EditAnywhere)
+	float MovePower = 100.0f;
+
+	UPROPERTY(EditAnywhere)
+	float steminaPower = 0.1f;
+
+	UPROPERTY(EditAnywhere)
+	bool isSteminaOn = false;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool isParry = false;
+
 public:
 	/** Returns CameraBoom subobject **/
 	UFUNCTION(BlueprintCallable, Category = "Lock On Camera")
@@ -163,12 +195,6 @@ public:
 	/** Returns FollowCamera subobject **/
 	UFUNCTION(BlueprintCallable, Category = "Lock On Camera")
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-
-	UPROPERTY(EditAnywhere)
-	class UStaticMeshComponent* compShield;
-
-	UPROPERTY(EditAnywhere)
-	class UStaticMeshComponent* compShieldHendle;
 
 	UPROPERTY(EditAnywhere)
 	class UStaticMeshComponent* compSword;
@@ -185,7 +211,10 @@ public:
 	class UPlayerAnim * anim;
 	UPROPERTY(EditAnywhere)
 	class USoundBase * dieSound;
-
+	UPROPERTY(EditAnywhere)
+	class UParticleSystem* blood;
+	UPROPERTY(EditAnywhere)
+	class UParticleSystem* DefenseParticle;
 	
 	/** Called for forwards/backward input */
 	void MoveForward(float Value);
@@ -219,11 +248,18 @@ public:
 
 	void Parry();
 
-	void Shild();
+	void DefenseOn();
+	void DefenseOff();
 
 	void healing();
 
 	void Die();
+
+	void changeWeapon();
+
+public:
+	UFUNCTION()
+	void NukBack();
 
 
 
@@ -240,5 +276,7 @@ public:
 	float maxHp = 5;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float  curHp = 5;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float  curHped = 5;
 	void Damaged(int value);
 };

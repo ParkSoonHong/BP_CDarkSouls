@@ -4,6 +4,7 @@
 #include "PlayerAnim.h"
 #include "PSH_CPlayer.h"
 #include "Components/CapsuleComponent.h"
+#include "PSH_Shield.h"
 
 UPlayerAnim::UPlayerAnim()
 {
@@ -31,22 +32,10 @@ UPlayerAnim::UPlayerAnim()
 		AttackMontage2 = tempAttack2.Object;
 	}
 
-	ConstructorHelpers::FObjectFinder<UAnimMontage>tempShild(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/Ani/MT_PSH_Shild.MT_PSH_Shild_C'"));
-	if (tempShild.Succeeded())
-	{
-		ShildMontage = tempShild.Object;
-	}
-
 	ConstructorHelpers::FObjectFinder<UAnimMontage>tempHardAttack(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/Ani/MT_PSH_HArdAttack.MT_PSH_HArdAttack_C'"));
 	if (tempHardAttack.Succeeded())
 	{
 		HardAttackMontage = tempHardAttack.Object;
-	}
-
-	ConstructorHelpers::FObjectFinder<UAnimMontage>tempParry(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/Ani/MT_PSH_Parry.MT_PSH_Parry_C'"));
-	if (tempParry.Succeeded())
-	{
-		parryMontage = tempParry.Object;
 	}
 
 	ConstructorHelpers::FObjectFinder<UAnimMontage>tempDamage1(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/Ani/Hit/Hit.Hit_C'"));
@@ -73,10 +62,40 @@ UPlayerAnim::UPlayerAnim()
 		healingMontage = tempLife.Object;
 	}
 
-	ConstructorHelpers::FObjectFinder<UAnimMontage>tempDead(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/Ani/MT_Dead.MT_Dead'"));
-	if (tempDead.Succeeded())
+	ConstructorHelpers::FObjectFinder<UAnimMontage>tempEquip(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/equip.equip'"));
+	if (tempEquip.Succeeded())
 	{
-		deadMontage = tempDead.Object;
+		equipMontage = tempEquip.Object;
+	}
+	
+	ConstructorHelpers::FObjectFinder<UAnimMontage>tempUnEquip(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/unequip.unequip'"));
+	if (tempUnEquip.Succeeded())
+	{
+		unequipMontage = tempUnEquip.Object;
+	}
+
+	ConstructorHelpers::FObjectFinder<UAnimMontage>tempDefenseOn(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/Ani/MT_PSH_Shild.MT_PSH_Shild'"));
+	if (tempDefenseOn.Succeeded())
+	{
+		DefenseOnMontage = tempDefenseOn.Object;
+	}
+
+	ConstructorHelpers::FObjectFinder<UAnimMontage>tempParry(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/Ani/MT_PSH_Parry.MT_PSH_Parry_C'"));
+	if (tempParry.Succeeded())
+	{
+		parryMontage = tempParry.Object;
+	}
+
+	ConstructorHelpers::FObjectFinder<UAnimMontage>tempDie(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/Ani/MT_Dead.MT_Dead'"));
+	if (tempDie.Succeeded())
+	{
+		deadMontage = tempDie.Object;
+	}
+
+	ConstructorHelpers::FObjectFinder<UAnimMontage>tempStun(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/Ani/MT_PSH_Stun.MT_PSH_Stun'"));
+	if (tempStun.Succeeded())
+	{
+		StunMontage = tempStun.Object;
 	}
 }
 void UPlayerAnim::NativeUpdateAnimation(float DeltaSeconds)
@@ -117,6 +136,8 @@ void UPlayerAnim::AnimNotify_AttackEnd() // 어택 끝났어
 	Player->isBackStep = true;
 	Player->isAttack = true;
 	Player->isHearing = true;
+	Player->isDefense = true;
+	Player->isRest = true;
 	Player->SworldCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
@@ -129,6 +150,8 @@ void UPlayerAnim::AnimNotify_StartAttack() // 공격 시작
 	Player->isRoll=false;
 	Player->isBackStep=false;
 	Player->isHearing = false;
+	Player->isDefense = false;
+	Player->isRest = false;
 }
 
 void UPlayerAnim::AnimNotify_ComboAttack() // 콤보 할거야?
@@ -136,6 +159,7 @@ void UPlayerAnim::AnimNotify_ComboAttack() // 콤보 할거야?
 	Player->PlayingAttack = true;
 	Player->isAttackTime = true;
 	Player->iscombo = true;
+
 }
 
 void UPlayerAnim::AnimNotify_BackstetpTime()
@@ -145,6 +169,9 @@ void UPlayerAnim::AnimNotify_BackstetpTime()
 	Player->isBackStep = true;
 	Player->isRoll = true;
 	Player->isHearing = true;
+	Player->isDefense = true;
+	Player->isRest = true;
+	Montage_Stop(0.5f,BackStepMontage);
 }
 
 
@@ -156,6 +183,8 @@ void UPlayerAnim::AnimNotify_RollEnd()
 	Player->isAttackTime = true;
 	Player->isBackStep = true;
 	Player->isHearing = true;
+	Player->isDefense = true;
+	Player->isRest = true;
 }
 
 void UPlayerAnim::AnimNotify_endHardAttack()
@@ -167,6 +196,8 @@ void UPlayerAnim::AnimNotify_endHardAttack()
 	Player->isRoll = true;
 	Player->isBackStep = true;
 	Player->isHearing = true;
+	Player->isDefense = true;
+	Player->isRest = true;
 	Player->compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
 }
@@ -179,6 +210,7 @@ void UPlayerAnim::AnimNotify_HitEnd()
 	Player->isAttackTime = true;
 	Player->isMoving = true;
 	Player->isHearing = true;
+	Player->isDefense = true;
 }
 
 void UPlayerAnim::AnimNotify_endHeling()
@@ -189,11 +221,42 @@ void UPlayerAnim::AnimNotify_endHeling()
 	Player->isBackStep = true;
 	Player->isMoving = true;
 	Player->isHearing = true;
+	Player->isDefense = true;
 }
 
 void UPlayerAnim::AnimNotify_movingOn()
 {
 	Player->isMoving = true;
+}
+
+void UPlayerAnim::AnimNotify_Equip()
+{
+	Player->compSword->SetVisibility(true);
+	Player->shield->SetVisibility(true);
+}
+
+void UPlayerAnim::AnimNotify_UnEquip()
+{
+	Player->compSword->SetVisibility(false);
+	Player->shield->SetVisibility(false);
+	
+}
+
+void UPlayerAnim::AnimNotify_endEquip()
+{
+	Player->isAttack = true;
+	Player->isAttackTime = true;
+	Player->isBackStep = true;
+	Player->isRoll = true;
+	Player->isMoving = true;
+	Player->isHearing = true;
+	Player->isDefense = true;
+}
+
+void UPlayerAnim::AnimNotify_ParryEnd()
+{
+	Player->isParry = false;
+	Player->shield->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void UPlayerAnim::PlayRollAnimation()
@@ -204,6 +267,8 @@ void UPlayerAnim::PlayRollAnimation()
 	Player->isBackStep = false;
 	Player->PlayingAttack = false;
 	Player->isHearing = false;
+	Player->isDefense = false;
+	Player->isRest = false;
 }
 
 void UPlayerAnim::PlayBackStepAnimation() // 백스텝 실행 
@@ -214,7 +279,9 @@ void UPlayerAnim::PlayBackStepAnimation() // 백스텝 실행
 	Player->isBackStep = true;
 	Player->isRoll = false;
 	Player->isHearing = false;
-	//실드때 사용 불가능 적어두기
+	Player->isDefense = false;
+	Player->isRest = false;
+
 }
 
 
@@ -227,6 +294,7 @@ void UPlayerAnim::PlayDamgedAnimation()
 	Player->isRoll = false;
 	Player->isMoving = false;
 	Player->isHearing = false;
+/*	Player->isDefense = false;*/
 }
 
 void UPlayerAnim::PlayDamgedAnimation2()
@@ -238,6 +306,7 @@ void UPlayerAnim::PlayDamgedAnimation2()
 	Player->isRoll = false;
 	Player->isMoving = false;
 	Player->isHearing = false;
+/*	Player->isDefense = false;*/
 }
 
 void UPlayerAnim::PlayDamgedAnimation3()
@@ -249,6 +318,7 @@ void UPlayerAnim::PlayDamgedAnimation3()
 	Player->isRoll = false;
 	Player->isMoving = false;
 	Player->isHearing = false;
+// 	Player->isDefense = false;
 }
 
 void UPlayerAnim::PlayAttackAnimation()
@@ -272,12 +342,14 @@ void UPlayerAnim::PlayHardAttackAnimation()
 	Player->isRoll = false;
 	Player->isBackStep = false;
 	Player->isHearing = false;
-
+	Player->isDefense = false;
+	Player->isRest = false;
 }
 
-void UPlayerAnim::PlayShildAnimation()
+void UPlayerAnim::PlayDefenseOnAnimation()
 {
-	Montage_Play(ShildMontage);
+	Montage_Play(DefenseOnMontage);
+	Player->isRest = false;
 }
 
 void UPlayerAnim::PlayParryAnimation()
@@ -294,10 +366,49 @@ void UPlayerAnim::PlayHealingAnimation()
 	Player->isRoll = false;
 	Player->isBackStep = false;
 	Player->isHearing = false;
+	Player->isDefense = false;
 }
 
 void UPlayerAnim::PlayDeadAnimation()
 {
 	Montage_Play(deadMontage);
+}
+
+void UPlayerAnim::PlayEquipAnimation() // 무기 장착
+{
+	Montage_Play(equipMontage);
+	Player->isAttack = false;
+	Player->isAttackTime = false;
+	Player->isBackStep = false;
+	Player->isRoll = false;
+	Player->isMoving = false;
+	Player->isHearing = false;
+	Player->isDefense = true;
+}
+
+void UPlayerAnim::PlayUnEquipAnimation()
+{
+	Montage_Play(unequipMontage);
+	Player->isAttack = false;
+	Player->isAttackTime = false;
+	Player->isBackStep = false;
+	Player->isRoll = false;
+	Player->isMoving = false;
+	Player->isHearing = false;
+	Player->isDefense = false;
+	
+}
+
+void UPlayerAnim::PlayStunAnimation()
+{
+	Montage_Play(StunMontage);
+	Player->isAttack = false;
+	Player->isAttackTime = false;
+	Player->isBackStep = false;
+	Player->isRoll = false;
+	Player->isMoving = false;
+	Player->isHearing = false;
+	Player->isDefense = false;
+	Player->isDefenseTime = false;
 }
 
