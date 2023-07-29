@@ -140,36 +140,44 @@ void UOSY_PursuerFSM::IdleState()
 	// Enemy forward 벡터가 direction 방향으로 일치시키고 싶다.
 	me->SetActorRotation(forward.Rotation());
 
-
-	// 만약 2초가 흘렀다면
+	// 2초가 흐른다음
 	if (currentTIme > DelayTime)
 	{
-		if (distance > BackstepRange)
+		// 만약 무브범위에 들어왔다면 움직여라
+		if (distance < MoveRange)
 		{
-			currentTIme = 0;
-			mState= EEnmeyState::Walk;
-			anim->animState=mState;
-		}
-		else
-		{
-			int Random=FMath::RandRange(1,10);
-			if (Random > 3)
+			if (distance > BackstepRange)
 			{
-			currentTIme = 0;
-			mState = EEnmeyState::Backstep;
-			anim->animState = mState;
+				currentTIme = 0;
+				mState= EEnmeyState::Walk;
+				anim->animState=mState;
 			}
 			else
 			{
+				int Random=FMath::RandRange(1,10);
+				if (Random > 5)
+				{
 				currentTIme = 0;
-				anim->bAttack2Play = true;
-				mState = EEnmeyState::Attack2;
+				mState = EEnmeyState::Backstep;
 				anim->animState = mState;
+				}
+				else
+				{
+					currentTIme = 0;
+					anim->bAttack2Play = true;
+					mState = EEnmeyState::Attack2;
+					anim->animState = mState;
+				}
 			}
+		// 그렇지 않다면 아무것도 하지마
+		}
+		else
+		{
+
 		}
 
 	}
-	
+
 }
 
 void UOSY_PursuerFSM::WalkState()
@@ -223,7 +231,7 @@ void UOSY_PursuerFSM::WalkState()
 				anim->animState = mState;
 			}
 		}
-
+	
 
 	
 }

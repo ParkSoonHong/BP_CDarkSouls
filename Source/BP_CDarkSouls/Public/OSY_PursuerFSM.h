@@ -50,7 +50,7 @@ public:
 	float currentTIme = 0;
 	UPROPERTY(EditAnywhere, Category ="FSM")
 	float delayTime;
-	float DelayTime= 2;
+	float DelayTime= 1.75;
 	float RushDelayTime= 1;
 	float stopTime=2;
 	
@@ -96,7 +96,7 @@ public: //Idle ¼Ó¼º
 	float attackstartDistance = 300;
 	float backstepstartDiatacne = 100;
 
-	float MoveRange =1000;
+	float MoveRange =3000;
 	float AttackRange = 250;
 	float BackstepRange = 150;
 
