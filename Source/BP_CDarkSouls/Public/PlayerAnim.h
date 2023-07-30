@@ -133,8 +133,8 @@ public:
 	UFUNCTION()
 	void AnimNotify_ParryEnd();
 
-// 	UFUNCTION()
-// 	void AnimNotify_ParryEnd();
+	UFUNCTION()
+	void AnimNotify_stunEnd();
 
 
 

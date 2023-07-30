@@ -20,10 +20,6 @@ public:
 		UPROPERTY()
 		class APSH_CPlayer* me;
 	
-
-public:
-	UFUNCTION()
-	void OnComponentOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	
 };
 

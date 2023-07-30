@@ -218,8 +218,7 @@ void UPlayerAnim::AnimNotify_endHeling()
 	Player->isAttackTime = true;
 	Player->isAttack = true;
 	Player->isRoll=true;
-	Player->isBackStep = true;
-	Player->isMoving = true;
+	Player->isBackStep = true;;
 	Player->isHearing = true;
 	Player->isDefense = true;
 }
@@ -257,6 +256,17 @@ void UPlayerAnim::AnimNotify_ParryEnd()
 {
 	Player->isParry = false;
 	Player->shield->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void UPlayerAnim::AnimNotify_stunEnd()
+{
+	Player->isAttack = true;
+	Player->isAttackTime = true;
+	Player->isBackStep = true;
+	Player->isRoll = true;
+	Player->isMoving = true;
+	Player->isHearing = true;
+	Player->isDefense = true;
 }
 
 void UPlayerAnim::PlayRollAnimation()
@@ -409,6 +419,5 @@ void UPlayerAnim::PlayStunAnimation()
 	Player->isMoving = false;
 	Player->isHearing = false;
 	Player->isDefense = false;
-	Player->isDefenseTime = false;
 }
 
