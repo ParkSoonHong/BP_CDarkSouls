@@ -154,6 +154,9 @@ public:
 	TSubclassOf<class UUserWidget> playMainWidget;
 
 	UPROPERTY(EditAnywhere)
+	class UUserWidget* mainwidget;
+
+	UPROPERTY(EditAnywhere)
 	class UPSH_Shield* shield;
 
 	UPROPERTY(EditAnywhere)
@@ -167,12 +170,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool isDefense = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	bool isDefenseTime = false;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	bool isDefenseDamage = false;
 
 
 	UPROPERTY(EditAnywhere)
@@ -216,6 +213,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UParticleSystem* DefenseParticle;
 	
+	UPROPERTY(EditAnywhere)
+	class USoundBase * defenseSound;
 	/** Called for forwards/backward input */
 	void MoveForward(float Value);
 	/** Called for side to side input */
@@ -256,6 +255,8 @@ public:
 	void Die();
 
 	void changeWeapon();
+
+	void tagetOn();
 
 public:
 	UFUNCTION()

@@ -174,42 +174,63 @@ void UPKM_OLDDSFSM::IdleState()
 		direction = Target->GetActorLocation() - Me->GetActorLocation();
 		distance = direction.Size();
 	}
-
-	if (distance < BackRange) {
-		if (FVector::DotProduct(direction, Me->GetActorForwardVector()) >= 0) {
-			UE_LOG(LogTemp, Log, TEXT("Go BackStep"));
-			currentTime = 0;
-			BackStepSpeed = 0;
-			//방향 완전히 돌려라
-			GetOwner()->SetActorRotation(direction.Rotation());
-			//--------------------------------------------------------------------------------------------
-			mState = EEnemyState::BackStep;
-
-			UE_LOG(LogTemp, Log, TEXT("memset Time=%f"), currentTime);
-		}
-		else 
-		{	//방향돌리기
-				FVector Forward = Me->GetActorForwardVector();
-				Forward = FMath::Lerp<FVector, float>(Forward, direction, 0.1 * GetWorld()->DeltaTimeSeconds);
-				GetOwner()->SetActorRotation(Forward.Rotation());
-				UE_LOG(LogTemp, Log, TEXT("Turn.."));
-		}
-	}
-	else if (distance < attackRange)
+	if (distance < attackRange)
 	{
-		UE_LOG(LogTemp, Log, TEXT("switchAttack"));
-		currentTime = 0;
-		mState = EEnemyState::Attack;
+		if (distance < BackRange) {
+			if (!bBackStepRand)
+			{
+				BackRand = FMath::RandRange(1, 4);
+				bBackStepRand = true;
+				UE_LOG(LogTemp, Log, TEXT("BackRand=%d"),BackRand);
+			}
+			if (BackRand==1)
+			{
+				if (FVector::DotProduct(direction, Me->GetActorForwardVector()) >= 0) {
+					UE_LOG(LogTemp, Log, TEXT("Go BackStep"));
+					currentTime = 0;
+					BackStepSpeed = 0;
+					//방향 완전히 돌려라
+					GetOwner()->SetActorRotation(direction.Rotation());
+					//--------------------------------------------------------------------------------------------
+					mState = EEnemyState::BackStep;
+					bBackStepRand = false;
+					UE_LOG(LogTemp, Log, TEXT("memset Time=%f"), currentTime);
+				}
+				else
+				{	//방향돌리기
+					FVector Forward = Me->GetActorForwardVector();
+					Forward = FMath::Lerp<FVector, float>(Forward, direction, 0.1 * GetWorld()->DeltaTimeSeconds);
+					GetOwner()->SetActorRotation(Forward.Rotation());
+					UE_LOG(LogTemp, Log, TEXT("Turn.."));
+				}
+			}
+			else
+			{
+				UE_LOG(LogTemp, Log, TEXT("switchAttack"));
+				currentTime = 0;
+				mState = EEnemyState::Attack;
+				bBackStepRand = false;
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Log, TEXT("switchAttack"));
+			currentTime = 0;
+			mState = EEnemyState::Attack;
+			bBackStepRand = false;
+		}
 	}
 	else if (distance < MoveRange)
 	{
 		UE_LOG(LogTemp, Log, TEXT("switchMove"));
 		mState = EEnemyState::Move;
+		bBackStepRand = false;
 	}
 	else if (distance < RunRange)
 	{
 		UE_LOG(LogTemp, Log, TEXT("switchRun"));
 		mState = EEnemyState::Run;
+		bBackStepRand = false;
 	}
 
 }
@@ -223,26 +244,7 @@ void UPKM_OLDDSFSM::RunState()
 			direction = Target->GetActorLocation() - Me->GetActorLocation();
 			distance = direction.Size();
 		}
-		if (distance < BackRange) {
-			if (FVector::DotProduct(direction, Me->GetActorForwardVector()) >= 0) {
-				UE_LOG(LogTemp, Log, TEXT("Go BackStep"));
-				currentTime = 0;
-				BackStepSpeed = 0;
-				//방향 완전히 돌려라
-				GetOwner()->SetActorRotation(direction.Rotation());
-				//--------------------------------------------------------------------------------------------
-				mState = EEnemyState::BackStep;
-
-				UE_LOG(LogTemp, Log, TEXT("memset Time=%f"), currentTime);
-			}
-			else {
-				FVector Forward = Me->GetActorForwardVector();
-				Forward = FMath::Lerp<FVector, float>(Forward, direction, 0.1 * GetWorld()->DeltaTimeSeconds);
-				GetOwner()->SetActorRotation(Forward.Rotation());
-				UE_LOG(LogTemp, Log, TEXT("Turn.."));
-			}
-		}
-		else if (distance < attackRange)
+		if (distance < attackRange)
 		{
 			UE_LOG(LogTemp, Log, TEXT("switchAttack"));
 			currentTime = 0;
@@ -251,7 +253,12 @@ void UPKM_OLDDSFSM::RunState()
 		}
 		else if (distance < MoveRange)
 		{
-			int32 RandRushRun = FMath::RandRange(1, 2);
+			int32 RandRushRun = FMath::RandRange(1, 3);
+			if (!bFirstDash)
+			{
+				RandRushRun = 1;
+				bFirstDash = true;
+			}
 			if (RandRushRun == 1)
 			{
 				bRunAnimCheck = false;
@@ -291,27 +298,7 @@ void UPKM_OLDDSFSM::MoveState()
 		direction = Target->GetActorLocation() - Me->GetActorLocation();
 		distance = direction.Size();
 	}
-	if (distance < BackRange) {
-		if (FVector::DotProduct(direction, Me->GetActorForwardVector()) >= 0) {
-			UE_LOG(LogTemp, Log, TEXT("Go BackStep"));
-			currentTime = 0;
-			BackStepSpeed = 0;
-			//방향 완전히 돌려라
-			GetOwner()->SetActorRotation(direction.Rotation());
-			//--------------------------------------------------------------------------------------------
-			bWalkAnimCheck = false;
-			mState = EEnemyState::BackStep;
-
-			UE_LOG(LogTemp, Log, TEXT("memset Time=%f"), currentTime);
-		}
-		else {
-				FVector Forward = Me->GetActorForwardVector();
-				Forward = FMath::Lerp<FVector, float>(Forward, direction, 0.1 * GetWorld()->DeltaTimeSeconds);
-				GetOwner()->SetActorRotation(Forward.Rotation());
-				UE_LOG(LogTemp, Log, TEXT("Turn.."));
-		}
-	}
-	else if (distance < attackRange)
+	if (distance < attackRange)
 	{
 		UE_LOG(LogTemp, Log, TEXT("switchAttack"));
 		currentTime = 0;
@@ -353,7 +340,6 @@ void UPKM_OLDDSFSM::AttackState()
 {
 	currentTime += GetWorld()->DeltaTimeSeconds;
 	float FixRotTime = 1;
-
 	if (Target != nullptr)
 	{
 		direction = Target->GetActorLocation() - Me->GetActorLocation();
@@ -380,6 +366,11 @@ void UPKM_OLDDSFSM::AttackState()
 		6 래인지어택
 		*/
 		int32 RandAttack = FMath::RandRange(1, 6);
+		if (TestRandNum<7)
+		{
+			RandAttack = TestRandNum;
+			TestRandNum++;
+		}
 		if (RandAttack == 1)
 		{
 			currentTime = 0;
@@ -521,7 +512,6 @@ void UPKM_OLDDSFSM::Moving(float speed, FVector dir)
 
 void UPKM_OLDDSFSM::BackStepState()
 {
-
 	currentTime += GetWorld()->DeltaTimeSeconds;
 	float FastTime = 0.1;
 	float SlowTime = 0.8;
