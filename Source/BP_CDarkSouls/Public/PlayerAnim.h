@@ -81,6 +81,9 @@ public:
 	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
 	class UAnimMontage* StunMontage;
 
+	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
+	class UAnimMontage* FireMagicMontage;
+
 	UPROPERTY()
 	class APSH_CPlayer * Player;
 
@@ -145,6 +148,9 @@ public:
 	UFUNCTION()
 	void AnimNotify_stunEnd();
 
+	UFUNCTION()
+	void AnimNotify_Magic();
+
 
 
 	void PlayRollAnimation();
@@ -167,6 +173,7 @@ public:
 	void PlayEquipAnimation();
 	void PlayUnEquipAnimation();
 	void PlayStunAnimation();
+	void PlayFireMagicAnimation();
 
 
 public:

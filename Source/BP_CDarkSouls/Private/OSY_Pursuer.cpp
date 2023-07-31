@@ -31,8 +31,6 @@ AOSY_Pursuer::AOSY_Pursuer()
 	if (TempSwordMesh.Succeeded())
 	{
 		compSword->SetStaticMesh(TempSwordMesh.Object);
-		compSword->SetRelativeLocation(FVector(-10.18f,12.00f,-33.64f));
-		compSword->SetRelativeRotation(FRotator(2.22f,-14.53f,-8.93f));
 		compSword->SetRelativeScale3D(FVector(1));
 	}
 	// ½Çµå----------------------------------------------------------

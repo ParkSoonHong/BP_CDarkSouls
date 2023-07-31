@@ -474,11 +474,13 @@ void APSH_CPlayer::Attack()
 		if(isAttackTime) // 공격 할수 있니?
 		{ 	
 				anim->PlayAttackAnimation();
+				curStamina -= 30;
 				comboCount++;
 		
 			if (comboCount > 1) // 콤보가 트루야?
 			{
 					anim->PlayAttackAnimation2();
+					curStamina -= 30;
 					comboCount = 0;
 			}
 		
@@ -486,9 +488,12 @@ void APSH_CPlayer::Attack()
 	}
 	else
 	{
-		FActorSpawnParameters parm;
-		parm.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		GetWorld()->SpawnActor<AActor>(ExFire,parm);// 마법
+		if (isFire)
+		{
+		anim->PlayFireMagicAnimation();
+		curStamina -=60;
+		isFire = false;
+		}
 	}
 
 }
@@ -497,6 +502,7 @@ void APSH_CPlayer::HardAttack()
 {
 	if(isAttack)
 	{ 
+	curStamina -=30;
 	anim->PlayHardAttackAnimation();
 	}
 }
@@ -638,6 +644,13 @@ void APSH_CPlayer::tagetOn(UDSTargetComponent* NewTargetComponent) // 1번 눌르면
 
 }
 
+void APSH_CPlayer::FireMageic()
+{
+	FActorSpawnParameters parm;
+	parm.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	GetWorld()->SpawnActor<AActor>(ExFire, GetActorLocation() + GetActorForwardVector() * FVector(500, 0, 0), GetActorRotation(), parm);// 마법
+}
+
 void APSH_CPlayer::NukBack()
 {
 	UE_LOG(LogTemp, Warning, TEXT("nukBack"));
@@ -742,6 +755,7 @@ void APSH_CPlayer::steminaOring()
 	isAttack = false;
 	isDefense = false;
 	PlayingAttack = false;
+	isFire = false;
 	curTime = 0;
 }
 
@@ -753,21 +767,25 @@ void APSH_CPlayer::restTime()
 		curStamina = 100;
 		isRest = false;
 	}
-	if (curStamina <= 10)
+	if (curStamina <= 20)
 	{
 		isRoll = false;
 		isAttack = false;
 		isDefense = false;
 		PlayingAttack = false;
+		isAttackTime = false;
+		isFire = false;
 		isSteminaOn = true;
 		steminaPower = 0.2f;
 	}
-	if (isSteminaOn&&curStamina >= 15)
+	if (isSteminaOn&&curStamina >= 25)
 	{
 		isRoll = true;
 		isAttack = true;
+		isAttackTime = true;
 		isDefense = true;
 		PlayingAttack = true;
+		isFire = true;
 		isSteminaOn = false;
 		steminaPower = 0.3f;
 	}

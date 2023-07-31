@@ -194,6 +194,9 @@ public:
 	bool isEquip = false;
 
 	UPROPERTY(EditAnywhere)
+	bool isFire = true;
+
+	UPROPERTY(EditAnywhere)
 	float RLValu = 0;
 
 	UPROPERTY(EditAnywhere)
@@ -275,6 +278,7 @@ public:
 
 	void tagetOn(UDSTargetComponent* NewTargetComponent);
 
+	void FireMageic();
 public:
 	UFUNCTION()
 	void NukBack();
