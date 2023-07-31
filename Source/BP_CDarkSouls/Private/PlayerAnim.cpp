@@ -114,6 +114,12 @@ UPlayerAnim::UPlayerAnim()
 	{
 		StunMontage = tempStun.Object;
 	}
+
+	ConstructorHelpers::FObjectFinder<UAnimMontage>tempFireMagicMontage(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/AttackAnim/MT_PSH_Magic.MT_PSH_Magic'"));
+	if (tempFireMagicMontage.Succeeded())
+	{
+		FireMagicMontage = tempFireMagicMontage.Object;
+	}
 }
 void UPlayerAnim::NativeUpdateAnimation(float DeltaSeconds)
 {
@@ -284,6 +290,19 @@ void UPlayerAnim::AnimNotify_stunEnd()
 	Player->isMoving = true;
 	Player->isHearing = true;
 	Player->isDefense = true;
+}
+
+void UPlayerAnim::AnimNotify_Magic()
+{
+	Player->FireMageic();
+	Player->isAttack = true;
+	Player->isAttackTime = true;
+	Player->isBackStep = true;
+	Player->isRoll = true;
+	Player->isMoving = true;
+	Player->isHearing = true;
+	Player->isDefense = true;
+	Player->isFire = true;
 }
 
 void UPlayerAnim::PlayRollAnimation()
@@ -473,5 +492,18 @@ void UPlayerAnim::PlayStunAnimation()
 	Player->isMoving = false;
 	Player->isHearing = false;
 	Player->isDefense = false;
+}
+
+void UPlayerAnim::PlayFireMagicAnimation()
+{
+	Montage_Play(FireMagicMontage);
+	Player->isAttack = false;
+	Player->isAttackTime = false;
+	Player->isBackStep = false;
+	Player->isRoll = false;
+	Player->isMoving = false;
+	Player->isHearing = false;
+	Player->isDefense = false;
+	Player->isFire = false;
 }
 
