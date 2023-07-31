@@ -22,6 +22,7 @@
 #include "Particles/ParticleSystem.h"
 #include "GameFramework/Character.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "GameFramework/PlayerController.h"
 
 
 // Sets default values
@@ -126,7 +127,7 @@ APSH_CPlayer::APSH_CPlayer()
 		blood = tmepblood.Object;
 	}
 
-	ConstructorHelpers::FObjectFinder<UParticleSystem> tempDefenseParticle(TEXT("/Script/Engine.ParticleSystem'/Game/Realistic_Starter_VFX_Pack_Vol2/Particles/Hit/P_Default.P_Default'"));
+	ConstructorHelpers::FObjectFinder<UParticleSystem> tempDefenseParticle(TEXT("/Script/Engine.ParticleSystem'/Game/Paladin_Anim_Set/Particles/P_Hit.P_Hit'"));
 	if (tempDefenseParticle.Succeeded())
 	{
 		DefenseParticle = tempDefenseParticle.Object;
@@ -144,6 +145,7 @@ APSH_CPlayer::APSH_CPlayer()
 	compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	shield->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+	
 	
 }
 
@@ -229,6 +231,26 @@ void APSH_CPlayer::Tick(float DeltaTime)
 			isDamaged = false;
 		}
 	}
+
+	if (isTagetOn)
+	{
+		/*TagetLocation */
+				FVector TagetLocation = tagetForward->GetOwner()->GetActorLocation();
+				FVector playerLocation = GetActorLocation();
+				FVector DiretionToTaget = (TagetLocation - playerLocation).GetSafeNormal();
+		
+		FRotator PlayerRot = UKismetMathLibrary::FindLookAtRotation(playerLocation, TagetLocation);
+				/*FRotator newRotation = */
+
+		SetActorRotation(PlayerRot);
+		
+		anim->isTagetAnim = true;
+
+		if (isPressedForwardMovekey || isPressedRightMovekey)
+		{
+			
+		}
+	}
 }
 
 // Called to bind functionality to input
@@ -249,7 +271,6 @@ void APSH_CPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	// Action inputs
 	PlayerInputComponent->BindAction("TagetLook", IE_Pressed, CameraLockArm, &UPlayerLockArmComponent::ToggleCameraLock);
 	PlayerInputComponent->BindAction("TagetLook", IE_Pressed, CameraLockArm, &UPlayerLockArmComponent::ToggleSoftLock);
-	PlayerInputComponent->BindAction("TagetLook", IE_Pressed, this, &APSH_CPlayer::tagetOn);
 
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &APSH_CPlayer::Attack);
 	PlayerInputComponent->BindAction("HardAttack", IE_Pressed, this, &APSH_CPlayer::HardAttack);
@@ -278,9 +299,11 @@ void APSH_CPlayer::MoveForward(float Val)
 			// get forward vector
 			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 			AddMovementInput(Direction, Val);
+
+			UE_LOG(LogTemp,Warning,TEXT("%f"),Val);
 		}
 	}
-
+	FBValu = Val;
 	if (Val != 0) // 움직이고 있다.
 	{
 		isPressedForwardMovekey = true;
@@ -306,7 +329,7 @@ void APSH_CPlayer::MoveRight(float Val)
 			AddMovementInput(Direction, Val);
 		}
 	}
-
+	RLValu = Val;
 	if (Val != 0) // 움직이고 있다.
 	{
 		isPressedRightMovekey = true;
@@ -412,10 +435,21 @@ void APSH_CPlayer::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedCompon
 			UE_LOG(LogTemp, Warning, TEXT("Overlap"));
 			Damaged(1);
 		}
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(),blood,GetActorLocation(),FRotator::ZeroRotator);
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(),blood, GetActorLocation(),FRotator::ZeroRotator);
 	}
 	else
-	{
+	{	
+		if (OverlapOldDs != nullptr)
+		{
+			OverlapOldDs->spearComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		}
+
+		if (tagetPursuer != nullptr)
+		{
+			tagetPursuer->compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		
+		}
 		
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DefenseParticle, shield->GetComponentLocation(), FRotator::ZeroRotator);
 		UGameplayStatics::PlaySound2D(GetWorld(), defenseSound);
@@ -435,17 +469,26 @@ void APSH_CPlayer::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedCompon
 
 void APSH_CPlayer::Attack()
 {
-	if(isAttackTime) // 공격 할수 있니?
-	{ 	
-			anim->PlayAttackAnimation();
-			comboCount++;
+	if(isEquip)
+	{ 
+		if(isAttackTime) // 공격 할수 있니?
+		{ 	
+				anim->PlayAttackAnimation();
+				comboCount++;
 		
-		if (comboCount > 1) // 콤보가 트루야?
-		{
-				anim->PlayAttackAnimation2();
-				comboCount = 0;
+			if (comboCount > 1) // 콤보가 트루야?
+			{
+					anim->PlayAttackAnimation2();
+					comboCount = 0;
+			}
+		
 		}
-		
+	}
+	else
+	{
+		FActorSpawnParameters parm;
+		parm.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		GetWorld()->SpawnActor<AActor>(ExFire,parm);// 마법
 	}
 
 }
@@ -576,16 +619,22 @@ void APSH_CPlayer::changeWeapon()
 	}
 }
 
-void APSH_CPlayer::tagetOn()
+
+void APSH_CPlayer::tagetOn(UDSTargetComponent* NewTargetComponent) // 1번 눌르면 2번누르면 꺼짐
 {
-// 	UDSTargetComponent* newTargetComponent;
-// 		newTargetComponent = Cast<UDSTargetComponent>(UGameplayStatics::GetActorOfClass(GetWorld(),UDSTargetComponent::StaticClass()));
-// 		FVector Dir = newTargetComponent->GetOwner()->GetActorLocation() - GetActorLocation();
+	UE_LOG(LogTemp, Warning, TEXT("SetTaget"));
+	if (!isTagetoff)
+	{
+	tagetForward = NewTargetComponent;
+	 isTagetOn = true;
+	isTagetoff = true;
+	}
+	else
+	{
+		isTagetOn = false;
+		isTagetoff = false;
+	}
 
-	
-
-// 	FRotator rot = UKismetMathLibrary::MakeRotFromXY(Dir,GetActorForwardVector());
-// 	SetActorRotation(rot);
 
 }
 
@@ -623,14 +672,55 @@ void APSH_CPlayer::ReleasedSpacebar()
 	{	
 		
 		if (curTime < runTime)
-		{	
-			if (isRoll)
+		{	if(!isTagetOn)
 			{
-				curStamina -= 30;
-				Roll();
-				isRoll = false;
-			}
+				if (isRoll)
+				{
+					curStamina -= 30;
+					Roll();
+					isRoll = false;
+				}
+			}		
+			else
+			{
+				if (RLValu>0.5)
+				{	
+					if (isRoll)
+					{
+						curStamina -= 30;
+						isRoll = false;
+						anim->PlayRRollAnimation();
+					}
+				}
+				else if(RLValu<-0.5)
+				{
+					if (isRoll)
+					{
+						curStamina -= 30;
+						isRoll = false;
+						anim->PlayLRollAnimation();
+					}
+				}
 
+				if (FBValu > 0.5)
+				{
+					if (isRoll)
+					{
+						curStamina -= 30;
+						Roll();
+						isRoll = false;
+					}
+				}
+				else if (FBValu < -0.5)
+				{
+					if (isRoll)
+					{
+						curStamina -= 30;
+						isRoll = false;
+						anim->PlayBRollAnimation();
+					}
+				}
+			}
 		}
 	}
 	curTime = 0;

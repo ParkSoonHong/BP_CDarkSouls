@@ -6,6 +6,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "PlayerLockArmComponent.generated.h"
 
+
 UENUM(BlueprintType)
 enum class EDirection : uint8
 {
@@ -46,7 +47,6 @@ public:
 	
 	UPlayerLockArmComponent();
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
 
 	void ToggleCameraLock();
 	void ToggleSoftLock();
