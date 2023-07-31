@@ -25,10 +25,19 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite,Category="Settings")
 	bool isChange = true;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite,Category="Settings")
+	bool isTagetAnim = false;
+
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
 	class UAnimMontage* RollMontage;
+	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
+	class UAnimMontage* RRollMontage;
+	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
+	class UAnimMontage* LRollMontage;
+	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
+	class UAnimMontage* BRollMontage;
 
 	UPROPERTY(EditDefaultsOnly,Category="AnimMontage")
 	class UAnimMontage* BackStepMontage;
@@ -139,6 +148,9 @@ public:
 
 
 	void PlayRollAnimation();
+	void PlayRRollAnimation();
+	void PlayLRollAnimation();
+	void PlayBRollAnimation();
 	void PlayBackStepAnimation();
 	void PlayDamgedAnimation();
 	void PlayDamgedAnimation2();

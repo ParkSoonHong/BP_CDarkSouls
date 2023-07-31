@@ -14,6 +14,23 @@ UPlayerAnim::UPlayerAnim()
 		RollMontage = tempRoll.Object;
 	}
 	
+	ConstructorHelpers::FObjectFinder<UAnimMontage>tempRRoll(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/Ani/MT_PSH_RRoll.MT_PSH_RRoll'"));
+	if (tempRRoll.Succeeded())
+	{
+		RRollMontage = tempRRoll.Object;
+	}
+
+	ConstructorHelpers::FObjectFinder<UAnimMontage>tempLRoll(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/Ani/MT_PSH_LRoll.MT_PSH_LRoll'"));
+	if (tempLRoll.Succeeded())
+	{
+		LRollMontage = tempLRoll.Object;
+	}
+
+	ConstructorHelpers::FObjectFinder<UAnimMontage>tempBRoll(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/Ani/MT_PSH_BRoll.MT_PSH_BRoll'"));
+	if (tempBRoll.Succeeded())
+	{
+		BRollMontage = tempBRoll.Object;
+	}
 	ConstructorHelpers::FObjectFinder<UAnimMontage>tempBackStep(TEXT("/Script/Engine.AnimMontage'/Game/ParkSoonHong/Ani/MT_PSH_BackStep.MT_PSH_BackStep_C'"));
 	if (tempBackStep.Succeeded())
 	{
@@ -281,6 +298,42 @@ void UPlayerAnim::PlayRollAnimation()
 	Player->isRest = false;
 }
 
+void UPlayerAnim::PlayRRollAnimation()
+{
+	Montage_Play(RRollMontage);
+	Player->isAttack = false;
+	Player->isAttackTime = false;
+	Player->isBackStep = false;
+	Player->PlayingAttack = false;
+	Player->isHearing = false;
+	Player->isDefense = false;
+	Player->isRest = false;
+}
+
+void UPlayerAnim::PlayLRollAnimation()
+{
+	Montage_Play(LRollMontage);
+	Player->isAttack = false;
+	Player->isAttackTime = false;
+	Player->isBackStep = false;
+	Player->PlayingAttack = false;
+	Player->isHearing = false;
+	Player->isDefense = false;
+	Player->isRest = false;
+}
+
+void UPlayerAnim::PlayBRollAnimation()
+{
+	Montage_Play(BRollMontage);
+	Player->isAttack = false;
+	Player->isAttackTime = false;
+	Player->isBackStep = false;
+	Player->PlayingAttack = false;
+	Player->isHearing = false;
+	Player->isDefense = false;
+	Player->isRest = false;
+}	
+
 void UPlayerAnim::PlayBackStepAnimation() // ¹é½ºÅÜ ½ÇÇà 
 { 
 	Montage_Play(BackStepMontage);
@@ -394,6 +447,7 @@ void UPlayerAnim::PlayEquipAnimation() // ¹«±â ÀåÂø
 	Player->isMoving = false;
 	Player->isHearing = false;
 	Player->isDefense = true;
+	Player->isEquip = true;
 }
 
 void UPlayerAnim::PlayUnEquipAnimation()
@@ -406,7 +460,7 @@ void UPlayerAnim::PlayUnEquipAnimation()
 	Player->isMoving = false;
 	Player->isHearing = false;
 	Player->isDefense = false;
-	
+	Player->isEquip = false;
 }
 
 void UPlayerAnim::PlayStunAnimation()

@@ -181,10 +181,23 @@ public:
 	UPROPERTY(EditAnywhere)
 	bool isSteminaOn = false;
 
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool isParry = false;
 
+	UPROPERTY(EditAnywhere,BlueprintReadOnly)
+	bool isTagetOn = false;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly)
+	bool isTagetoff = false;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly)
+	bool isEquip = false;
+
+	UPROPERTY(EditAnywhere)
+	float RLValu = 0;
+
+	UPROPERTY(EditAnywhere)
+	float FBValu = 0;
 public:
 	/** Returns CameraBoom subobject **/
 	UFUNCTION(BlueprintCallable, Category = "Lock On Camera")
@@ -212,6 +225,10 @@ public:
 	class UParticleSystem* blood;
 	UPROPERTY(EditAnywhere)
 	class UParticleSystem* DefenseParticle;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AActor> ExFire;
+	UPROPERTY(EditAnywhere)
+	class UDSTargetComponent* tagetForward;
 	
 	UPROPERTY(EditAnywhere)
 	class USoundBase * defenseSound;
@@ -256,7 +273,7 @@ public:
 
 	void changeWeapon();
 
-	void tagetOn();
+	void tagetOn(UDSTargetComponent* NewTargetComponent);
 
 public:
 	UFUNCTION()

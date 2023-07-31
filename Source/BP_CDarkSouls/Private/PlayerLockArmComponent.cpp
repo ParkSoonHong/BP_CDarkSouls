@@ -9,8 +9,9 @@
 #include "PSH_CPlayer.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
 
-//#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Green, text)
+/*#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Green, text)*/
 
 
 
@@ -27,13 +28,14 @@ UPlayerLockArmComponent::UPlayerLockArmComponent()
 	CameraRotationLagSpeed= 2.f;
 	CameraLagMaxDistance = 300.0f;
 
-	/*player = Cast<APSH_CPlayer>(GetOwner());*/
-
 }
 
 void UPlayerLockArmComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime,TickType,ThisTickFunction);
+
+	auto OwnerActor = GetOwner();
+	player = Cast<APSH_CPlayer>(OwnerActor);
 
 	if (IsCameraLockedToTarget())
 	{
@@ -110,8 +112,9 @@ void UPlayerLockArmComponent::ToggleCameraLock()
 
 	if (NewCameraTarget != nullptr)
 	{
-		//print(TEXT("Testing"));
+		/*print(TEXT("Testing"));*/
 		LockToTarget(NewCameraTarget);
+		player->tagetOn(NewCameraTarget); // ÄÄÆ÷³ÍÆ®¶û, ºÒ°ª ³Ñ°ÜÁÜ
 	}
 }
 
@@ -139,6 +142,7 @@ void UPlayerLockArmComponent::ToggleSoftLock()
 void UPlayerLockArmComponent::LockToTarget(UDSTargetComponent* NewTargetComponent)
 {
 	CameraTarget = NewTargetComponent;
+
 	bEnableCameraRotationLag = true;
 /*	player->GetCharacterMovement()->bOrientRotationToMovement = false;*/
 	
