@@ -58,6 +58,7 @@ public:
 	void RaiseAttackState();
 	void TakeDownAttackState();
 	void TestAttackState();
+	UFUNCTION(BlueprintCallable)
 	void ReciveDamage(float value);
 	float GiveDamage();
 	int32 MyAttacktype;
