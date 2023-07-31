@@ -164,10 +164,10 @@ void APSH_CPlayer::BeginPlay()
 	if (playMainWidget != nullptr)
 	{
 		mainwidget = CreateWidget(GetWorld(), playMainWidget);
+		mainwidget->AddToViewport();
+		mainwidget->SetVisibility(ESlateVisibility::Hidden);
 	}
 
-	mainwidget->AddToViewport();
-	mainwidget->SetVisibility(ESlateVisibility::Hidden);
 
 }
 
