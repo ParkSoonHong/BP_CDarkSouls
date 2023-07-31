@@ -24,8 +24,6 @@ APKM_OLDDS::APKM_OLDDS()
 	if (TempSMesh.Succeeded())
 	{
 		spearComp->SetStaticMesh(TempSMesh.Object);
-		spearComp->SetRelativeLocationAndRotation(FVector(0, 0, 320), FRotator(0, 0, 0));
-		spearComp->SetWorldScale3D(FVector(1.5, 1.5, 1.5));
 	}
 	//spearComp->SetupAttachment(GetMesh());
 	spearComp->SetCollisionProfileName(TEXT("PKMSpear"));
