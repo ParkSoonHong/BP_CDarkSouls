@@ -474,13 +474,13 @@ void APSH_CPlayer::Attack()
 		if(isAttackTime) // 공격 할수 있니?
 		{ 	
 				anim->PlayAttackAnimation();
-				curStamina -= 30;
+				curStamina -= 11;
 				comboCount++;
 		
 			if (comboCount > 1) // 콤보가 트루야?
 			{
 					anim->PlayAttackAnimation2();
-					curStamina -= 30;
+					curStamina -= 11;
 					comboCount = 0;
 			}
 		
@@ -619,7 +619,6 @@ void APSH_CPlayer::changeWeapon()
 	else
 	{
 		anim->PlayUnEquipAnimation();
-		mainwidget->SetVisibility(ESlateVisibility::Hidden);
 		anim->isChange = true;
 		
 	}
