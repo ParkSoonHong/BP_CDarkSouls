@@ -18,9 +18,13 @@ enum class EEnemyState : uint8
 	BackStep,
 	RushAttack,
 	StingAttack,
-	SweepAttack,
+	StingTwoAttack,
 	SwingAttack,
 	RangeAttack,
+	RaiseAttack,
+	TakeDownAttack,
+	TestAttack,
+
 };
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BP_CDARKSOULS_API UPKM_OLDDSFSM : public UActorComponent
@@ -48,9 +52,13 @@ public:
 	void BackStepState();
 	void RushAttackState();
 	void StingAttackState();
-	void SweepAttackState();
+	void StingTwoAttackState();
 	void SwingAttackState();
 	void RangeAttackState();
+	void RaiseAttackState();
+	void TakeDownAttackState();
+	void TestAttackState();
+	UFUNCTION(BlueprintCallable)
 	void ReciveDamage(float value);
 	float GiveDamage();
 	int32 MyAttacktype;
@@ -60,7 +68,7 @@ public:
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="FSM")
 	EEnemyState mState=EEnemyState::Idle;
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="FSM")
-	class AUPlayer* Target;
+	class APSH_CPlayer* Target;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
 	class APKM_OLDDS *Me;
 	FVector direction;
@@ -71,7 +79,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
 	float MoveRange = 1000.0f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
-	float BackRange = 200.0f;
+	float BackRange = 300.0f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
 	float attackRange = 400.0f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
@@ -79,12 +87,13 @@ public:
 	float BackStepSpeed;
 	float StingSpeed;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
-	int32 HP=10;
+	int32 OLDDSHP=10;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
+	int32 OLDDSMAXHP=10;
 	UPROPERTY(EditAnywhere,Category="FSMDraw")
 	bool bDebugRange=false;
 	bool bStingdirCheck = false;
 	bool bRushdirCheck=false;
-	bool bSweepGoCheck = false;
 	bool bRangeAttackHit = false;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
 	bool bBackStepAnimCheck = false;
@@ -94,6 +103,124 @@ public:
 	bool bWalkAnimCheck = false;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
 	bool bRunAnimCheck = false;
-	int32 SweepRand;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
+	bool bRangeAttackAnimCheck = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
+	bool bStingAttackAnimCheck = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
+	bool bStingTwoAttackAnimCheck = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
+	bool bSwingAttackAnimCheck = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
+	bool bRaiseAttackAnimCheck = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
+	bool bTakeDownAttackAnimCheck = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
+	bool bTestAttackAnimCheck = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "FSM")
+	bool bTestAttackAnimPlayingEnd = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "FSM")
+	bool bDieAnimCheck=false;
+	
+	int32 TESTRand = 1;
 	float MovingSpeed=0;
+	int32 ComboCount = 0;
+	//연속공격 변수
+	int32 SequenceAttack = 0;
+
+	bool bRangeAttackEffect=false;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystem *RushAttackFactory;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystemComponent *RushAttackEffect;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystem *RangeAttackBallFactory;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystemComponent *RangeBallEffect;
+   
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystem *RangeAttackFactory;
+   
+   UPROPERTY(EditDefaultsOnly,Category="Effect")
+   class UParticleSystemComponent *RangeAttackEffect;
+
+   	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystem *DieFactory;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystemComponent *DieEffect;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystem *DieEndStartFactory;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystemComponent *DieEndStartEffect;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystem *DieEndFactory;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystemComponent *DieEndEffect;
+
+	int32 High = 0;
+	FVector RangingLoc;
+	FVector RangeStartLoc;
+
+
+
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* RushChargeSound;
+	
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* RushSound;
+	bool bRushSound = false;
+
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* RangeChargeSound;
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* RangeSound;
+	bool bRangeSound = false;
+
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* SwingSound;
+	bool bSwingSound = false;
+
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* BackStepSound;
+	bool bBackStepSound = false;
+
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* DamageSound;
+
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* DownKneeSound;
+	bool bDownKneeSound = false;
+
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* DeadSound;
+	bool bDeadSound = false;
+
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* StingSound;
+	bool bStingSound = false;
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* Sting2Sound;
+	bool bSting2Sound = false;
+
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* MapSound;
+
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class UAudioComponent* MapAudio;
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* DieBloodSound;
+
+	int32 TestRandNum=1;
+	bool bFirstDash = false;
+	int32 BackRand;
+	bool bBackStepRand=false;
 };

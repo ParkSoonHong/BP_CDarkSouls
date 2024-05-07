@@ -10,10 +10,15 @@ UENUM(BlueprintType)
 enum class EEnmeyState :uint8
 {
 	Idle UMETA(DisplayName = "Idle State"),
-	Walk UMETA(DisplayName = "Walk State"),
-	Rush UMETA(DisplayName = "Rush State"),
 	Backstep UMETA(DisplayName = "Backstep State"),
+	Walk UMETA(DisplayName = "Walk State"),
 	Attack UMETA(DisplayName = "Attack State"),
+	Rush UMETA(DisplayName = "Rush State"),
+	RushAttack UMETA(DisplayName = "RushAttack State"),
+	Attack1_1 UMETA(DisplayName = "Attack1_1 State"),
+	Attack1_2 UMETA(DisplayName = "Attack1_2 State"),
+	Attack1_3 UMETA(DisplayName = "Attack1_3 State"),
+	Attack2 UMETA(DisplayName = "Attack2 State"),
 	Damage UMETA(DisplayName = "Damage State"),
 	Die UMETA(DisplayName = "Die State")
 };
@@ -44,7 +49,9 @@ public:
 	float idleDelayTime = 2;
 	float currentTIme = 0;
 	UPROPERTY(EditAnywhere, Category ="FSM")
-	float delayTime ;
+	float delayTime;
+	float DelayTime= 1.75;
+	float RushDelayTime= 1;
 	float stopTime=2;
 	
 
@@ -52,7 +59,7 @@ public:
 	UPROPERTY(EditAnywhere, Category ="FSM")
 	float Backspeed;
 	UPROPERTY(EditAnywhere, Category ="FSM")
-	float Walkspeed = 3000;
+	float Walkspeed = 500;
 	UPROPERTY(EditAnywhere, Category ="FSM")
 	float Rushspeed;
 	// 나를 소유하고 있는 액터
@@ -60,32 +67,42 @@ public:
 	class AOSY_Pursuer *me;
 	// 타겟 선언
 	UPROPERTY(EditAnywhere)
-	class AUPlayer *Target;
+	class APSH_CPlayer *Target;
 
 public:	 // 상태 함수
 	void IdleState();
 	void BackstepState();
 	void WalkState();
-	void RushState();
 	void AttackState();
+	void RushState();
+	void RushAttackState();
+	void Attack1_1State();
+	void Attack1_2State();
+	void Attack1_3State();
+	void Attack2State();
 	void DamageState();
 	void DieState();
 
 public: //Idle 속성
 	// 필요속성 : 플레이어와의 거리, 대시거리, 무브거리,어택거리, 백스텝거리
 	float RushDistance = 5000;
-	float RushStartDistance = 1000;
-	float AttackStartDistance = 200;
-	float BackstepStartDistance = 100;
+	float AttackStartDistance = 2000;
+	float BackstepStartDistance = 200;
+	float RushStartDistance = 600;
+	float RushAttackDistance = 500;
+
+
+	float rushstartDistance= 1000;
+	float attackstartDistance = 300;
+	float backstepstartDiatacne = 100;
+
+	float MoveRange =3000;
+	float AttackRange = 250;
+	float BackstepRange = 150;
+
 
 public: // Attack 속성
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void LowerAndRaiseWeapon();
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void LowerAndRaiseWeapon2();
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void LowerAndRaiseWeapon3();
-	
+
 	bool bAttackSelect = false;
 	float pattern;
 	bool bAttackdirOk = false;
@@ -94,5 +111,49 @@ public: //피격 속성
 	UFUNCTION()
 	void ReciveDamage(float value);
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
-	int32 HP=10;
+	int32 PURSUERHP=10;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FSM")
+	int32 PURSUERMAXHP=10;
+
+public:	//애니관련
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	class UOSY_AnimInstance*anim;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystem *DieFactory;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystemComponent *DieEffect;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystem *DieEndStartFactory;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystemComponent *DieEndStartEffect;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystem *DieEndFactory;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	class UParticleSystemComponent *DieEndEffect;
+
+	UPROPERTY(EditDefaultsOnly,Category="Sounds")
+	class USoundBase *RushSound;
+	bool bRushSound=false;
+
+	UPROPERTY(EditDefaultsOnly,Category="Sounds")
+	class USoundBase *RushAttackSound;
+	bool bRushAttackSound=false;
+
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* MapSound;
+	
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class USoundBase* ReactSound;
+
+	UPROPERTY(EditDefaultsOnly,Category="Sound")
+	class UAudioComponent* MapAudio;
+
+	FVector JumpStartloc;
+	bool bcheckrushattackloc = false;
 };

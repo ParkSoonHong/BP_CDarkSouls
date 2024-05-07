@@ -4,7 +4,7 @@
 #include "PKM_OLDDS.h"
 #include "PKM_OLDDSFSM.h"
 #include "Components/CapsuleComponent.h"
-#include "UPlayer.h"
+#include "PSH_CPlayer.h"
 // Sets default values
 APKM_OLDDS::APKM_OLDDS()
 {
@@ -17,15 +17,13 @@ APKM_OLDDS::APKM_OLDDS()
 		GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
 		GetMesh()->SetWorldScale3D(FVector(0.5, 0.5, 0.5));
 	}
-	ConstructorHelpers::FObjectFinder<UStaticMesh> TempSMesh(TEXT("/Script/Engine.StaticMesh'/Game/ParkKyoungMin/Model/Spear/Myspear.Myspear'"));
+	ConstructorHelpers::FObjectFinder<UStaticMesh> TempSMesh(TEXT("/Script/Engine.StaticMesh'/Game/ParkKyoungMin/Model/Spear/MySpear2.MySpear2'"));
 	spearComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SpearMesh"));
-	spearComp->SetupAttachment(GetMesh());
+	spearComp->SetupAttachment(GetMesh(),TEXT("WeaponSocket"));
 	//spearComp->SetupAttachment(GetMesh());
 	if (TempSMesh.Succeeded())
 	{
 		spearComp->SetStaticMesh(TempSMesh.Object);
-		spearComp->SetRelativeLocationAndRotation(FVector(0, 0, 320), FRotator(0, 0, 0));
-		spearComp->SetWorldScale3D(FVector(1.5, 1.5, 1.5));
 	}
 	//spearComp->SetupAttachment(GetMesh());
 	spearComp->SetCollisionProfileName(TEXT("PKMSpear"));
@@ -63,10 +61,11 @@ void APKM_OLDDS::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 
 void APKM_OLDDS::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	UE_LOG(LogTemp, Log, TEXT("OVerlap"));
 	if (FSM->Target->PlayingAttack)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Player->Hit"));
 		FSM->ReciveDamage(1);
-		FSM->Target->PlayerWeaponComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		FSM->Target->compSword->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 }
